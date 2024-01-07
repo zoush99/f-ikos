@@ -11,3 +11,7 @@
 using FNumber = ikos::core::FNumber;
 using ikos::core::Signed;
 using ikos::core::Unsigned;
+
+BOOST_AUTO_TEST_CASE(test_constructor_signed) {
+  BOOST_CHECK(FNumber(1,32,Signed)==FNumber(1,32,Signed));
+}
