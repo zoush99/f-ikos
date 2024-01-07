@@ -29,6 +29,7 @@ add_unit_test(adt patricia_tree set)
 add_unit_test(number z_number)
 add_unit_test(number q_number)
 add_unit_test(number machine_int)
+add_unit_test(number f_number)  # By zoush99
 add_unit_test(value numeric constant)
 add_unit_test(value numeric interval)
 add_unit_test(value numeric congruence)
