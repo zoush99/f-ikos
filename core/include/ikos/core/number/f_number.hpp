@@ -305,8 +305,30 @@ public:
   }
 
   /// \brief Unary plus
-  const FNumber& operator+() const{
-    return *this;
+
+  /// \brief Prefix increment
+
+  /// \brief Postfix increment
+
+  /// \brief Unary minus
+  const FNumber operator-() const {
+    if (this->is_fl()) {
+      return FNumber(-this->_n.f, this->_bit_width,this->_sign);
+    } else {
+      return FNumber(-this->_n.d, this->_bit_width,this->_sign);
+    }
+  }
+
+  /// \brief Truncate the floating point number to the given bit width
+  /// \todo
+  FNumber trunc(uint64_t bit_width) const{
+    ikos_assert(this->_bit_width > bit_width);
+
+    if (this->is_fl()) {
+      return FNumber(this->_n.f, bit_width, this->_sign);
+    } else {
+      return FNumber(this->_n.d, bit_width, this->_sign);
+    }
   }
 
 public: // friends
