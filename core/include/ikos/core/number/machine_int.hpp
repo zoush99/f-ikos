@@ -678,7 +678,7 @@ public:
   /// \name Unary Operators
   /// @{
 
-  // \brief Set the machine integer to the minimum integer
+  /// \brief Set the machine integer to the minimum integer
   void set_min() {
     if (this->is_signed()) {
       if (this->is_small()) {
@@ -691,7 +691,7 @@ public:
     }
   }
 
-  // \brief Set the machine integer to the maximum integer
+  /// \brief Set the machine integer to the maximum integer
   void set_max() {
     if (this->is_signed()) {
       if (this->_bit_width == 1) {
@@ -710,7 +710,7 @@ public:
     }
   }
 
-  // \brief Set the machine integer to zero
+  /// \brief Set the machine integer to zero
   void set_zero() {
     if (this->is_small()) {
       this->_n.i = 0;

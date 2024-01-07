@@ -217,7 +217,122 @@ public:
     return *this;
   }
 
+  /// \brief Multiplication assignment
+  FNumber& operator*=(const FNumber& x){
+    if (this->is_fl()) {
+      if(x.is_fl()){  // fl *= fl
+        this->_n.f *= x._n.f;
+      }else{  // fl *= do
+        this->_n.f *= static_cast<float>(x._n.d);
+      }
+    } else {
+      if(x.is_fl()){  // do *= fl
+        this->_n.d *= static_cast<double >(x._n.f);
+      } else{ // do *= do
+        this->_n.d *= x._n.d;
+      }
+    }
+    return *this;
+  }
+
+  /// \brief Division assignment
+  /// \todo
+  FNumber& operator/=(const FNumber& x){
+    return *this;
+  }
+
+  /// @}
+  /// \name Value Characterization Functions
+  /// @{
+
+  /// \brief Return the bit width of the floating point number
+  uint64_t bit_width() const{return this->_bit_width;}
+
+  /// \brief Return the signedness (Signed or Unsigned) of the floating point number
+  /// Each one is a signed floating point number
+  Signedness sign() const { return this->_sign; }
+
+  bool is_signed() const { return this->_sign == Signed; }
+  bool is_unsigned() const { return this->_sign == Unsigned; }
+
+  /// @}
+  /// \name Value tests
+  /// @{
+
+  /// \brief Return true if this is the minimum machine integer
+
+  /// \brief Return true if this is the maximum machine integer
+
+  /// \brief Return true if the machine integer is 0
+  bool is_zero() const {
+    if (this->is_fl()) {
+      return this->_n.f == 0;
+    } else {
+      return this->_n.d == 0;
+    }
+  }
+
+  /// @}
+  /// \name Conversion Functions
+  /// @{
+
+  /// \brief Return the floating point number as a ZNumber
+
+  /// \brief Return a string representation of the floating point number in the given base
+  std::string str(int base = 10) const {
+    if (this->is_fl()) {
+        return std::to_string(this->_n.f);
+    } else {
+      return std::to_string(this->_n.d);
+    }
+  }
+
+  /// @}
+  /// \name Unary Operators
+  /// @{
+
+  /// \brief Set the floating point number to the minimum floating point number
+
+  /// \brief Set the floating point number to the maximum floating point number
+
+  /// \brief Set the floating point number to zero
+  void set_zero() {
+    if (this->is_fl()) {
+      this->_n.f = 0;
+    } else {
+      this->_n.d = 0;
+    }
+  }
+
+  /// \brief Unary plus
+  const FNumber& operator+() const{
+    return *this;
+  }
+
+public: // friends
+  friend bool operator==(const FNumber& lhs, const FNumber& rhs);
+
 }; // end class FNumber
 
+/// @}
+/// \name Comparison Operators
+/// @{
+
+/// \brief Equality operator
+inline bool operator==(const FNumber& lhs, const FNumber& rhs) {
+  if (lhs.is_fl()) {
+    if(rhs.is_fl()){  // fl == fl
+      return lhs._n.f == rhs._n.f;
+    }else { // fl == do
+      return static_cast< double >(lhs._n.f) == rhs._n.d;
+    }
+  } else {
+    if(rhs.is_fl()){  // do == fl
+      return lhs._n.d==static_cast<double>(rhs._n.f);
+    }else{  // do == do
+      return lhs._n.d == rhs._n.d;
+    }
+  }
+}
 } // end namespace core
 } // end namespace ikos
