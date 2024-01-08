@@ -43,7 +43,7 @@ public:
   /// \brief Default constructor
   FNumber() = delete;
 
-  /// \brief Create a floating point number from an integral type
+  /// \brief Create a floating point number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
@@ -92,6 +92,20 @@ public:
       this->_n.f = n.to< int >();
     } else {
       this->_n.d = n.to< int >();
+    }
+  }
+
+  /// \brief Create a floating point number from a type
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FNumber(T n): _sign(Signed){
+    if (this->is_fl()) {
+      _bit_width=32;
+      this->_n.f = static_cast< float >(n);
+    } else {
+      _bit_width=64;
+      this->_n.d = static_cast< double >(n);
     }
   }
 

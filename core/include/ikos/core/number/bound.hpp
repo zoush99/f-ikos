@@ -83,6 +83,11 @@ private:
   }
 
   /// \brief Private constructor
+  Bound(bool is_infinite, double n) : _is_infinite(is_infinite), _n(n) {
+    this->normalize();
+  }
+
+  /// \brief Private constructor
   Bound(bool is_infinite, Number n)
       : _is_infinite(is_infinite), _n(std::move(n)) {
     this->normalize();
@@ -102,7 +107,11 @@ public:
   /// \brief Create a bound
   explicit Bound(int n) : _is_infinite(false), _n(n) {}
 
-  /// \todo(floating point)
+  /// \brief Create a bound
+  explicit Bound(float n) : _is_infinite(false), _n(n) {}
+
+  /// \brief Create a bound
+  explicit Bound(double n) : _is_infinite(false), _n(n) {}
 
   /// \brief Create a bound
   explicit Bound(Number n) : _is_infinite(false), _n(std::move(n)) {}
@@ -122,7 +131,19 @@ public:
     return *this;
   }
 
-  /// \todo(floating point)
+  /// \brief Assign a number
+  Bound& operator=(float n) {
+    this->_is_infinite = false;
+    this->_n = n;
+    return *this;
+  }
+
+  /// \brief Assign a number
+  Bound& operator=(double n) {
+    this->_is_infinite = false;
+    this->_n = n;
+    return *this;
+  }
 
   /// \brief Assign a number
   Bound& operator=(Number n) {
@@ -493,5 +514,7 @@ using ZBound = Bound< ZNumber >;
 /// \brief Bound on unlimited precision rationals
 using QBound = Bound< QNumber >;
 
+/// \brief Bound on floating point numbers(32 bits, 64 bits)
+using FBound = Bound< FNumber >;
 } // end namespace core
 } // end namespace ikos

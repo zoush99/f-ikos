@@ -8,11 +8,21 @@
 
 #include <ikos/core/number/bound.hpp>
 
-using FNumber = ikos::core::FNumber;
+using ZNumber=ikos::core::ZNumber;
+using BoundZ = ikos::core::Bound<ZNumber>;
+
+using FNumber=ikos::core::FNumber;
+using BoundF = ikos::core::Bound<FNumber>;
+
 using ikos::core::Signed;
 using ikos::core::Unsigned;
 
 BOOST_AUTO_TEST_CASE(test_constructor_signed) {
-  BOOST_CHECK(FNumber(1,32,Signed)==FNumber(1,32,Signed));
-
+  BoundZ z(1);
+  BoundF f(1.2);
+  ZNumber Z(1);
+  FNumber F(1.2);
+  BoundZ Zz(Z);
+  BoundF Ff(F);
+  BOOST_CHECK(BoundF(1.2)==BoundF(1.2));
 }
