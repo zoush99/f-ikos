@@ -688,5 +688,97 @@ inline bool operator>(T lhs, const FNumber& rhs) {
   return FNumber(lhs, rhs.bit_width(), rhs.sign()) > rhs;
 }
 
+/// \brief Greater or equal comparison
+inline bool operator>=(const FNumber& lhs, const FNumber& rhs) {
+  if (lhs.is_fl()) {
+    if (rhs.is_fl()) { // fl >= fl
+      return lhs._n.f >= rhs._n.f;
+    } else { // fl >= do
+      return static_cast< double >(lhs._n.f) >= rhs._n.d;
+    }
+  } else {
+    if (rhs.is_fl()) { // do >= fl
+      return lhs._n.d >= static_cast< double >(rhs._n.f);
+    } else { // do >= do
+      return lhs._n.d >= rhs._n.d;
+    }
+  }
+}
+
+/// \brief Greater or equal comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator>=(const FNumber& lhs, T rhs) {
+  return lhs >= FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Greater or equal comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator>=(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) >= rhs;
+}
+
+/// @}
+/// \name Utility functions (min, max, etc.)
+/// @{
+
+/// \brief Return the smaller of the given floating point numbers
+inline const FNumber& min(const FNumber& a, const FNumber& b) {
+  return (a < b) ? a : b;
+}
+
+/// \brief Return the greater of the given floating point numbers
+inline const FNumber& max(const FNumber& a, const FNumber& b) {
+  return (a < b) ? b : a;
+}
+
+/// \brief Return the absolute value of the given floating point numbers
+inline FNumber abs(const FNumber& n) {
+  return n < 0 ? -n : n;
+}
+
+/// @}
+/// \name Input / Output
+/// @{
+
+/// \brief Write a machine integer on a stream
+inline std::ostream& operator<<(std::ostream& o, const FNumber& n) {
+  if (n.is_fl()) {
+      o << n._n.f;
+  } else {
+    o << n._n.d;
+  }
+  return o;
+}
+
+/// @}
+
+/// \brief Return the hash of a MachineInt
+inline std::size_t hash_value(const FNumber& n) {
+  std::size_t hash = 0;
+  if (n.is_fl()) {
+    boost::hash_combine(hash, n._n.f);
+  } else {
+    boost::hash_combine(hash, *n._n.d);
+  }
+  boost::hash_combine(hash, n._bit_width);
+  boost::hash_combine(hash, n._sign);
+  return hash;
+}
+
 } // end namespace core
 } // end namespace ikos
+
+
+namespace std {
+
+/// \brief Hash for MachineInt
+template <>
+struct hash< ikos::core::FNumber > {
+  std::size_t operator()(const ikos::core::FNumber& n) const {
+    return ikos::core::hash_value(n);
+  }
+};
+
+} // end namespace std
