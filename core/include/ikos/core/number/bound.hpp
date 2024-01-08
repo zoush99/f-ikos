@@ -52,6 +52,7 @@
 #include <boost/optional.hpp>
 
 #include <ikos/core/exception.hpp>
+#include <ikos/core/number/f_number.hpp>  // By zoush99
 #include <ikos/core/number/q_number.hpp>
 #include <ikos/core/number/z_number.hpp>
 #include <ikos/core/support/assert.hpp>
@@ -76,7 +77,10 @@ private:
     this->normalize();
   }
 
-  /// \todo(floating point)
+  /// \brief Private constructor
+  Bound(bool is_infinite, float n) : _is_infinite(is_infinite), _n(n) {
+    this->normalize();
+  }
 
   /// \brief Private constructor
   Bound(bool is_infinite, Number n)

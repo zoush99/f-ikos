@@ -726,9 +726,39 @@ inline const FNumber& min(const FNumber& a, const FNumber& b) {
   return (a < b) ? a : b;
 }
 
+/// \brief Return the smaller of the given numbers
+inline const FNumber& min(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c) {
+  return min(min(a, b), c);
+}
+
+/// \brief Return the smaller of the given numbers
+inline const FNumber& min(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c,
+                          const FNumber& d) {
+  return min(min(min(a, b), c), d);
+}
+
 /// \brief Return the greater of the given floating point numbers
 inline const FNumber& max(const FNumber& a, const FNumber& b) {
   return (a < b) ? b : a;
+}
+
+/// \brief Return the greater of the given numbers
+inline const FNumber& max(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c) {
+  return max(max(a, b), c);
+}
+
+/// \brief Return the greater of the given numbers
+inline const FNumber& max(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c,
+                          const FNumber& d) {
+  return max(max(max(a, b), c), d);
 }
 
 /// \brief Return the absolute value of the given floating point numbers
