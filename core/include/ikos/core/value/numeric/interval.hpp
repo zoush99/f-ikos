@@ -97,7 +97,10 @@ public:
   static Interval bottom() { return Interval(BottomTag{}); }
 
   /// \brief Create the interval [n, n]
-  explicit Interval(int n) : _lb(n), _ub(n) {}
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  explicit Interval(T n) : _lb(n), _ub(n) {}
 
   /// \brief Create the interval [n, n]
   explicit Interval(const Number& n) : _lb(n), _ub(n) {}
@@ -345,6 +348,7 @@ public:
     }
   }
 
+  /// \todo (floating point)
   /// \brief Helper for mod([a, b], n)
   ///
   /// If mod([a, b], n) is equivalent to [a, b] - x, returns x
@@ -380,7 +384,12 @@ public:
   }
 
   /// \brief Return true if the interval contains n
-  bool contains(int n) const { return this->contains(Number(n)); }
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  bool contains(T n) const {
+    return this->contains(Number(n));
+  }
 
   /// \brief Return true if the interval contains n
   bool contains(Number n) const {
@@ -498,6 +507,35 @@ inline Interval< QNumber > operator/(const Interval< QNumber >& lhs,
         return IntervalT::top();
       }
     } else {
+      BoundT ll = lhs.lb() / rhs.lb();
+      BoundT lu = lhs.lb() / rhs.ub();
+      BoundT ul = lhs.ub() / rhs.lb();
+      BoundT uu = lhs.ub() / rhs.ub();
+      return IntervalT(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
+    }
+  }
+}
+
+/// \todo (floating point)
+/// \brief Divide intervals
+inline Interval< FNumber > operator/(const Interval< FNumber >& lhs,
+                                     const Interval< FNumber >& rhs) {
+  using BoundT = Bound< FNumber >;
+  using IntervalT = Interval< FNumber >;
+
+  if (lhs.is_bottom() || rhs.is_bottom()) {
+    return IntervalT::bottom();
+  } else {
+    if (rhs.contains(0)) {
+      IntervalT l(rhs.lb(), BoundT(-1));
+      IntervalT u(BoundT(1), rhs.ub());
+      return (lhs / l).join(lhs / u);
+    } else if (lhs.contains(0)) {
+      IntervalT l(lhs.lb(), BoundT(-1));
+      IntervalT u(BoundT(1), lhs.ub());
+      return (l / rhs).join(u / rhs).join(IntervalT(0));
+    } else {
+      // Neither the dividend nor the divisor contains 0
       BoundT ll = lhs.lb() / rhs.lb();
       BoundT lu = lhs.lb() / rhs.ub();
       BoundT ul = lhs.ub() / rhs.lb();
@@ -809,6 +847,9 @@ using ZInterval = Interval< ZNumber >;
 
 /// \brief Interval on unlimited precision rationals
 using QInterval = Interval< QNumber >;
+
+/// \brief Interval on floating point numbers
+using FInterval = Interval< FNumber >;
 
 } // end namespace numeric
 } // end namespace core
