@@ -237,8 +237,15 @@ public:
   }
 
   /// \brief Division assignment
-  /// \todo
-  FNumber& operator/=(const FNumber& x) { return *this; }
+  FNumber& operator/=(const FNumber& x) {
+    ikos_assert_msg(!x.is_zero(), "division by zero");
+    if (this->is_fl()) {  // fl / fl
+        this->_n.f=this->_n.f / x._n.f;
+      } else {  // do / do
+        this->_n.d=this->_n.d / x._n.d;
+      }
+      return *this;
+  }
 
   /// @}
   /// \name Value Characterization Functions
@@ -291,10 +298,6 @@ public:
   /// \name Unary Operators
   /// @{
 
-  /// \brief Set the floating point number to the minimum floating point number
-
-  /// \brief Set the floating point number to the maximum floating point number
-
   /// \brief Set the floating point number to zero
   void set_zero() {
     if (this->is_fl()) {
@@ -303,12 +306,6 @@ public:
       this->_n.d = 0;
     }
   }
-
-  /// \brief Unary plus
-
-  /// \brief Prefix increment
-
-  /// \brief Postfix increment
 
   /// \brief Unary minus
   const FNumber operator-() const {
@@ -320,38 +317,39 @@ public:
   }
 
   /// \brief Truncate the floating point number to the given bit width
-  /// \todo
-  FNumber trunc(uint64_t bit_width) const { // 32/64 -> 32/64
-    ikos_assert(this->_bit_width > bit_width);
-
-    if (this->is_fl()) { // 32 -> 32
-      return FNumber(this->_n.f, bit_width, this->_sign);
-    } else {
-      if (bit_width == 32) { // 64 -> 32
-        return FNumber(static_cast< float >(this->_n.d),
-                       bit_width,
-                       this->_sign);
-      } else { // 64 -> 64
-        return FNumber(this->_n.d, bit_width, this->_sign);
-      }
-    }
-  }
-
-  /// \brief Extend the floating point number to the given bit width
-  /// \todo
-  FNumber ext(uint64_t bit_width) const { // 32/64 -> 32/64
-    ikos_assert(this->_bit_width < bit_width);
+  FNumber trunc(uint64_t bit_width) const { // 32 -> 32, 64 -> 32/64
+    ikos_assert(this->_bit_width >= bit_width);
 
     if (this->is_fl()) {
       if (bit_width == 32) { // 32 -> 32
-        return FNumber(this->_n.f, bit_width, this->_sign);
+        return FNumber(*this);
+      }
+    }
+    else {
+        if (bit_width == 32) { // 64 -> 32
+          return FNumber(static_cast< float >(this->_n.d),
+                         bit_width,
+                         this->_sign);
+        } else { // 64 -> 64
+          return FNumber(*this);
+        }
+      }
+    }
+
+  /// \brief Extend the floating point number to the given bit width
+  FNumber ext(uint64_t bit_width) const { // 32 -> 32/64, 64 -> 64
+    ikos_assert(this->_bit_width <= bit_width);
+
+    if (this->is_fl()) {
+      if (bit_width == 32) { // 32 -> 32
+        return FNumber(*this);
       } else { // 32 -> 64
         return FNumber(static_cast< double >(this->_n.f),
                        bit_width,
                        this->_sign);
       }
     } else { // 64 -> 64
-      return FNumber(this->_n.d, bit_width, this->_sign);
+      return FNumber(*this);
     }
   }
 
