@@ -189,9 +189,10 @@ public:
   void add(const Number& n) { this->_cst += n; }
 
   /// \brief Add a constant
-  void add(int n) { this->_cst += n; }
-
-  /// \todo(floating point)
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  void add(T n) { this->_cst += n; }
 
   /// \brief Add a variable
   void add(VariableRef var) { this->add(1, var); }
@@ -214,7 +215,10 @@ public:
   }
 
   /// \brief Add a term cst * var
-  void add(int cst, VariableRef var) {
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  void add(T cst, VariableRef var) {
     auto it = this->_map.find(var);
     if (it != this->_map.end()) {
       Number r = it->second + cst;
@@ -263,9 +267,10 @@ public:
   void operator+=(const Number& n) { this->_cst += n; }
 
   /// \brief Add a number
-  void operator+=(int n) { this->_cst += n; }
-
-  /// \todo(floating point)
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  void operator+=(T n) { this->_cst += n; }
 
   /// \brief Add a variable
   void operator+=(VariableRef var) { this->add(var); }
@@ -282,9 +287,10 @@ public:
   void operator-=(const Number& n) { this->_cst -= n; }
 
   /// \brief Substract a number
-  void operator-=(int n) { this->_cst -= n; }
-
-  /// \todo(floating point)
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  void operator-=(T n) { this->_cst -= n; }
 
   /// \brief Substract a variable
   void operator-=(VariableRef var) { this->add(-1, var); }
@@ -318,7 +324,10 @@ public:
   }
 
   /// \brief Multiply by a constant
-  void operator*=(int n) {
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  void operator*=(T n) {
     if (n == 0) {
       this->_map.clear();
       this->_cst = 0;

@@ -73,17 +73,10 @@ private:
 
 private:
   /// \brief Private constructor
-  Bound(bool is_infinite, int n) : _is_infinite(is_infinite), _n(n) {
-    this->normalize();
-  }
-
-  /// \brief Private constructor
-  Bound(bool is_infinite, float n) : _is_infinite(is_infinite), _n(n) {
-    this->normalize();
-  }
-
-  /// \brief Private constructor
-  Bound(bool is_infinite, double n) : _is_infinite(is_infinite), _n(n) {
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  Bound(bool is_infinite, T n) : _is_infinite(is_infinite), _n(n) {
     this->normalize();
   }
 
@@ -105,13 +98,10 @@ public:
   Bound() = delete;
 
   /// \brief Create a bound
-  explicit Bound(int n) : _is_infinite(false), _n(n) {}
-
-  /// \brief Create a bound
-  explicit Bound(float n) : _is_infinite(false), _n(n) {}
-
-  /// \brief Create a bound
-  explicit Bound(double n) : _is_infinite(false), _n(n) {}
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  explicit Bound(T n) : _is_infinite(false), _n(n) {}
 
   /// \brief Create a bound
   explicit Bound(Number n) : _is_infinite(false), _n(std::move(n)) {}
@@ -125,21 +115,10 @@ public:
       default;
 
   /// \brief Assign a number
-  Bound& operator=(int n) {
-    this->_is_infinite = false;
-    this->_n = n;
-    return *this;
-  }
-
-  /// \brief Assign a number
-  Bound& operator=(float n) {
-    this->_is_infinite = false;
-    this->_n = n;
-    return *this;
-  }
-
-  /// \brief Assign a number
-  Bound& operator=(double n) {
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  Bound& operator=(T n) {
     this->_is_infinite = false;
     this->_n = n;
     return *this;
