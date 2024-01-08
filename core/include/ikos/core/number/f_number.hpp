@@ -760,7 +760,7 @@ inline std::size_t hash_value(const FNumber& n) {
   if (n.is_fl()) {
     boost::hash_combine(hash, n._n.f);
   } else {
-    boost::hash_combine(hash, *n._n.d);
+    boost::hash_combine(hash, n._n.d);
   }
   boost::hash_combine(hash, n._bit_width);
   boost::hash_combine(hash, n._sign);
