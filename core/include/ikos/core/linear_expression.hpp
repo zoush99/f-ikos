@@ -49,10 +49,10 @@
 #include <boost/optional.hpp>
 
 #include <ikos/core/adt/patricia_tree/set.hpp>
+#include <ikos/core/number/supported_integralorfloat.hpp> // By zoush99
 #include <ikos/core/semantic/dumpable.hpp>
 #include <ikos/core/semantic/indexable.hpp>
 #include <ikos/core/semantic/variable.hpp>
-#include <ikos/core/number/supported_integralorfloat.hpp> // By zoush99
 
 namespace ikos {
 namespace core {
@@ -135,7 +135,10 @@ public:
   explicit LinearExpression(Number n) : _cst(std::move(n)) {}
 
   /// \brief Create a constant expression
-  explicit LinearExpression(int n) : _cst(n) {}
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  explicit LinearExpression(T n) : _cst(n) {}
 
   /// \brief Create a variable expression
   explicit LinearExpression(VariableRef var) {
@@ -192,7 +195,9 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  void add(T n) { this->_cst += n; }
+  void add(T n) {
+    this->_cst += n;
+  }
 
   /// \brief Add a variable
   void add(VariableRef var) { this->add(1, var); }
@@ -270,7 +275,9 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  void operator+=(T n) { this->_cst += n; }
+  void operator+=(T n) {
+    this->_cst += n;
+  }
 
   /// \brief Add a variable
   void operator+=(VariableRef var) { this->add(var); }
@@ -290,7 +297,9 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  void operator-=(T n) { this->_cst -= n; }
+  void operator-=(T n) {
+    this->_cst -= n;
+  }
 
   /// \brief Substract a variable
   void operator-=(VariableRef var) { this->add(-1, var); }
@@ -402,9 +411,12 @@ inline LinearExpression< Number, VariableRef > operator*(
   return LinearExpression< Number, VariableRef >(std::move(n), e.var());
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator*(
-    VariableExpression< Number, VariableRef > e, int n) {
+    VariableExpression< Number, VariableRef > e, T n) {
   return LinearExpression< Number, VariableRef >(n, e.var());
 }
 
@@ -414,9 +426,12 @@ inline LinearExpression< Number, VariableRef > operator*(
   return LinearExpression< Number, VariableRef >(std::move(n), e.var());
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator*(
-    int n, VariableExpression< Number, VariableRef > e) {
+    T n, VariableExpression< Number, VariableRef > e) {
   return LinearExpression< Number, VariableRef >(n, e.var());
 }
 
@@ -427,9 +442,12 @@ inline LinearExpression< Number, VariableRef > operator*(
   return e;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator*(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   e *= n;
   return e;
 }
@@ -441,9 +459,12 @@ inline LinearExpression< Number, VariableRef > operator*(
   return e;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator*(
-    int n, LinearExpression< Number, VariableRef > e) {
+    T n, LinearExpression< Number, VariableRef > e) {
   e *= n;
   return e;
 }
@@ -460,9 +481,12 @@ inline LinearExpression< Number, VariableRef > operator+(
   return r;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator+(
-    VariableExpression< Number, VariableRef > e, int n) {
+    VariableExpression< Number, VariableRef > e, T n) {
   LinearExpression< Number, VariableRef > r(e.var());
   r += n;
   return r;
@@ -476,9 +500,12 @@ inline LinearExpression< Number, VariableRef > operator+(
   return r;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator+(
-    int n, VariableExpression< Number, VariableRef > e) {
+    T n, VariableExpression< Number, VariableRef > e) {
   LinearExpression< Number, VariableRef > r(e.var());
   r += n;
   return r;
@@ -500,9 +527,12 @@ inline LinearExpression< Number, VariableRef > operator+(
   return e;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator+(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   e += n;
   return e;
 }
@@ -514,9 +544,12 @@ inline LinearExpression< Number, VariableRef > operator+(
   return e;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator+(
-    int n, LinearExpression< Number, VariableRef > e) {
+    T n, LinearExpression< Number, VariableRef > e) {
   e += n;
   return e;
 }
@@ -557,9 +590,12 @@ inline LinearExpression< Number, VariableRef > operator-(
   return r;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator-(
-    VariableExpression< Number, VariableRef > e, int n) {
+    VariableExpression< Number, VariableRef > e, T n) {
   LinearExpression< Number, VariableRef > r(e.var());
   r -= n;
   return r;
@@ -573,9 +609,12 @@ inline LinearExpression< Number, VariableRef > operator-(
   return r;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator-(
-    int n, VariableExpression< Number, VariableRef > e) {
+    T n, VariableExpression< Number, VariableRef > e) {
   LinearExpression< Number, VariableRef > r(-1, e.var());
   r += n;
   return r;
@@ -597,9 +636,13 @@ inline LinearExpression< Number, VariableRef > operator-(
   return e;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+
 inline LinearExpression< Number, VariableRef > operator-(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   e -= n;
   return e;
 }
@@ -620,9 +663,12 @@ inline LinearExpression< Number, VariableRef > operator-(
   return e;
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearExpression< Number, VariableRef > operator-(
-    int n, LinearExpression< Number, VariableRef > e) {
+    T n, LinearExpression< Number, VariableRef > e) {
   e *= -1;
   e += n;
   return e;
