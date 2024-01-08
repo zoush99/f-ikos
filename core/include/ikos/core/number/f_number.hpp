@@ -100,7 +100,7 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FNumber(T n): _sign(Signed){
-    if (std::is_same< T, float >::value) {  // fl
+    if (std::is_same< T, float >::value || std::is_same< T, int >::value) {  // fl
       _bit_width=32;
       this->_n.f = static_cast< float >(n);
     } else {  // do

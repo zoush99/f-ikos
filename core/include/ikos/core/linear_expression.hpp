@@ -52,6 +52,7 @@
 #include <ikos/core/semantic/dumpable.hpp>
 #include <ikos/core/semantic/indexable.hpp>
 #include <ikos/core/semantic/variable.hpp>
+#include <ikos/core/number/supported_integralorfloat.hpp> // By zoush99
 
 namespace ikos {
 namespace core {
@@ -154,7 +155,10 @@ public:
   }
 
   /// \brief Create the expression cst * var
-  LinearExpression(int cst, VariableRef var) {
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  LinearExpression(T cst, VariableRef var) {
     if (cst != 0) {
       this->_map.emplace(var, Number(cst));
     }
