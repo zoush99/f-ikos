@@ -238,7 +238,15 @@ public:
 
   /// \brief Division assignment
   /// \todo
-  FNumber& operator/=(const FNumber& x) { return *this; }
+  FNumber& operator/=(const FNumber& x) {
+    ikos_assert_msg(!x.is_zero(), "division by zero");
+    if (this->is_fl()) {  // fl / fl
+        this->_n.f=this->_n.f / x._n.f;
+      } else {  // do / do
+        this->_n.d=this->_n.d / x._n.d;
+      }
+      return *this;
+  }
 
   /// @}
   /// \name Value Characterization Functions
@@ -339,7 +347,7 @@ public:
 
   /// \brief Extend the floating point number to the given bit width
   /// \todo
-  FNumber ext(uint64_t bit_width) const { // 32/64 -> 32/64
+  FNumber ext(uint64_t bit_width) const { // 32 -> 32/64, 64 -> 64
     ikos_assert(this->_bit_width < bit_width);
 
     if (this->is_fl()) {
