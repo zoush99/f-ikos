@@ -260,9 +260,12 @@ inline LinearConstraint< Number, VariableRef > operator<=(
                     LinearConstraint< Number, VariableRef >::Inequality);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator<=(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(std::move(e) - n,
@@ -288,9 +291,12 @@ inline LinearConstraint< Number, VariableRef > operator<=(
                     LinearConstraint< Number, VariableRef >::Inequality);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator<=(
-    VariableExpression< Number, VariableRef > x, int n) {
+    VariableExpression< Number, VariableRef > x, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(std::move(x) - n,
@@ -340,9 +346,12 @@ inline LinearConstraint< Number, VariableRef > operator>=(
                     LinearConstraint< Number, VariableRef >::Inequality);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator>=(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(n - std::move(e),
@@ -368,9 +377,12 @@ inline LinearConstraint< Number, VariableRef > operator>=(
                     LinearConstraint< Number, VariableRef >::Inequality);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator>=(
-    VariableExpression< Number, VariableRef > x, int n) {
+    VariableExpression< Number, VariableRef > x, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(n - std::move(x),
@@ -420,9 +432,12 @@ inline LinearConstraint< Number, VariableRef > operator==(
                     LinearConstraint< Number, VariableRef >::Equality);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator==(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(std::move(e) - n,
@@ -448,9 +463,12 @@ inline LinearConstraint< Number, VariableRef > operator==(
                     LinearConstraint< Number, VariableRef >::Equality);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator==(
-    VariableExpression< Number, VariableRef > x, int n) {
+    VariableExpression< Number, VariableRef > x, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(std::move(x) - n,
@@ -500,9 +518,12 @@ inline LinearConstraint< Number, VariableRef > operator!=(
                     LinearConstraint< Number, VariableRef >::Disequation);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator!=(
-    LinearExpression< Number, VariableRef > e, int n) {
+    LinearExpression< Number, VariableRef > e, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(std::move(e) - n,
@@ -528,9 +549,12 @@ inline LinearConstraint< Number, VariableRef > operator!=(
                     LinearConstraint< Number, VariableRef >::Disequation);
 }
 
-template < typename Number, typename VariableRef >
+template < typename Number,
+           typename VariableRef,
+           typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
 inline LinearConstraint< Number, VariableRef > operator!=(
-    VariableExpression< Number, VariableRef > x, int n) {
+    VariableExpression< Number, VariableRef > x, T n) {
   return LinearConstraint<
       Number,
       VariableRef >(std::move(x) - n,

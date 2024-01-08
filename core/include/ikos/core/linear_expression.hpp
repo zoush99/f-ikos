@@ -640,7 +640,6 @@ template < typename Number,
            typename VariableRef,
            typename T,
            class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-
 inline LinearExpression< Number, VariableRef > operator-(
     LinearExpression< Number, VariableRef > e, T n) {
   e -= n;
