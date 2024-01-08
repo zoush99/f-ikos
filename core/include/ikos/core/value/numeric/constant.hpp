@@ -89,7 +89,10 @@ public:
   static Constant bottom() { return Constant(BottomTag{}); }
 
   /// \brief Create the constant n
-  explicit Constant(int n) : _kind(NumberKind), _n(n) {}
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  explicit Constant(T n) : _kind(NumberKind), _n(n) {}
 
   /// \brief Create the constant n
   explicit Constant(Number n) : _kind(NumberKind), _n(std::move(n)) {}
@@ -277,7 +280,10 @@ public:
   boost::optional< Number > singleton() const { return this->number(); }
 
   /// \brief Return true if the constant contains n
-  bool contains(int n) const {
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  bool contains(T n) const {
     return this->is_top() || (this->is_number() && this->_n == n);
   }
 
