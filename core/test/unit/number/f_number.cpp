@@ -50,7 +50,9 @@ BOOST_AUTO_TEST_CASE(test_bit_width) {
 }
 
 BOOST_AUTO_TEST_CASE(test_sign) {
-  BOOST_CHECK(FNumber(0,32,Signed).sign()==Signed);
+  FNumber F(10,32,Signed);
+  std::cout<<F<<std::endl;
+  BOOST_CHECK(FNumber(10,32,Signed).sign()==Signed);
   BOOST_CHECK(FNumber(1.2f,32,Signed).sign()==Signed);
   BOOST_CHECK(FNumber(1.2,32,Signed).sign()==Signed);
 }

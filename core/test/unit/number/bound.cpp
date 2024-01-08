@@ -24,5 +24,9 @@ BOOST_AUTO_TEST_CASE(test_constructor_signed) {
   FNumber F(1.2);
   BoundZ Zz(Z);
   BoundF Ff(F);
+  Ff.dump(std::cout);
+  std::cout<<std::endl;
   BOOST_CHECK(BoundF(1.2)==BoundF(1.2));
+  BOOST_CHECK(BoundF(2.4)==(BoundF(1.2)*BoundF(2)));
+
 }

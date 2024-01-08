@@ -51,9 +51,9 @@ public:
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
 
-    if (this->is_fl()) {
+    if (std::is_same< T, float >::value || std::is_same< T, int >::value) {  // fl or int
       this->_n.f = static_cast< float >(n);
-    } else {
+    } else {  // do
       this->_n.d = static_cast< double >(n);
     }
   }
@@ -66,9 +66,9 @@ public:
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
 
-    if (this->is_fl()) {
+    if (std::is_same< T, float >::value || std::is_same< T, int >::value) {  // fl or int
       this->_n.f = static_cast< float >(n);
-    } else {
+    } else {  // do
       this->_n.d = static_cast< double >(n);
     }
   }
@@ -77,9 +77,9 @@ public:
   FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    if (this->is_fl()) {
+    if (bit_width == 32) {  // fl
       this->_n.f = n.to< int >();
-    } else {
+    } else {  // do
       this->_n.d = n.to< int >();
     }
   }
@@ -88,9 +88,9 @@ public:
   FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign, NormalizedTag)
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    if (this->is_fl()) {
+    if (bit_width == 32) {  // fl
       this->_n.f = n.to< int >();
-    } else {
+    } else {  // do
       this->_n.d = n.to< int >();
     }
   }
@@ -100,10 +100,10 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FNumber(T n): _sign(Signed){
-    if (this->is_fl()) {
+    if (std::is_same< T, float >::value) {  // fl
       _bit_width=32;
       this->_n.f = static_cast< float >(n);
-    } else {
+    } else {  // do
       _bit_width=64;
       this->_n.d = static_cast< double >(n);
     }
@@ -784,7 +784,7 @@ inline FNumber abs(const FNumber& n) {
 /// \name Input / Output
 /// @{
 
-/// \brief Write a machine integer on a stream
+/// \brief Write a floating point number on a stream
 inline std::ostream& operator<<(std::ostream& o, const FNumber& n) {
   if (n.is_fl()) {
       o << n._n.f;
