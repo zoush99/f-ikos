@@ -101,6 +101,8 @@ inline ap_scalar_t* to_ap_scalar(const QNumber& n) {
   return ap_scalar_alloc_set_mpq(e.get_mpq_t());
 }
 
+/// \todo(floating point)
+
 /// \brief Conversion from ikos::ZNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const ZNumber& n) {
   mpq_class e(n.mpz());
@@ -112,6 +114,8 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   mpq_class e(q.mpq());
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
+
+/// \todo(floating point)
 
 /// \brief Conversion from ap_scalar_t* to ikos::ZNumber/QNumber
 template < typename Number >
