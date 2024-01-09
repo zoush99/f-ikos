@@ -778,6 +778,7 @@ public:
   /// \name Machine integer abstract domain methods
   /// @{
 
+  /// \todo(floating point)
   void assign(VariableRef x, const MachineInt& n) override {
     this->_ptr->assign(x, n);
   }
