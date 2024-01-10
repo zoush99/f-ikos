@@ -91,6 +91,7 @@ public:
                 "memory::AbstractDomain");
 
 private:
+  /// \todo(numerical)
   using IntInterval = core::machine_int::Interval;
   using IntIntervalCongruence = core::machine_int::IntervalCongruence;
   using IntVariable = core::VariableExpression< MachineInt, Variable* >;
@@ -439,7 +440,7 @@ private:
       this->_inv.normal().int_assign(this->_lhs, rhs);
     }
 
-    void floating_point(const DummyNumber&) { ikos_unreachable("unreachable"); }
+    void floating_point(const FNumber &) { ikos_unreachable("unreachable"); }
 
     void memory_location(MemoryLocation*) { ikos_unreachable("unreachable"); }
 
@@ -469,8 +470,8 @@ private:
 
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
-    /// \todo(floating point)
-    void floating_point(const DummyNumber&) {
+    void floating_point(const FNumber& rhs) {
+      /// \todo(floating point)
       this->_inv.normal().float_assign_nondet(this->_lhs);
     }
 
@@ -501,7 +502,7 @@ private:
 
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
-    void floating_point(const DummyNumber&) { ikos_unreachable("unreachable"); }
+    void floating_point(const FNumber&) { ikos_unreachable("unreachable"); }
 
     void memory_location(MemoryLocation* addr) {
       this->_inv.normal().pointer_assign(this->_lhs, addr, Nullity::non_null());
@@ -568,7 +569,7 @@ private:
       }
     }
 
-    void floating_point(const DummyNumber&) { ikos_unreachable("unreachable"); }
+    void floating_point(const FNumber&) { ikos_unreachable("unreachable"); }
 
     void memory_location(MemoryLocation*) { ikos_unreachable("unreachable"); }
 
@@ -609,7 +610,7 @@ private:
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
     /// \todo(floating point)
-    void floating_point(const DummyNumber&) {
+    void floating_point(const FNumber&) {
       this->_inv.normal().float_assign_nondet(this->_lhs);
     }
 
@@ -642,7 +643,7 @@ private:
 
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
-    void floating_point(const DummyNumber&) { ikos_unreachable("unreachable"); }
+    void floating_point(const FNumber&) { ikos_unreachable("unreachable"); }
 
     void memory_location(MemoryLocation* addr) {
       this->_inv.normal().pointer_assign(this->_lhs, addr, Nullity::non_null());
@@ -864,6 +865,8 @@ public:
     }
   }
 
+  /// \todo(start here to convert front-end data types to back-end analyzerd
+  /// data types) By zoush99
 public:
   /// @}
   /// \name Implement ExecutionEngine
@@ -969,6 +972,7 @@ public:
     const Literal& lhs = this->_lit_factory.get(s->result());
     const Literal& rhs = this->_lit_factory.get(s->operand());
 
+    /// \todo(covert AR data types to machine integer types)    By zoush99
     switch (s->op()) {
       case ar::UnaryOperation::UTrunc:
       case ar::UnaryOperation::STrunc: {

@@ -71,6 +71,9 @@ using DummyNumber = ikos::core::DummyNumber;
 /// \brief Class for unlimited precision integers
 using ZNumber = ikos::core::ZNumber;
 
+/// \brief Class for floating point numbers
+using FNumber = ikos::core::FNumber;
+
 /// \brief Class for arbitrary precision machine integers
 using MachineInt = ikos::core::MachineInt;
 
