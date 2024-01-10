@@ -55,6 +55,7 @@
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integral.hpp>
 #include <ikos/core/number/z_number.hpp>
+#include <ikos/core/number/f_number.hpp>
 
 namespace ikos {
 namespace analyzer {

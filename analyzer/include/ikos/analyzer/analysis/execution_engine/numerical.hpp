@@ -961,6 +961,7 @@ public:
   }
 
   /// \brief Execute an UnaryOperation statement
+  /// \todo (covert AR data types to machine integer types)    By zoush99
   void exec(ar::UnaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {
       this->_inv.set_normal_flow_to_bottom();
@@ -972,7 +973,7 @@ public:
     const Literal& lhs = this->_lit_factory.get(s->result());
     const Literal& rhs = this->_lit_factory.get(s->operand());
 
-    /// \todo(covert AR data types to machine integer types)    By zoush99
+    /// \todo(floating point)
     switch (s->op()) {
       case ar::UnaryOperation::UTrunc:
       case ar::UnaryOperation::STrunc: {
@@ -1158,7 +1159,9 @@ private:
         this->_inv.normal().int_apply(IntUnaryOperator::SignCast,
                                       lhs.var(),
                                       rhs.scalar().var());
-      } else {
+      }
+      /// \todo(floating point)
+      else {
         this->_inv.normal().int_assign_nondet(lhs.var());
       }
     } else {
@@ -1183,6 +1186,7 @@ private:
   }
 
 public:
+  /// \todo (covert AR data types to machine integer types)    By zoush99
   /// \brief Execute a BinaryOperation statement
   void exec(ar::BinaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {
@@ -1200,6 +1204,7 @@ public:
     const ScalarLit& right = this->_lit_factory.get_scalar(s->right());
 
     switch (s->op()) {
+        /// \todo(floating point)
       case ar::BinaryOperation::UAdd:
       case ar::BinaryOperation::SAdd: {
         this->exec_int_bin_operation(lhs,
@@ -1292,6 +1297,7 @@ public:
   }
 
 private:
+  /// \todo(floating point)
   /// \brief Execute an integer binary operation
   void exec_int_bin_operation(const ScalarLit& lhs,
                               IntBinaryOperator op,
