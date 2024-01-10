@@ -214,6 +214,8 @@ struct ApplyBinOperator<
   }
 };
 
+/// \todo(floating point)
+
 } // end namespace detail
 
 } // end namespace numeric
