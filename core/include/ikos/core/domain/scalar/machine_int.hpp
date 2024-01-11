@@ -901,24 +901,8 @@ public:
     this->_integer.assign(x, e);
   }
 
-/*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(y));
-
-    if (this->is_bottom_fast()) {
-      return;
-    }
-
-    this->_uninitialized.assert_initialized(y);
-
-    if (this->_uninitialized.is_bottom()) {
-      this->set_to_bottom();
-      return;
-    }
-
-    this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y);
-  }*/
+/*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override
+*/
 
   void float_apply(FnuBinaryOperator op,
                  VariableRef x,
