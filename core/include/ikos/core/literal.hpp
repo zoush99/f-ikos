@@ -397,6 +397,7 @@ private:
   };
 
 public:
+  /// \todo(floating point)
   /// \brief Get the floating point
   const FNumber& floating_point() const {
     return boost::apply_visitor(GetFloatingPoint(), this->_lit);

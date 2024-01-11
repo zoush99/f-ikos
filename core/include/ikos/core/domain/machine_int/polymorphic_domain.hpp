@@ -68,7 +68,6 @@ class PolymorphicDomain final
                                           PolymorphicDomain< VariableRef > > {
 public:
   using LinearExpressionT = LinearExpression< MachineInt, VariableRef >;
-  using LinearExpressionF = LinearExpression< FNumber, VariableRef >; // by zoush99
   using VariableTrait = machine_int::VariableTraits< VariableRef >;
 
 private:
