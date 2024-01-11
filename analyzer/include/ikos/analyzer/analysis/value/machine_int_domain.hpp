@@ -52,6 +52,7 @@ namespace ikos {
 namespace analyzer {
 namespace value {
 
+/// \todo(floating point)
 /// \brief Machine integer abstract domain used for the value analysis
 using MachineIntAbstractDomain =
     core::machine_int::PolymorphicDomain< Variable* >;

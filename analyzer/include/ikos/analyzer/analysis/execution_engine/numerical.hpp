@@ -986,7 +986,6 @@ public:
     const Literal& lhs = this->_lit_factory.get(s->result());
     const Literal& rhs = this->_lit_factory.get(s->operand());
 
-    /// \todo(floating point)
     switch (s->op()) {
       case ar::UnaryOperation::UTrunc:
       case ar::UnaryOperation::STrunc: {
@@ -999,15 +998,15 @@ public:
         this->exec_int_conv(IntUnaryOperator::Ext, lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::FPTrunc:
-      case ar::UnaryOperation::FPExt: {
+      case ar::UnaryOperation::FPExt: { // floating point
         this->exec_float_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::FPToUI:
-      case ar::UnaryOperation::FPToSI: {
+      case ar::UnaryOperation::FPToSI: {  // floating point
         this->exec_float_to_int_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::UIToFP:
-      case ar::UnaryOperation::SIToFP: {
+      case ar::UnaryOperation::SIToFP: {  // floating point
         this->exec_int_to_float_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::PtrToUI:
@@ -1032,15 +1031,16 @@ private:
     ikos_assert_msg(lhs.is_machine_int_var(),
                     "left hand side is not an integer variable");
 
-    if (rhs.is_machine_int()) {
+    if (rhs.is_machine_int()) { // machine integer constant
       auto type = cast< ar::IntegerType >(lhs.var()->type());
+      // question?
       this->_inv.normal()
           .int_assign(lhs.var(),
                       core::machine_int::apply_unary_operator(op,
                                                               rhs.machine_int(),
                                                               type->bit_width(),
                                                               type->sign()));
-    } else if (rhs.is_machine_int_var()) {
+    } else if (rhs.is_machine_int_var()) {  // machine integer variable
       this->_inv.normal().int_apply(op, lhs.var(), rhs.var());
     } else {
       ikos_unreachable("unexpected arguments");
