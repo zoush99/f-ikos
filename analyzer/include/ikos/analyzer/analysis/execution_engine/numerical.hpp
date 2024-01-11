@@ -91,7 +91,7 @@ public:
                 "memory::AbstractDomain");
 
 private:
-  /// \todo(numerical)
+  /// \todo(numeric)
   using IntInterval = core::machine_int::Interval;
   using IntIntervalCongruence = core::machine_int::IntervalCongruence;
   using IntVariable = core::VariableExpression< MachineInt, Variable* >;
@@ -106,6 +106,18 @@ private:
   using IntBinaryOperator = core::machine_int::BinaryOperator;
   using IntPredicate = core::machine_int::Predicate;
   using PointerPredicate = core::pointer::Predicate;
+
+  // By zoush99
+  using FnuInterval = core::numeric::Interval<FNumber>;
+  using FnuVariable = core::VariableExpression< FNumber, Variable* >;
+  using FnuLinearExpression = core::LinearExpression< FNumber, Variable* >;
+  using FnuLinearConstraint = core::LinearConstraint< FNumber, Variable* >;
+  using FnuLinearConstraintSystem =
+      core::LinearConstraintSystem< FNumber, Variable* >;
+  /// \todo
+  using FnuUnaryOperator = core::machine_int::UnaryOperator;
+  using FnuBinaryOperator = core::machine_int::BinaryOperator;
+  using FnuPredicate = core::machine_int::Predicate;
 
 private:
   /// \brief Current invariant

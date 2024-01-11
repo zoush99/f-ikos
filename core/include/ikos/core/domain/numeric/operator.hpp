@@ -47,6 +47,7 @@
 
 #include <ikos/core/number/q_number.hpp>
 #include <ikos/core/number/z_number.hpp>
+#include <ikos/core/number/f_number.hpp>  // By zoush99
 
 namespace ikos {
 namespace core {
@@ -67,6 +68,7 @@ enum class BinaryOperator {
   ///
   /// On integers (Z), this is the integer division with rounding towards zero.
   /// On rationals (Q), this is the exact division.
+  /// On rationals (F), this is the floating point division with rounding mode.
   Div,
 
   /// \brief Remainder
@@ -143,6 +145,36 @@ inline const char* bin_operator_text(BinaryOperator op) {
   }
 }
 
+/// \brief Predicate
+enum class Predicate {
+  EQ,
+  NE,
+  GT,
+  GE,
+  LT,
+  LE,
+};
+
+/// \brief Compare the given operands with the given predicate
+template < typename T >
+bool compare(Predicate pred, const T& lhs, const T& rhs) {
+  switch (pred) {
+    case Predicate::EQ:
+      return lhs == rhs;
+    case Predicate::NE:
+      return lhs != rhs;
+    case Predicate::GT:
+      return lhs > rhs;
+    case Predicate::GE:
+      return lhs >= rhs;
+    case Predicate::LT:
+      return lhs < rhs;
+    case Predicate::LE:
+      return lhs <= rhs;
+    default:
+      ikos_unreachable("unreachable");
+  }
+}
 namespace detail {
 
 template < typename T, typename = void >
@@ -214,9 +246,29 @@ struct ApplyBinOperator<
   }
 };
 
-/// \todo(floating point)
+/// \brief Implementation for abstract values on FNumber
+template < typename T >
+struct ApplyBinOperator<
+    T,
+    std::enable_if_t< std::is_same< typename T::NumberT, FNumber >::value > > {
+  inline T operator()(BinaryOperator op, const T& lhs, const T& rhs) const {
+    switch (op) {
+      case BinaryOperator::Add:
+        return lhs + rhs;
+      case BinaryOperator::Sub:
+        return lhs - rhs;
+      case BinaryOperator::Mul:
+        return lhs * rhs;
+      case BinaryOperator::Div:
+        return lhs / rhs;
+      default:
+        ikos_unreachable("unsupported operator");
+    }
+  }
+};
 
 } // end namespace detail
+
 
 } // end namespace numeric
 } // end namespace core

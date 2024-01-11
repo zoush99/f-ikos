@@ -103,6 +103,7 @@ public:
     }
   }
 
+  /// \todo(floating point)
   boost::optional< ar::MachineInt > extract_constant(ar::BasicBlock* bb) const {
     if (bb->empty()) {
       return boost::none;
