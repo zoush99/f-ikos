@@ -61,6 +61,7 @@
 #include <ikos/analyzer/analysis/pointer/value.hpp>
 #include <ikos/analyzer/support/assert.hpp>
 #include <ikos/analyzer/support/cast.hpp>
+#include <ikos/core/domain/numeric/operator.hpp>  // By zoush99
 
 namespace ikos {
 namespace analyzer {
@@ -115,9 +116,9 @@ private:
   using FnuLinearConstraintSystem =
       core::LinearConstraintSystem< FNumber, Variable* >;
   /// \todo
-  using FnuUnaryOperator = core::machine_int::UnaryOperator;
-  using FnuBinaryOperator = core::machine_int::BinaryOperator;
-  using FnuPredicate = core::machine_int::Predicate;
+  // using FnuUnaryOperator = core::machine_int::UnaryOperator;
+  using FnuBinaryOperator = core::numeric::BinaryOperator;
+  using FnuPredicate = core::numeric::Predicate;
 
 private:
   /// \brief Current invariant
