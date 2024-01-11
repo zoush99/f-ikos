@@ -68,6 +68,7 @@ class PolymorphicDomain final
                                           PolymorphicDomain< VariableRef > > {
 public:
   using LinearExpressionT = LinearExpression< MachineInt, VariableRef >;
+  using LinearExpressionF = LinearExpression< FNumber, VariableRef >; // by zoush99
   using VariableTrait = machine_int::VariableTraits< VariableRef >;
 
 private:
@@ -738,7 +739,7 @@ public:
     this->_ptr->widen_with(*other._ptr);
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   void widen_threshold_with(const PolymorphicDomain& other,
                             const MachineInt& threshold) override {
     this->_ptr->widen_threshold_with(*other._ptr, threshold);
@@ -752,7 +753,7 @@ public:
     this->_ptr->narrow_with(*other._ptr);
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   void narrow_threshold_with(const PolymorphicDomain& other,
                              const MachineInt& threshold) override {
     this->_ptr->narrow_threshold_with(*other._ptr, threshold);
@@ -774,7 +775,7 @@ public:
     return PolymorphicDomain(this->_ptr->widening(*other._ptr));
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   PolymorphicDomain widening_threshold(
       const PolymorphicDomain& other,
       const MachineInt& threshold) const override {
@@ -790,7 +791,7 @@ public:
     return PolymorphicDomain(this->_ptr->narrowing(*other._ptr));
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   PolymorphicDomain narrowing_threshold(
       const PolymorphicDomain& other,
       const MachineInt& threshold) const override {
@@ -826,7 +827,7 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   void apply(BinaryOperator op,
              VariableRef x,
              VariableRef y,
@@ -834,7 +835,7 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   void apply(BinaryOperator op,
              VariableRef x,
              const MachineInt& y,
@@ -846,12 +847,12 @@ public:
     this->_ptr->add(pred, x, y);
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   void add(Predicate pred, VariableRef x, const MachineInt& y) override {
     this->_ptr->add(pred, x, y);
   }
 
-/// \todo(floating point)
+  /// \todo(floating point)
   void add(Predicate pred, const MachineInt& x, VariableRef y) override {
     this->_ptr->add(pred, x, y);
   }
