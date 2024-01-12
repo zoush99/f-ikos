@@ -52,9 +52,6 @@
 #pragma once
 
 #include <memory>
-
-#include <ikos/core/domain/machine_int/abstract_domain.hpp>
-
 #include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/support/assert.hpp>
 #include <ikos/core/support/mpl.hpp>
@@ -73,7 +70,6 @@ class PolymorphicDomain final
     : public numeric::AbstractDomain<FNumber,VariableRef,PolymorphicDomain< VariableRef >> {
 public:
   using LinearExpressionT = LinearExpression< FNumber, VariableRef >;
-  using VariableTrait = machine_int::VariableTraits< VariableRef >;
 
 private:
   /// Type erasure idiom
@@ -190,10 +186,13 @@ private:
     virtual std::unique_ptr< PolymorphicBase > widening(
         const PolymorphicBase& other) const = 0;
 
-    /// \todo(floating point)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > widening_threshold(
         const PolymorphicBase& other, const MachineInt& threshold) const = 0;
+
+    /// \brief Perform the widening of two abstract values with a threshold
+    virtual std::unique_ptr< PolymorphicBase > widening_threshold(
+        const PolymorphicBase& other, const FNumber& threshold) const = 0;
 
     /// \brief Perform the intersection of two abstract values
     virtual std::unique_ptr< PolymorphicBase > meet(
