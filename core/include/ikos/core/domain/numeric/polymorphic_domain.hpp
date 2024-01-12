@@ -830,9 +830,13 @@ public:
     this->_ptr->widen_with(*other._ptr);
   }
 
-  /// \todo(floating point)
   void widen_threshold_with(const PolymorphicDomain& other,
                             const MachineInt& threshold) override {
+    this->_ptr->widen_threshold_with(*other._ptr, threshold);
+  }
+
+  void widen_threshold_with(const PolymorphicDomain& other,
+                            const FNumber& threshold) override {
     this->_ptr->widen_threshold_with(*other._ptr, threshold);
   }
 
@@ -844,9 +848,13 @@ public:
     this->_ptr->narrow_with(*other._ptr);
   }
 
-  /// \todo(floating point)
   void narrow_threshold_with(const PolymorphicDomain& other,
                              const MachineInt& threshold) override {
+    this->_ptr->narrow_threshold_with(*other._ptr, threshold);
+  }
+
+  void narrow_threshold_with(const PolymorphicDomain& other,
+                             const FNumber& threshold) override {
     this->_ptr->narrow_threshold_with(*other._ptr, threshold);
   }
 
@@ -866,10 +874,16 @@ public:
     return PolymorphicDomain(this->_ptr->widening(*other._ptr));
   }
 
-  /// \todo(floating point)
   PolymorphicDomain widening_threshold(
       const PolymorphicDomain& other,
       const MachineInt& threshold) const override {
+    return PolymorphicDomain(
+        this->_ptr->widening_threshold(*other._ptr, threshold));
+  }
+
+  PolymorphicDomain widening_threshold(
+      const PolymorphicDomain& other,
+      const FNumber& threshold) const override {
     return PolymorphicDomain(
         this->_ptr->widening_threshold(*other._ptr, threshold));
   }
@@ -882,7 +896,6 @@ public:
     return PolymorphicDomain(this->_ptr->narrowing(*other._ptr));
   }
 
-  /// \todo(floating point)
   PolymorphicDomain narrowing_threshold(
       const PolymorphicDomain& other,
       const MachineInt& threshold) const override {
@@ -890,12 +903,21 @@ public:
         this->_ptr->narrowing_threshold(*other._ptr, threshold));
   }
 
+  PolymorphicDomain narrowing_threshold(
+      const PolymorphicDomain& other,
+      const FNumber& threshold) const override {
+    return PolymorphicDomain(
+        this->_ptr->narrowing_threshold(*other._ptr, threshold));
+  }
   /// @}
   /// \name Machine integer abstract domain methods
   /// @{
 
-  /// \todo(floating point)
   void assign(VariableRef x, const MachineInt& n) override {
+    this->_ptr->assign(x, n);
+  }
+
+  void assign(VariableRef x, const FNumber& n) override {
     this->_ptr->assign(x, n);
   }
 
@@ -907,9 +929,9 @@ public:
     this->_ptr->assign(x, e);
   }
 
-  void apply(UnaryOperator op, VariableRef x, VariableRef y) override {
+/*  void apply(UnaryOperator op, VariableRef x, VariableRef y) override {
     this->_ptr->apply(op, x, y);
-  }
+  }*/
 
   void apply(BinaryOperator op,
              VariableRef x,
@@ -918,7 +940,6 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-  /// \todo(floating point)
   void apply(BinaryOperator op,
              VariableRef x,
              VariableRef y,
@@ -926,10 +947,23 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-  /// \todo(floating point)
+  void apply(BinaryOperator op,
+             VariableRef x,
+             VariableRef y,
+             const FNumber& z) override {
+    this->_ptr->apply(op, x, y, z);
+  }
+
   void apply(BinaryOperator op,
              VariableRef x,
              const MachineInt& y,
+             VariableRef z) override {
+    this->_ptr->apply(op, x, y, z);
+  }
+
+  void apply(BinaryOperator op,
+             VariableRef x,
+             const FNumber& y,
              VariableRef z) override {
     this->_ptr->apply(op, x, y, z);
   }
@@ -938,63 +972,69 @@ public:
     this->_ptr->add(pred, x, y);
   }
 
-  /// \todo(floating point)
   void add(Predicate pred, VariableRef x, const MachineInt& y) override {
     this->_ptr->add(pred, x, y);
   }
 
-  /// \todo(floating point)
+  void add(Predicate pred, VariableRef x, const FNumber& y) override {
+    this->_ptr->add(pred, x, y);
+  }
+
   void add(Predicate pred, const MachineInt& x, VariableRef y) override {
     this->_ptr->add(pred, x, y);
   }
 
-  void set(VariableRef x, const Interval& value) override {
+  void add(Predicate pred, const FNumber& x, VariableRef y) override {
+    this->_ptr->add(pred, x, y);
+  }
+
+  void set(VariableRef x, const Interval<FNumber>& value) override {
     this->_ptr->set(x, value);
   }
 
-  void set(VariableRef x, const Congruence& value) override {
+  void set(VariableRef x, const Congruence<FNumber>& value) override {
     this->_ptr->set(x, value);
   }
 
-  void set(VariableRef x, const IntervalCongruence& value) override {
+  void set(VariableRef x, const IntervalCongruence<FNumber>& value) override {
     this->_ptr->set(x, value);
   }
 
-  void refine(VariableRef x, const Interval& value) override {
+  void refine(VariableRef x, const Interval<FNumber>& value) override {
     this->_ptr->refine(x, value);
   }
 
-  void refine(VariableRef x, const Congruence& value) override {
+  void refine(VariableRef x, const Congruence<FNumber>& value) override {
     this->_ptr->refine(x, value);
   }
 
-  void refine(VariableRef x, const IntervalCongruence& value) override {
+  void refine(VariableRef x, const IntervalCongruence<FNumber>& value) override {
     this->_ptr->refine(x, value);
   }
 
   void forget(VariableRef x) override { this->_ptr->forget(x); }
 
-  Interval to_interval(VariableRef x) const override {
+  Interval<FNumber> to_interval(VariableRef x) const override {
     return this->_ptr->to_interval(x);
   }
 
-  Interval to_interval(const LinearExpressionT& e) const override {
+  Interval<FNumber> to_interval(const LinearExpressionT& e) const override {
     return this->_ptr->to_interval(e);
   }
 
-  Congruence to_congruence(VariableRef x) const override {
+  Congruence<FNumber> to_congruence(VariableRef x) const override {
     return this->_ptr->to_congruence(x);
   }
 
-  Congruence to_congruence(const LinearExpressionT& e) const override {
+  Congruence<FNumber> to_congruence(const LinearExpressionT& e) const override {
     return this->_ptr->to_congruence(e);
   }
 
-  IntervalCongruence to_interval_congruence(VariableRef x) const override {
+  IntervalCongruence<FNumber> to_interval_congruence(VariableRef x) const override {
     return this->_ptr->to_interval_congruence(x);
   }
 
-  IntervalCongruence to_interval_congruence(
+  IntervalCongruence<FNumber> to_interval_congruence(
       const LinearExpressionT& e) const override {
     return this->_ptr->to_interval_congruence(e);
   }
