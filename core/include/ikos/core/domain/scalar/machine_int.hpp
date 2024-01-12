@@ -1585,6 +1585,34 @@ public:
     }
   }
 
+  void scalar_float_to_int(VariableRef x,
+                             VariableRef f) override {
+    ikos_assert(ScalarVariableTrait::is_int(x));
+    ikos_assert(ScalarVariableTrait::is_float(f));
+
+    if (this->is_bottom_fast()) {
+      return;
+    }
+
+    this->_uninitialized.assert_initialized(f);
+    this->_uninitialized.assign_initialized(x);
+    this->_integer.forget(x);
+  }
+
+  void scalar_int_to_float(VariableRef f,
+                             VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(f));
+    ikos_assert(ScalarVariableTrait::is_int(x));
+
+    if (this->is_bottom_fast()) {
+      return;
+    }
+
+    this->_uninitialized.assert_initialized(x);
+    this->_uninitialized.assign_initialized(f);
+  }
+
+  /// \brief pointer -> integer
   void scalar_pointer_to_int(VariableRef x,
                              VariableRef p,
                              MemoryLocationRef) override {

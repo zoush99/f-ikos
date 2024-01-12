@@ -45,6 +45,7 @@
 
 #include <ikos/core/domain/abstract_domain.hpp>
 #include <ikos/core/domain/machine_int/operator.hpp>
+#include <ikos/core/domain/numeric/operator.hpp> // By zoush99
 #include <ikos/core/domain/pointer/operator.hpp>
 #include <ikos/core/linear_expression.hpp>
 #include <ikos/core/number/machine_int.hpp>
@@ -60,8 +61,6 @@
 #include <ikos/core/value/pointer/pointer_set.hpp>
 #include <ikos/core/value/pointer/points_to_set.hpp>
 #include <ikos/core/value/uninitialized.hpp>
-#include <ikos/core/domain/numeric/operator.hpp>  // By zoush99
-
 
 namespace ikos {
 namespace core {
@@ -101,9 +100,9 @@ public:
   using FnuBinaryOperator = numeric::BinaryOperator;
   using FnuPredicate = numeric::Predicate;
   using FnuLinearExpression = LinearExpression< FNumber, VariableRef >;
-  using FnuInterval = numeric::Interval<FNumber>;
-  using FnuCongruence = numeric::Congruence<FNumber>;
-  using FnuIntervalCongruence = numeric::IntervalCongruence<FNumber>;
+  using FnuInterval = numeric::Interval< FNumber >;
+  using FnuCongruence = numeric::Congruence< FNumber >;
+  using FnuIntervalCongruence = numeric::IntervalCongruence< FNumber >;
 
 public:
   /// \brief Perform the widening of two abstract values with a threshold
@@ -320,38 +319,39 @@ public:
   virtual void float_assign(VariableRef x, const FnuLinearExpression& e) = 0;
 
   /// \brief Apply `x = op y`
-  // virtual void float_apply(IntUnaryOperator op, VariableRef x, VariableRef y) = 0;
+  // virtual void float_apply(IntUnaryOperator op, VariableRef x, VariableRef y)
+  // = 0;
 
   /// \brief Apply `x = y op z`
   virtual void float_apply(FnuBinaryOperator op,
-                         VariableRef x,
-                         VariableRef y,
-                         VariableRef z) = 0;
+                           VariableRef x,
+                           VariableRef y,
+                           VariableRef z) = 0;
 
   /// \brief Apply `x = y op z`
   virtual void float_apply(FnuBinaryOperator op,
-                         VariableRef x,
-                         VariableRef y,
-                         const FNumber& z) = 0;
+                           VariableRef x,
+                           VariableRef y,
+                           const FNumber& z) = 0;
 
   /// \brief Apply `x = y op z`
   virtual void float_apply(FnuBinaryOperator op,
-                         VariableRef x,
-                         const FNumber& y,
-                         VariableRef z) = 0;
+                           VariableRef x,
+                           const FNumber& y,
+                           VariableRef z) = 0;
 
   // \brief Add the constraint `x pred y`
   virtual void float_add(FnuPredicate pred, VariableRef x, VariableRef y) = 0;
 
   // \brief Add the constraint `x pred y`
   virtual void float_add(FnuPredicate pred,
-                       VariableRef x,
-                       const FNumber& y) = 0;
+                         VariableRef x,
+                         const FNumber& y) = 0;
 
   // \brief Add the constraint `x pred y`
   virtual void float_add(FnuPredicate pred,
-                       const FNumber& x,
-                       VariableRef y) = 0;
+                         const FNumber& x,
+                         VariableRef y) = 0;
 
   /// \brief Set the interval value of a variable
   virtual void float_set(VariableRef x, const FnuInterval& value) = 0;
@@ -370,7 +370,7 @@ public:
 
   /// \brief Refine the value of a variable with an interval-congruence
   virtual void float_refine(VariableRef x,
-                          const FnuIntervalCongruence& value) = 0;
+                            const FnuIntervalCongruence& value) = 0;
 
   /// \brief Forget an integer variable
   virtual void float_forget(VariableRef x) = 0;
@@ -586,6 +586,12 @@ public:
 
   /// \brief Assign `x` to a non deterministic value
   virtual void scalar_assign_nondet(VariableRef x) = 0;
+
+  /// \brief Assign 'x = fl-to-int f'
+  void scalar_float_to_int(VariableRef x, VariableRef f) = 0;
+
+  /// \brief Assign 'f = x-to-fl x'
+  void scalar_int_to_float(VariableRef f, VariableRef x) = 0;
 
   /// \brief Assign `x = ptr-to-int p`
   virtual void scalar_pointer_to_int(VariableRef x,

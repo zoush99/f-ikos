@@ -115,7 +115,6 @@ private:
   using FnuLinearConstraint = core::LinearConstraint< FNumber, Variable* >;
   using FnuLinearConstraintSystem =
       core::LinearConstraintSystem< FNumber, Variable* >;
-  /// \todo
   // using FnuUnaryOperator = core::machine_int::UnaryOperator;
   using FnuBinaryOperator = core::numeric::BinaryOperator;
   using FnuPredicate = core::numeric::Predicate;
@@ -878,7 +877,6 @@ public:
     }
   }
 
-  /// \todo(start here to convert front-end data types to back-end analyzerd
   /// data types) By zoush99
 public:
   /// @}
@@ -974,7 +972,6 @@ public:
   }
 
   /// \brief Execute an UnaryOperation statement
-  /// \todo (covert AR data types to machine integer types)    By zoush99
   void exec(ar::UnaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {
       this->_inv.set_normal_flow_to_bottom();
@@ -1072,42 +1069,34 @@ private:
         }*/
   }
 
-  /// \todo(floating point)
   /// \brief Execute a conversion from floating point to integer
   void exec_float_to_int_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_machine_int_var(),
                     "left hand side is not an integer variable");
 
-    /*    if (rhs.is_floating_point_var()) {
-          this->_inv.normal().uninit_assert_initialized(rhs.var());
-        }
-        this->_inv.normal().int_assign_nondet(lhs.var());
-        */
-    if (rhs.is_floating_point()) {
-      auto type = cast< ar::IntegerType >(lhs.var()->type());
-      auto zero = MachineInt::zero(type->bit_width(), type->sign());
-      this->_inv.normal().int_assign(lhs.var(),
-                                     zero); // floating point -> integer
-    } else if (rhs.is_floating_point_var()) {
+    if (rhs.is_floating_point_var()) {
+      this->_inv.normal().uninit_assert_initialized(rhs.var());
       this->_inv.normal()
-          .scalar_pointer_to_int(lhs.var(),
-                                 rhs.var(),
-                                 this->_mem_factory.get_absolute_zero());
-    } else {
-      ikos_unreachable("unreachable");
+          .scalar_float_to_int(lhs.var(),
+                                 rhs.var());  // By zoush99
+    }else{
+      ikos_unreachable("unexpected operand");
     }
   }
 
-  /// \todo(floating point)
   /// \brief Execute a conversion from integer to floating point
   void exec_int_to_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
-    ikos_assert_msg(lhs.is_floating_point_var(),
+   ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not a floating point variable");
 
     if (rhs.is_machine_int_var()) {
       this->_inv.normal().uninit_assert_initialized(rhs.var());
+      this->_inv.normal()
+          .scalar_int_to_float(lhs.var(),
+                               rhs.var());  // By zoush99
+    }else{
+      ikos_unreachable("unexpected operand");
     }
-    this->_inv.normal().float_assign_nondet(lhs.var());
   }
 
   /// \brief Execute a conversion from pointer to integer
@@ -1178,7 +1167,6 @@ private:
     }
   }
 
-  /// \todo(floating point)
   /// \brief Execute a bitcast with a scalar left hand side
   void exec_bitcast(ar::UnaryOperation* s,
                     const ScalarLit& lhs,
@@ -1200,7 +1188,6 @@ private:
                                       lhs.var(),
                                       rhs.scalar().var());
       }
-      /// \todo(floating point)
       else {
         this->_inv.normal().int_assign_nondet(lhs.var());
       }
@@ -1503,34 +1490,42 @@ public:
       case ar::Comparison::SILE: {
         this->exec_int_comparison(IntPredicate::LE, left, right);
       } break;
-      case ar::Comparison::FOEQ:{
+      case ar::Comparison::FOEQ: {
         this->exec_float_comparison(FnuPredicate::EQ, left, right);
       } break;
-      case ar::Comparison::FOGT:{
+      case ar::Comparison::FOGT: {
         this->exec_float_comparison(FnuPredicate::GT, left, right);
       } break;
-      case ar::Comparison::FOGE:{
+      case ar::Comparison::FOGE: {
         this->exec_float_comparison(FnuPredicate::GE, left, right);
       } break;
-      case ar::Comparison::FOLT:{
+      case ar::Comparison::FOLT: {
         this->exec_float_comparison(FnuPredicate::LT, left, right);
       } break;
-      case ar::Comparison::FOLE:{
+      case ar::Comparison::FOLE: {
         this->exec_float_comparison(FnuPredicate::LE, left, right);
       } break;
-      case ar::Comparison::FONE:{
+      case ar::Comparison::FONE: {
         this->exec_float_comparison(FnuPredicate::NE, left, right);
       } break;
-        /// \todo(floating point)
+        /// \todo(floating point ordered)
       case ar::Comparison::FORD:
+        /// \todo(floating point unordered)
       case ar::Comparison::FUNO:
+        /// \todo(floating point unordered or equal)
       case ar::Comparison::FUEQ:
+        /// \todo(floating point unordered or greater than)
       case ar::Comparison::FUGT:
+        /// \todo(floating point unordered or greater equal)
       case ar::Comparison::FUGE:
+        /// \todo(floating point unordered or less than)
       case ar::Comparison::FULT:
+        /// \todo(floating point unordered or less equal)
       case ar::Comparison::FULE:
+        /// \todo(floating point unordered or not equal)
       case ar::Comparison::FUNE: {
-        this->exec_float_comparison(left, right);
+        /// \todo(dump)
+        this->exec_float_comparison(FnuPredicate::EQ,left, right);
       } break;
       case ar::Comparison::PEQ: {
         this->exec_ptr_comparison(PointerPredicate::EQ, left, right);
