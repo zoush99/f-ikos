@@ -621,9 +621,9 @@ private:
 
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
-    /// \todo(floating point)
-    void floating_point(const FNumber&) {
-      this->_inv.normal().float_assign_nondet(this->_lhs);
+    void floating_point(const FNumber& rhs) {
+      ikos_assert(this->_type->bit_width() == rhs.bit_width());
+      this->_inv.normal().float_assign(this->_lhs, rhs);
     }
 
     void memory_location(MemoryLocation*) { ikos_unreachable("unreachable"); }
@@ -635,6 +635,9 @@ private:
     void machine_int_var(Variable*) { ikos_unreachable("unreachable"); }
 
     void floating_point_var(Variable* rhs) {
+      auto rhs_type = ar::cast< ar::FloatType >(rhs->type());
+      ikos_assert(this->_type->bit_width() == rhs_type->bit_width());
+
       this->_inv.normal().uninit_assert_initialized(rhs);
       this->_inv.normal().float_assign(this->_lhs, rhs);
     }
@@ -877,7 +880,6 @@ public:
     }
   }
 
-  /// data types) By zoush99
 public:
   /// @}
   /// \name Implement ExecutionEngine
