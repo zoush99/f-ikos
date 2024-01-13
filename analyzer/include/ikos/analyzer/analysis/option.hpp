@@ -64,6 +64,7 @@ class SettingsTable;
 /// \brief Machine integer abstract domain
 enum class MachineIntDomainOption {
   Interval,
+  FInterval, // floating point interval, by zoush99
   Congruence,
   IntervalCongruence,
   DBM,
@@ -91,6 +92,8 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
   switch (d) {
     case MachineIntDomainOption::Interval:
       return "interval";
+    case MachineIntDomainOption::FInterval: // By zoush99
+      return "finterval";
     case MachineIntDomainOption::Congruence:
       return "congruence";
     case MachineIntDomainOption::IntervalCongruence:
@@ -131,6 +134,22 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
       return "var-pack-apron-ppl-linear-congruences";
     case MachineIntDomainOption::VarPackApronPkgridPolyhedraLinearCongruences:
       return "var-pack-apron-pkgrid-polyhedra-lin-cong";
+    default: {
+      ikos_unreachable("unreachable");
+    }
+  }
+}
+
+/// \brief Numeric abstract domain
+enum class NumericDomainOption {
+  FInterval, // floating point interval, by zoush99
+};
+
+/// \brief Return a string representing a NumericDomainOption
+inline const char* numeric_domain_option_str(NumericDomainOption d) {
+  switch (d) {
+    case NumericDomainOption::FInterval: // By zoush99
+      return "finterval";
     default: {
       ikos_unreachable("unreachable");
     }

@@ -1,10 +1,11 @@
 //
-// Created by zou on 1/11/24.
+// Created by zou on 1/13/24.
 //
+
 /*******************************************************************************
  *
  * \file
- * \brief Implement make_(top|bottom)_machine_int_apron_interval
+ * \brief Machine integer abstract domain used by the value analysis
  *
  * Author: Maxime Arthaud
  *
@@ -44,25 +45,38 @@
  *
  ******************************************************************************/
 
-//#include <ikos/core/domain/machine_int/interval.hpp>
-#include <ikos/core/domain/numeric/f_interval.hpp>
-//#include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
-#include <ikos/analyzer/analysis/value/numeric_domain.hpp>
+#pragma once
+
+#include <ikos/core/domain/numeric//polymorphic_domain.hpp>
+
+#include <ikos/analyzer/analysis/option.hpp>
+#include <ikos/analyzer/analysis/variable.hpp>
 
 namespace ikos {
 namespace analyzer {
 namespace value {
 
-namespace {
+/// \todo(floating point)
+/// \brief Machine integer abstract domain used for the value analysis
+using NumericAbstractDomain =
+    core::numeric::PolymorphicDomain< Variable* >;
 
-using RuntimeNumericDomain = core::numeric::IntervalDomain< FNumber,Variable* >;
+/// \name Constructors of floating point abstract domains
+/// @{
 
-} // end anonymous namespace
+NumericAbstractDomain make_top_f_interval();
+NumericAbstractDomain make_bottom_f_interval();
 
-NumericAbstractDomain make_top_f_interval() {
-  return NumericAbstractDomain(RuntimeNumericDomain::top());
-}
+/// @}
 
-MachineIntAbstractDomain make_bottom_machine_int_interval() {
-  return MachineIntAbstractDomain(RuntimeMachineIntDomain::bottom());
-}
+/// \brief Create the top machine integer abstract value of the given choice
+NumericAbstractDomain make_top_f_abstract_value(
+    NumericDomainOption domain);
+
+/// \brief Create the bottom machine integer abstract value of the given choice
+NumericAbstractDomain make_bottom_f_abstract_value(
+    NumericDomainOption domain);
+
+} // end namespace value
+} // end namespace analyzer
+} // end namespace ikos
