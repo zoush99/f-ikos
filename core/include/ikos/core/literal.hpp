@@ -362,7 +362,7 @@ private:
   /// \brief Visitor that returns the floating point
   struct GetFloatingPoint : public boost::static_visitor< const FNumber& > {
     const FNumber& operator()(const MachineIntLit&) const {
-      ikos_unreachable("trying to call floating_point() on a machine integer");
+      ikos_unreachable("trying to call numeric() on a machine integer");
     }
 
     const FNumber& operator()(const FloatingPointLit& lit) const {
@@ -370,29 +370,29 @@ private:
     }
 
     const FNumber& operator()(const MemoryLocationLit&) const {
-      ikos_unreachable("trying to call floating_point() on a memory location");
+      ikos_unreachable("trying to call numeric() on a memory location");
     }
 
     const FNumber& operator()(const NullLit&) const {
-      ikos_unreachable("trying to call floating_point() on null");
+      ikos_unreachable("trying to call numeric() on null");
     }
 
     const FNumber& operator()(const UndefinedLit&) const {
-      ikos_unreachable("trying to call floating_point() on undefined");
+      ikos_unreachable("trying to call numeric() on undefined");
     }
 
     const FNumber& operator()(const MachineIntVarLit&) const {
       ikos_unreachable(
-          "trying to call floating_point() on a machine integer variable");
+          "trying to call numeric() on a machine integer variable");
     }
 
     const FNumber& operator()(const FloatingPointVarLit&) const {
       ikos_unreachable(
-          "trying to call floating_point() on a floating point variable");
+          "trying to call numeric() on a floating point variable");
     }
 
     const FNumber& operator()(const PointerVarLit&) const {
-      ikos_unreachable("trying to call floating_point() on a pointer variable");
+      ikos_unreachable("trying to call numeric() on a pointer variable");
     }
   };
 
@@ -494,7 +494,7 @@ public:
   /// Visitors should implement the following methods:
   ///
   /// R machine_int(const MachineInt&);
-  /// R floating_point(const FNumber&);
+  /// R numeric(const FNumber&);
   /// R memory_location(MemoryLocationRef);
   /// R null();
   /// R undefined();
@@ -622,7 +622,7 @@ private:
     }
 
     void operator()(const FloatingPointLit& lit) {
-      o << "floating_point{" << lit.value << "}";
+      o << "numeric{" << lit.value << "}";
     }
 
     void operator()(const MemoryLocationLit& lit) {

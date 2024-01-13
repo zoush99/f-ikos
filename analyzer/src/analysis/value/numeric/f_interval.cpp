@@ -1,11 +1,10 @@
 //
-// Created by zou on 1/13/24.
+// Created by zou on 1/11/24.
 //
-
 /*******************************************************************************
  *
  * \file
- * \brief Machine integer abstract domain used by the value analysis
+ * \brief Implement make_(top|bottom)_machine_int_apron_interval
  *
  * Author: Maxime Arthaud
  *
@@ -45,36 +44,42 @@
  *
  ******************************************************************************/
 
-#pragma once
+/// \todo
+#include <ikos/core/domain/machine_int/interval.hpp>
 
-#include <ikos/core/domain/numeric/polymorphic_domain.hpp>
+#include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
 
-#include <ikos/analyzer/analysis/option.hpp>
-#include <ikos/analyzer/analysis/variable.hpp>
+#include <ikos/core/domain/numeric/f_interval.hpp>
+
+#include <ikos/analyzer/analysis/value/numeric_domain.hpp>
 
 namespace ikos {
 namespace analyzer {
 namespace value {
 
-/// \brief Machine integer abstract domain used for the value analysis
-using NumericAbstractDomain =
-    core::numeric::PolymorphicDomain<FNumber ,Variable* >;
+namespace {
 
-/// \name Constructors of floating point abstract domains
-/// @{
+using RuntimeMachineIntDomain = core::machine_int::IntervalDomain< Variable* >;
 
-NumericAbstractDomain make_top_numeric_interval();
-NumericAbstractDomain make_bottom_numeric_interval();
+using RuntimeNumericDomain = core::numeric::IntervalDomain<FNumber,Variable* >; // By zoush99
 
-/// @}
+} // end anonymous namespace
 
-/// \brief Create the top machine integer abstract value of the given choice
-NumericAbstractDomain make_top_numeric_abstract_value(
-    MachineIntDomainOption domain);
+MachineIntAbstractDomain make_top_machine_int_interval() {
+  return MachineIntAbstractDomain(RuntimeMachineIntDomain::top());
+}
 
-/// \brief Create the bottom machine integer abstract value of the given choice
-NumericAbstractDomain make_bottom_numeric_abstract_value(
-    MachineIntDomainOption domain);
+MachineIntAbstractDomain make_bottom_machine_int_interval() {
+  return MachineIntAbstractDomain(RuntimeMachineIntDomain::bottom());
+}
+
+NumericAbstractDomain make_top_numeric_interval() { // By zoush99
+  return NumericAbstractDomain(RuntimeNumericDomain::top());
+}
+
+NumericAbstractDomain make_bottom_numeric_interval() {  // By zoush99
+  return NumericAbstractDomain(RuntimeNumericDomain::bottom());
+}
 
 } // end namespace value
 } // end namespace analyzer

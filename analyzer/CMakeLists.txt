@@ -276,6 +276,9 @@ add_executable(ikos-analyzer
   src/util/progress.cpp
   src/util/source_location.cpp
   src/util/timer.cpp
+        src/analysis/value/numeric_domain.cpp
+        ../core/include/ikos/core/domain/numeric/f_interval.hpp
+        src/analysis/value/numeric/f_interval.cpp
 )
 if (IKOS_LINK_LLVM_DYLIB)
   set(IKOS_ANALYZER_LLVM_LIBS "LLVM")

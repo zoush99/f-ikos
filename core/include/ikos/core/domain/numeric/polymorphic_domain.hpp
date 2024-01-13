@@ -65,11 +65,11 @@ namespace numeric {
 /// The PolymorphicDomain is a machine integer abstract domain whose behavior
 /// depends on the abstract domain it is constructed with. It allows the use of
 /// different abstract domains at runtime.
-template < typename VariableRef >
+template <typename Number,typename VariableRef>
 class PolymorphicDomain final
-    : public numeric::AbstractDomain<FNumber,VariableRef,PolymorphicDomain< VariableRef >> {
+    : public numeric::AbstractDomain<Number,VariableRef,PolymorphicDomain< Number,VariableRef >> {
 public:
-  using LinearExpressionT = LinearExpression< FNumber, VariableRef >;
+  using LinearExpressionT = LinearExpression< Number, VariableRef >;
 
 private:
   /// Type erasure idiom

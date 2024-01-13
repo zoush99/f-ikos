@@ -140,6 +140,7 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
   }
 }
 
+/*
 /// \brief Numeric abstract domain
 enum class NumericDomainOption {
   FInterval, // floating point interval, by zoush99
@@ -155,6 +156,7 @@ inline const char* numeric_domain_option_str(NumericDomainOption d) {
     }
   }
 }
+*/
 
 /// \brief Either Interprocedural or Intraprocedural
 enum class Procedural {

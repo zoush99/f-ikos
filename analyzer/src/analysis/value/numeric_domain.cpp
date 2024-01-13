@@ -1,10 +1,10 @@
 //
-// Created by zou on 1/11/24.
+// Created by zou on 1/13/24.
 //
 /*******************************************************************************
  *
  * \file
- * \brief Implement make_(top|bottom)_machine_int_apron_interval
+ * \brief Machine integer abstract domain used by the value analysis
  *
  * Author: Maxime Arthaud
  *
@@ -12,7 +12,7 @@
  *
  * Notices:
  *
- * Copyright (c) 2018-2019 United States Government as represented by the
+ * Copyright (c) 2019 United States Government as represented by the
  * Administrator of the National Aeronautics and Space Administration.
  * All Rights Reserved.
  *
@@ -44,25 +44,34 @@
  *
  ******************************************************************************/
 
-//#include <ikos/core/domain/machine_int/interval.hpp>
-#include <ikos/core/domain/numeric/f_interval.hpp>
-//#include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
 #include <ikos/analyzer/analysis/value/numeric_domain.hpp>
 
 namespace ikos {
 namespace analyzer {
 namespace value {
 
-namespace {
-
-using RuntimeNumericDomain = core::numeric::IntervalDomain< FNumber,Variable* >;
-
-} // end anonymous namespace
-
-NumericAbstractDomain make_top_f_interval() {
-  return NumericAbstractDomain(RuntimeNumericDomain::top());
+NumericAbstractDomain make_top_numeric_abstract_value(
+    MachineIntDomainOption domain) {
+  switch (domain) {
+    case MachineIntDomainOption::FInterval:
+      return make_top_numeric_interval();
+    default: {
+      ikos_unreachable("unreachable");
+    }
+  }
 }
 
-MachineIntAbstractDomain make_bottom_machine_int_interval() {
-  return MachineIntAbstractDomain(RuntimeMachineIntDomain::bottom());
+NumericAbstractDomain make_bottom_numeric_abstract_value(
+    MachineIntDomainOption domain) {
+  switch (domain) {
+    case MachineIntDomainOption::FInterval:
+      return make_bottom_numeric_interval();
+    default: {
+      ikos_unreachable("unreachable");
+    }
+  }
 }
+
+} // end namespace value
+} // end namespace analyzer
+} // end namespace ikos
