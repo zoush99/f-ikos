@@ -51,10 +51,10 @@
 
 #pragma once
 
-#include <memory>
 #include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/support/assert.hpp>
 #include <ikos/core/support/mpl.hpp>
+#include <memory>
 
 namespace ikos {
 namespace core {
@@ -67,7 +67,8 @@ namespace numeric {
 /// different abstract domains at runtime.
 template <typename Number,typename VariableRef>
 class PolymorphicDomain final
-    : public numeric::AbstractDomain<Number,VariableRef,PolymorphicDomain< Number,VariableRef >> {
+    : public numeric::AbstractDomain<Number,VariableRef,
+                                      PolymorphicDomain< Number,VariableRef >> {
 public:
   using LinearExpressionT = LinearExpression< Number, VariableRef >;
 

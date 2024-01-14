@@ -45,12 +45,8 @@
  ******************************************************************************/
 
 /// \todo
-#include <ikos/core/domain/machine_int/interval.hpp>
-
-#include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
-
+#include <ikos/core/domain/machine_int/numeric_domain_adapter.hpp>
 #include <ikos/core/domain/numeric/f_interval.hpp>
-
 #include <ikos/analyzer/analysis/value/numeric_domain.hpp>
 
 namespace ikos {
@@ -59,26 +55,19 @@ namespace value {
 
 namespace {
 
-using RuntimeMachineIntDomain = core::machine_int::IntervalDomain< Variable* >;
-
-using RuntimeNumericDomain = core::numeric::IntervalDomain<FNumber,Variable* >; // By zoush99
+using RuntimeNumericDomain = core::numeric::IntervalDomain<FNumber,Variable*>; // By zoush99
+using RuntimeMachineIntDomain =
+    core::machine_int::NumericDomainAdapter< Variable*, RuntimeNumericDomain >;
 
 } // end anonymous namespace
 
-MachineIntAbstractDomain make_top_machine_int_interval() {
-  return MachineIntAbstractDomain(RuntimeMachineIntDomain::top());
-}
-
-MachineIntAbstractDomain make_bottom_machine_int_interval() {
-  return MachineIntAbstractDomain(RuntimeMachineIntDomain::bottom());
-}
-
+/// \todo
 NumericAbstractDomain make_top_numeric_interval() { // By zoush99
-  return NumericAbstractDomain(RuntimeNumericDomain::top());
+  return RuntimeMachineIntDomain(RuntimeNumericDomain::top());
 }
 
 NumericAbstractDomain make_bottom_numeric_interval() {  // By zoush99
-  return NumericAbstractDomain(RuntimeNumericDomain::bottom());
+  return RuntimeMachineIntDomain(RuntimeNumericDomain::bottom());
 }
 
 } // end namespace value

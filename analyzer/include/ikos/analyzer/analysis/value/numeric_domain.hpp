@@ -56,9 +56,9 @@ namespace ikos {
 namespace analyzer {
 namespace value {
 
-/// \brief Machine integer abstract domain used for the value analysis
+/// \brief Floating point abstract domain used for the value analysis
 using NumericAbstractDomain =
-    core::numeric::PolymorphicDomain<FNumber ,Variable* >;
+    core::numeric::PolymorphicDomain<FNumber,Variable* >;
 
 /// \name Constructors of floating point abstract domains
 /// @{
@@ -68,11 +68,11 @@ NumericAbstractDomain make_bottom_numeric_interval();
 
 /// @}
 
-/// \brief Create the top machine integer abstract value of the given choice
+/// \brief Create the top floating point abstract value of the given choice
 NumericAbstractDomain make_top_numeric_abstract_value(
     MachineIntDomainOption domain);
 
-/// \brief Create the bottom machine integer abstract value of the given choice
+/// \brief Create the bottom floating point abstract value of the given choice
 NumericAbstractDomain make_bottom_numeric_abstract_value(
     MachineIntDomainOption domain);
 
