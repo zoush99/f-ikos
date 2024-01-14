@@ -146,7 +146,6 @@ private:
     /// \brief Perform the widening of two abstract values
     virtual void widen_with(const PolymorphicBase& other) = 0;
 
-    /// \todo(floating point)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual void widen_threshold_with(const PolymorphicBase& other,
                                       const MachineInt& threshold) = 0;
@@ -157,7 +156,6 @@ private:
     /// \brief Perform the narrowing of two abstract values
     virtual void narrow_with(const PolymorphicBase& other) = 0;
 
-    /// \todo(floating point)
     /// \brief Perform the narrowing of two abstract values with a threshold
     virtual void narrow_threshold_with(const PolymorphicBase& other,
                                        const MachineInt& threshold) = 0;
@@ -179,7 +177,6 @@ private:
     virtual std::unique_ptr< PolymorphicBase > widening(
         const PolymorphicBase& other) const = 0;
 
-    /// \todo(floating point)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > widening_threshold(
         const PolymorphicBase& other, const MachineInt& threshold) const = 0;
@@ -192,7 +189,6 @@ private:
     virtual std::unique_ptr< PolymorphicBase > narrowing(
         const PolymorphicBase& other) const = 0;
 
-    /// \todo(floating point)
     /// \brief Perform the narrowing of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > narrowing_threshold(
         const PolymorphicBase& other, const MachineInt& threshold) const = 0;
@@ -201,7 +197,6 @@ private:
     /// \name Machine integer abstract domain methods
     /// @{
 
-    /// \todo(floating point)
     /// \brief Assign `x = n`
     virtual void assign(VariableRef x, const MachineInt& n) = 0;
 
@@ -220,14 +215,12 @@ private:
                        VariableRef y,
                        VariableRef z) = 0;
 
-    /// \todo(floating point)
     /// \brief Apply `x = y op z`
     virtual void apply(BinaryOperator op,
                        VariableRef x,
                        VariableRef y,
                        const MachineInt& z) = 0;
 
-    /// \todo(floating point)
     /// \brief Apply `x = y op z`
     virtual void apply(BinaryOperator op,
                        VariableRef x,
@@ -237,11 +230,9 @@ private:
     /// \brief Add the constraint `x pred y`
     virtual void add(Predicate pred, VariableRef x, VariableRef y) = 0;
 
-    /// \todo(floating point)
     /// \brief Add the constraint `x pred y`
     virtual void add(Predicate pred, VariableRef x, const MachineInt& y) = 0;
 
-    /// \todo(floating point)
     /// \brief Add the constraint `x pred y`
     virtual void add(Predicate pred, const MachineInt& x, VariableRef y) = 0;
 
@@ -413,7 +404,6 @@ private:
           static_cast< const PolymorphicDerivedT& >(other)._inv);
     }
 
-    /// \todo(floating point)
     void widen_threshold_with(const PolymorphicBase& other,
                               const MachineInt& threshold) override {
       this->assert_compatible(other);
@@ -435,7 +425,6 @@ private:
           static_cast< const PolymorphicDerivedT& >(other)._inv);
     }
 
-    /// \todo(floating point)
     void narrow_threshold_with(const PolymorphicBase& other,
                                const MachineInt& threshold) override {
       this->assert_compatible(other);
@@ -474,7 +463,6 @@ private:
           static_cast< const PolymorphicDerivedT& >(other)._inv));
     }
 
-    /// \todo(floating point)
     std::unique_ptr< PolymorphicBase > widening_threshold(
         const PolymorphicBase& other,
         const MachineInt& threshold) const override {
@@ -501,7 +489,6 @@ private:
           static_cast< const PolymorphicDerivedT& >(other)._inv));
     }
 
-    /// \todo(floating point)
     std::unique_ptr< PolymorphicBase > narrowing_threshold(
         const PolymorphicBase& other,
         const MachineInt& threshold) const override {
@@ -518,7 +505,6 @@ private:
     /// \name Machine integer abstract domain methods
     /// @{
 
-    /// \todo(floating point)
     void assign(VariableRef x, const MachineInt& n) override {
       this->_inv.assign(x, n);
     }
@@ -542,7 +528,6 @@ private:
       this->_inv.apply(op, x, y, z);
     }
 
-    /// \todo(floating point)
     void apply(BinaryOperator op,
                VariableRef x,
                VariableRef y,
@@ -550,7 +535,6 @@ private:
       this->_inv.apply(op, x, y, z);
     }
 
-    /// \todo(floating point)
     void apply(BinaryOperator op,
                VariableRef x,
                const MachineInt& y,
@@ -562,12 +546,10 @@ private:
       this->_inv.add(pred, x, y);
     }
 
-    /// \todo(floating point)
     void add(Predicate pred, VariableRef x, const MachineInt& y) override {
       this->_inv.add(pred, x, y);
     }
 
-    /// \todo(floating point)
     void add(Predicate pred, const MachineInt& x, VariableRef y) override {
       this->_inv.add(pred, x, y);
     }
@@ -633,12 +615,10 @@ private:
       this->_inv.counter_unmark(x);
     }
 
-    /// \todo(floating point)
     void counter_init(VariableRef x, const MachineInt& c) override {
       this->_inv.counter_init(x, c);
     }
 
-    /// \todo(floating point)
     void counter_incr(VariableRef x, const MachineInt& k) override {
       this->_inv.counter_incr(x, k);
     }
@@ -738,7 +718,6 @@ public:
     this->_ptr->widen_with(*other._ptr);
   }
 
-  /// \todo(floating point)
   void widen_threshold_with(const PolymorphicDomain& other,
                             const MachineInt& threshold) override {
     this->_ptr->widen_threshold_with(*other._ptr, threshold);
@@ -752,7 +731,6 @@ public:
     this->_ptr->narrow_with(*other._ptr);
   }
 
-  /// \todo(floating point)
   void narrow_threshold_with(const PolymorphicDomain& other,
                              const MachineInt& threshold) override {
     this->_ptr->narrow_threshold_with(*other._ptr, threshold);
@@ -774,7 +752,6 @@ public:
     return PolymorphicDomain(this->_ptr->widening(*other._ptr));
   }
 
-  /// \todo(floating point)
   PolymorphicDomain widening_threshold(
       const PolymorphicDomain& other,
       const MachineInt& threshold) const override {
@@ -790,7 +767,6 @@ public:
     return PolymorphicDomain(this->_ptr->narrowing(*other._ptr));
   }
 
-  /// \todo(floating point)
   PolymorphicDomain narrowing_threshold(
       const PolymorphicDomain& other,
       const MachineInt& threshold) const override {
@@ -802,7 +778,6 @@ public:
   /// \name Machine integer abstract domain methods
   /// @{
 
-  /// \todo(floating point)
   void assign(VariableRef x, const MachineInt& n) override {
     this->_ptr->assign(x, n);
   }
@@ -826,7 +801,6 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-  /// \todo(floating point)
   void apply(BinaryOperator op,
              VariableRef x,
              VariableRef y,
@@ -834,7 +808,6 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-  /// \todo(floating point)
   void apply(BinaryOperator op,
              VariableRef x,
              const MachineInt& y,
@@ -846,12 +819,10 @@ public:
     this->_ptr->add(pred, x, y);
   }
 
-  /// \todo(floating point)
   void add(Predicate pred, VariableRef x, const MachineInt& y) override {
     this->_ptr->add(pred, x, y);
   }
 
-  /// \todo(floating point)
   void add(Predicate pred, const MachineInt& x, VariableRef y) override {
     this->_ptr->add(pred, x, y);
   }
