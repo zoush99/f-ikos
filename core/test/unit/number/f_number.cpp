@@ -30,8 +30,8 @@ BOOST_AUTO_TEST_CASE(test_zero){
 BOOST_AUTO_TEST_CASE(test_assign_operation_signed) {
   BOOST_CHECK((FNumber(1,32,Signed)+=FNumber(2,32,Signed))==FNumber(3,32,Signed));
   BOOST_CHECK((FNumber(12,32,Signed)-=FNumber(2,32,Signed))==FNumber(10,32,Signed));
-  BOOST_CHECK((FNumber(12,32,Signed)-=FNumber(2,32,Signed))==FNumber(10,64,Signed));
-  BOOST_CHECK((FNumber(2,32,Signed)-=FNumber(12,32,Signed))==FNumber(-10,64,Signed));
+  BOOST_CHECK((FNumber(12,32,Signed)-=FNumber(2,32,Signed))==FNumber(10,32,Signed));
+  BOOST_CHECK((FNumber(2,32,Signed)-=FNumber(12,32,Signed))==FNumber(-10,32,Signed));
   BOOST_CHECK((FNumber(12,32,Signed)*=FNumber(2,32,Signed))==FNumber(24,32,Signed));
   BOOST_CHECK((FNumber(2,32,Signed)*=FNumber(12,32,Signed))==FNumber(24,32,Signed));
   BOOST_CHECK((FNumber(2,32,Signed)*=FNumber(0,32,Signed))==FNumber(0,32,Signed));

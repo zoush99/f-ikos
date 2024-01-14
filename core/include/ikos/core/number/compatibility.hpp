@@ -41,6 +41,8 @@
  *
  ******************************************************************************/
 
+#pragma once
+
 #include <ikos/core/support/assert.hpp>
 #include <ikos/core/support/compiler.hpp>
 

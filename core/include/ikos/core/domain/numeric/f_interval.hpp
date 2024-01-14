@@ -233,6 +233,115 @@ public:
     solver.run(*this);
   }
 
+  /// \todo
+  /// By zoush99
+  /// { @
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, VariableRef y) override{
+    if (this->is_bottom()) {
+      return;
+    }
+
+    Interval<Number> xi = this->_inv.get(x);
+    Interval<Number> yi = this->_inv.get(y);
+
+    switch (pred) {
+      case Predicate::EQ: {
+        Interval<Number> i = xi.meet(yi);
+        this->_inv.set(x, i);
+        this->_inv.set(y, i);
+      } break;
+/*      case Predicate::NE: {
+        if (x == y) {
+          this->set_to_bottom();
+          return;
+        }
+        if (xi.singleton()) {
+          this->_inv.set(y, trim_bound(yi, *xi.singleton()));
+        }
+        if (yi.singleton()) {
+          this->_inv.set(x, trim_bound(xi, *yi.singleton()));
+        }
+      } break;
+      case Predicate::GT: {
+        this->add(Predicate::LT, y, x);
+      } break;
+      case Predicate::GE: {
+        this->add(Predicate::LE, y, x);
+      } break;
+      case Predicate::LT: {
+        if (x == y) {
+          this->set_to_bottom();
+          return;
+        }
+        if (yi.ub().is_min() || xi.lb().is_max()) {
+          this->set_to_bottom();
+          return;
+        }
+        MachineInt int_min = MachineInt::min(xi.bit_width(), xi.sign());
+        MachineInt int_max = MachineInt::max(xi.bit_width(), xi.sign());
+        MachineInt one(1, xi.bit_width(), xi.sign());
+        this->_inv.refine(x, Interval<Number>(int_min, yi.ub() - one));
+        this->_inv.refine(y, Interval<Number>(xi.lb() + one, int_max));
+      } break;
+      case Predicate::LE: {
+        this->_inv.refine(x, yi.lower_half_line());
+        this->_inv.refine(y, xi.upper_half_line());
+      } break;*/
+    }
+  }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, const Number& y) override{
+    if (this->is_bottom()) {
+      return;
+    }
+
+    Interval<Number> xi = this->_inv.get(x);
+    Interval<Number> yi(y);
+
+    switch (pred) {
+      case Predicate::EQ: {
+        Interval<Number> i = xi.meet(yi);
+        this->_inv.set(x, i);
+      } break;
+/*      case Predicate::NE: {
+        this->_inv.set(x, trim_bound(xi, y));
+      } break;
+      case Predicate::GT: {
+        if (y.is_max()) {
+          this->set_to_bottom();
+          return;
+        }
+        MachineInt int_max = MachineInt::max(xi.bit_width(), xi.sign());
+        MachineInt one(1, xi.bit_width(), xi.sign());
+        this->_inv.refine(x, Interval<Number>(y + one, int_max));
+      } break;
+      case Predicate::GE: {
+        this->_inv.refine(x, yi.upper_half_line());
+      } break;
+      case Predicate::LT: {
+        if (y.is_min()) {
+          this->set_to_bottom();
+          return;
+        }
+        MachineInt int_min = MachineInt::min(xi.bit_width(), xi.sign());
+        MachineInt one(1, xi.bit_width(), xi.sign());
+        this->_inv.refine(x, Interval<Number>(int_min, y - one));
+      } break;
+      case Predicate::LE: {
+        this->_inv.refine(x, yi.lower_half_line());
+      } break;*/
+    }
+  }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, const Number& x, VariableRef y) override{
+    Parent::add(pred, x, y);
+  }
+  /// @ }
+
+
   void set(VariableRef x, const IntervalT& value) override {
     this->_inv.set(x, value);
   }
