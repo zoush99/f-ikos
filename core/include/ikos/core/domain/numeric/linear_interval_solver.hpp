@@ -84,6 +84,8 @@ inline QInterval trim_bound(const QInterval& i, const QBound&) {
   return i;
 }
 
+/// \todo?
+
 /// \brief Linear interval solver
 ///
 /// Note that the solver does not own the linear constraints.

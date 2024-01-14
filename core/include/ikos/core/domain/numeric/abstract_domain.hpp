@@ -100,11 +100,14 @@ public:
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, int n) = 0;
 
+/*
+  /// \todo Is it useful?
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, float n) = 0;
 
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, double n) = 0;
+*/
 
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, const Number& n) = 0;
@@ -138,6 +141,39 @@ public:
 
   /// \brief Add a linear constraint system
   virtual void add(const LinearConstraintSystemT& csts) = 0;
+
+  /// By zoush99
+  /// { @
+  /// \brief Add the constraint `x pred y`
+  virtual void add(Predicate pred, VariableRef x, VariableRef y) = 0;
+
+  /// \brief Add the constraint `x pred y`
+  virtual void add(Predicate pred, VariableRef x, const Number& y) = 0;
+
+  /// \brief Add the constraint `x pred y`
+  virtual void add(Predicate pred, const Number& x, VariableRef y) {
+    switch (pred) {
+      case Predicate::EQ: {
+        this->add(Predicate::EQ, y, x);
+      } break;
+      case Predicate::NE: {
+        this->add(Predicate::NE, y, x);
+      } break;
+      case Predicate::GT: {
+        this->add(Predicate::LT, y, x);
+      } break;
+      case Predicate::GE: {
+        this->add(Predicate::LE, y, x);
+      } break;
+      case Predicate::LT: {
+        this->add(Predicate::GT, y, x);
+      } break;
+      case Predicate::LE: {
+        this->add(Predicate::GE, y, x);
+      } break;
+    }
+  }
+  /// @ }
 
   /// \brief Set the interval value of a variable
   virtual void set(VariableRef x, const IntervalT& value) = 0;

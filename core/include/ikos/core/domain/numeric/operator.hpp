@@ -53,6 +53,9 @@ namespace ikos {
 namespace core {
 namespace numeric {
 
+/// \todo
+/// \brief Unary arithmetic operations
+
 /// \brief Binary arithmetic operations
 enum class BinaryOperator {
   /// \brief Addition
