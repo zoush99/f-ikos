@@ -65,13 +65,23 @@ namespace numeric {
 /// The PolymorphicDomain is a floating point abstract domain whose behavior
 /// depends on the abstract domain it is constructed with. It allows the use of
 /// different abstract domains at runtime.
-template <typename Number,typename VariableRef>
+template < typename Number,
+           typename VariableRef,
+           std::size_t MaxReductionCycles = 10 >
 class PolymorphicDomain final
-    : public numeric::AbstractDomain<Number,VariableRef,
-                                      PolymorphicDomain< Number,VariableRef >> {
+    : public numeric::AbstractDomain<
+          Number,
+          VariableRef,
+          PolymorphicDomain< Number, VariableRef, MaxReductionCycles > > {
 public:
   using LinearExpressionT = LinearExpression< Number, VariableRef >;
-
+  using LinearConstraintT =
+      LinearConstraint< Number, VariableRef >; // By zoush99
+  using LinearConstraintSystemT =
+      LinearConstraintSystem< Number, VariableRef >; // By zoush99
+  using LinearIntervalSolverT =
+      LinearIntervalSolver< Number, VariableRef, PolymorphicDomain >; // By
+                                                                      // zoush99
 private:
   /// Type erasure idiom
   ///
@@ -148,7 +158,7 @@ private:
     /// \brief Perform the widening of two abstract values
     virtual void widen_with(const PolymorphicBase& other) = 0;
 
-   /// \brief Perform the widening of two abstract values with a threshold
+    /// \brief Perform the widening of two abstract values with a threshold
     virtual void widen_threshold_with(const PolymorphicBase& other,
                                       const Number& threshold) = 0;
 
@@ -208,10 +218,10 @@ private:
     /// \brief Assign `x = e`
     virtual void assign(VariableRef x, const LinearExpressionT& e) = 0;
 
-/*
-    /// \brief Apply `x = op y`
-    virtual void apply(UnaryOperator op, VariableRef x, VariableRef y) = 0;
-*/
+    /*
+        /// \brief Apply `x = op y`
+        virtual void apply(UnaryOperator op, VariableRef x, VariableRef y) = 0;
+    */
 
     /// \brief Apply `x = y op z`
     virtual void apply(BinaryOperator op,
@@ -241,43 +251,48 @@ private:
     virtual void add(Predicate pred, const Number& x, VariableRef y) = 0;
 
     /// \brief Set the interval value of a variable
-    virtual void set(VariableRef x, const Interval<Number>& value) = 0;
+    virtual void set(VariableRef x, const Interval< Number >& value) = 0;
 
     /// \brief Set the congruence value of a variable
-    virtual void set(VariableRef x, const Congruence<Number>& value) = 0;
+    virtual void set(VariableRef x, const Congruence< Number >& value) = 0;
 
     /// \brief Set the interval-congruence value of a variable
-    virtual void set(VariableRef x, const IntervalCongruence<Number>& value) = 0;
+    virtual void set(VariableRef x,
+                     const IntervalCongruence< Number >& value) = 0;
 
     /// \brief Refine the value of a variable with an interval
-    virtual void refine(VariableRef x, const Interval<Number>& value) = 0;
+    virtual void refine(VariableRef x, const Interval< Number >& value) = 0;
 
     /// \brief Refine the value of a variable with a congruence
-    virtual void refine(VariableRef x, const Congruence<Number>& value) = 0;
+    virtual void refine(VariableRef x, const Congruence< Number >& value) = 0;
 
     /// \brief Refine the value of a variable with an interval-congruence
-    virtual void refine(VariableRef x, const IntervalCongruence<Number>& value) = 0;
+    virtual void refine(VariableRef x,
+                        const IntervalCongruence< Number >& value) = 0;
 
     /// \brief Forget a variable
     virtual void forget(VariableRef x) = 0;
 
     /// \brief Projection to an interval
-    virtual Interval<Number> to_interval(VariableRef x) const = 0;
+    virtual Interval< Number > to_interval(VariableRef x) const = 0;
 
     /// \brief Projection to an interval
-    virtual Interval<Number> to_interval(const LinearExpressionT& e) const = 0;
+    virtual Interval< Number > to_interval(
+        const LinearExpressionT& e) const = 0;
 
     /// \brief Projection to a congruence
-    virtual Congruence<Number> to_congruence(VariableRef x) const = 0;
+    virtual Congruence< Number > to_congruence(VariableRef x) const = 0;
 
     /// \brief Projection to a congruence
-    virtual Congruence<Number> to_congruence(const LinearExpressionT& e) const = 0;
+    virtual Congruence< Number > to_congruence(
+        const LinearExpressionT& e) const = 0;
 
     /// \brief Projection to an interval-congruence
-    virtual IntervalCongruence<Number> to_interval_congruence(VariableRef x) const = 0;
+    virtual IntervalCongruence< Number > to_interval_congruence(
+        VariableRef x) const = 0;
 
     /// \brief Projection to an interval-congruence
-    virtual IntervalCongruence<Number> to_interval_congruence(
+    virtual IntervalCongruence< Number > to_interval_congruence(
         const LinearExpressionT& e) const = 0;
 
     /// @}
@@ -312,7 +327,7 @@ private:
   class PolymorphicDerived final : public PolymorphicBase {
   public:
     static_assert(
-        numeric::IsAbstractDomain< Number,RuntimeDomain, VariableRef >::value,
+        numeric::IsAbstractDomain< Number, RuntimeDomain, VariableRef >::value,
         "RuntimeDomain must implement Number::AbstractDomain");
 
   private:
@@ -468,8 +483,7 @@ private:
     }
 
     std::unique_ptr< PolymorphicBase > widening_threshold(
-        const PolymorphicBase& other,
-        const Number& threshold) const override {
+        const PolymorphicBase& other, const Number& threshold) const override {
       this->assert_compatible(other);
       return std::make_unique< PolymorphicDerivedT >(
           this->_inv
@@ -494,8 +508,7 @@ private:
     }
 
     std::unique_ptr< PolymorphicBase > narrowing_threshold(
-        const PolymorphicBase& other,
-        const Number& threshold) const override {
+        const PolymorphicBase& other, const Number& threshold) const override {
       this->assert_compatible(other);
       return std::make_unique< PolymorphicDerivedT >(
           this->_inv
@@ -504,7 +517,6 @@ private:
                                        ._inv,
                                    threshold));
     }
-
 
     /// @}
     /// \name Floating point abstract domain methods
@@ -522,9 +534,9 @@ private:
       this->_inv.assign(x, e);
     }
 
-/*    void apply(UnaryOperator op, VariableRef x, VariableRef y) override {
-      this->_inv.apply(op, x, y);
-    }*/
+    /*    void apply(UnaryOperator op, VariableRef x, VariableRef y) override {
+          this->_inv.apply(op, x, y);
+        }*/
 
     void apply(BinaryOperator op,
                VariableRef x,
@@ -559,53 +571,57 @@ private:
       this->_inv.add(pred, x, y);
     }
 
-    void set(VariableRef x, const Interval<Number>& value) override {
+    void set(VariableRef x, const Interval< Number >& value) override {
       this->_inv.set(x, value);
     }
 
-    void set(VariableRef x, const Congruence<Number>& value) override {
+    void set(VariableRef x, const Congruence< Number >& value) override {
       this->_inv.set(x, value);
     }
 
-    void set(VariableRef x, const IntervalCongruence<Number>& value) override {
+    void set(VariableRef x,
+             const IntervalCongruence< Number >& value) override {
       this->_inv.set(x, value);
     }
 
-    void refine(VariableRef x, const Interval<Number>& value) override {
+    void refine(VariableRef x, const Interval< Number >& value) override {
       this->_inv.refine(x, value);
     }
 
-    void refine(VariableRef x, const Congruence<Number>& value) override {
+    void refine(VariableRef x, const Congruence< Number >& value) override {
       this->_inv.refine(x, value);
     }
 
-    void refine(VariableRef x, const IntervalCongruence<Number>& value) override {
+    void refine(VariableRef x,
+                const IntervalCongruence< Number >& value) override {
       this->_inv.refine(x, value);
     }
 
     void forget(VariableRef x) override { this->_inv.forget(x); }
 
-    Interval<Number> to_interval(VariableRef x) const override {
+    Interval< Number > to_interval(VariableRef x) const override {
       return this->_inv.to_interval(x);
     }
 
-    Interval<Number> to_interval(const LinearExpressionT& e) const override {
+    Interval< Number > to_interval(const LinearExpressionT& e) const override {
       return this->_inv.to_interval(e);
     }
 
-    Congruence<Number> to_congruence(VariableRef x) const override {
+    Congruence< Number > to_congruence(VariableRef x) const override {
       return this->_inv.to_congruence(x);
     }
 
-    Congruence<Number> to_congruence(const LinearExpressionT& e) const override {
+    Congruence< Number > to_congruence(
+        const LinearExpressionT& e) const override {
       return this->_inv.to_congruence(e);
     }
 
-    IntervalCongruence<Number> to_interval_congruence(VariableRef x) const override {
+    IntervalCongruence< Number > to_interval_congruence(
+        VariableRef x) const override {
       return this->_inv.to_interval_congruence(x);
     }
 
-    IntervalCongruence<Number> to_interval_congruence(
+    IntervalCongruence< Number > to_interval_congruence(
         const LinearExpressionT& e) const override {
       return this->_inv.to_interval_congruence(e);
     }
@@ -627,7 +643,6 @@ private:
     void counter_incr(VariableRef x, const Number& k) override {
       this->_inv.counter_incr(x, k);
     }
-
 
     void counter_forget(VariableRef x) override {
       this->_inv.counter_forget(x);
@@ -758,9 +773,8 @@ public:
     return PolymorphicDomain(this->_ptr->widening(*other._ptr));
   }
 
-  PolymorphicDomain widening_threshold(
-      const PolymorphicDomain& other,
-      const Number& threshold) const override {
+  PolymorphicDomain widening_threshold(const PolymorphicDomain& other,
+                                       const Number& threshold) const override {
     return PolymorphicDomain(
         this->_ptr->widening_threshold(*other._ptr, threshold));
   }
@@ -774,8 +788,7 @@ public:
   }
 
   PolymorphicDomain narrowing_threshold(
-      const PolymorphicDomain& other,
-      const Number& threshold) const override {
+      const PolymorphicDomain& other, const Number& threshold) const override {
     return PolymorphicDomain(
         this->_ptr->narrowing_threshold(*other._ptr, threshold));
   }
@@ -795,11 +808,11 @@ public:
     this->_ptr->assign(x, e);
   }
 
-/*
-  void apply(UnaryOperator op, VariableRef x, VariableRef y) override {
-    this->_ptr->apply(op, x, y);
-  }
-*/
+  /*
+    void apply(UnaryOperator op, VariableRef x, VariableRef y) override {
+      this->_ptr->apply(op, x, y);
+    }
+  */
 
   void apply(BinaryOperator op,
              VariableRef x,
@@ -822,6 +835,32 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
+  /// \todo By zoush99
+  /// { @
+  /// \brief Add a linear constraint
+  void add(const LinearConstraintT& cst) override {
+    if (this->is_bottom()) {
+      return;
+    }
+
+    LinearIntervalSolverT solver(MaxReductionCycles);
+    solver.add(cst);
+    solver.run(*this);
+  }
+
+  /// \brief Add a linear constraint system
+  void add(const LinearConstraintSystemT& csts) override {
+    if (this->is_bottom()) {
+      return;
+    }
+
+    LinearIntervalSolverT solver(MaxReductionCycles);
+    solver.add(csts);
+    solver.run(*this);
+  }
+
+  /// @ }
+
   void add(Predicate pred, VariableRef x, VariableRef y) override {
     this->_ptr->add(pred, x, y);
   }
@@ -834,55 +873,72 @@ public:
     this->_ptr->add(pred, x, y);
   }
 
-  void set(VariableRef x, const Interval<Number>& value) override {
+  void set(VariableRef x, const Interval< Number >& value) override {
     this->_ptr->set(x, value);
   }
 
-  void set(VariableRef x, const Congruence<Number>& value) override {
+  void set(VariableRef x, const Congruence< Number >& value) override {
     this->_ptr->set(x, value);
   }
 
-  void set(VariableRef x, const IntervalCongruence<Number>& value) override {
+  void set(VariableRef x, const IntervalCongruence< Number >& value) override {
     this->_ptr->set(x, value);
   }
 
-  void refine(VariableRef x, const Interval<Number>& value) override {
+  void refine(VariableRef x, const Interval< Number >& value) override {
     this->_ptr->refine(x, value);
   }
 
-  void refine(VariableRef x, const Congruence<Number>& value) override {
+  void refine(VariableRef x, const Congruence< Number >& value) override {
     this->_ptr->refine(x, value);
   }
 
-  void refine(VariableRef x, const IntervalCongruence<Number>& value) override {
+  void refine(VariableRef x,
+              const IntervalCongruence< Number >& value) override {
     this->_ptr->refine(x, value);
   }
 
   void forget(VariableRef x) override { this->_ptr->forget(x); }
 
-  Interval<Number> to_interval(VariableRef x) const override {
+  Interval< Number > to_interval(VariableRef x) const override {
     return this->_ptr->to_interval(x);
   }
 
-  Interval<Number> to_interval(const LinearExpressionT& e) const override {
+  Interval< Number > to_interval(const LinearExpressionT& e) const override {
     return this->_ptr->to_interval(e);
   }
 
-  Congruence<Number> to_congruence(VariableRef x) const override {
+  Congruence< Number > to_congruence(VariableRef x) const override {
     return this->_ptr->to_congruence(x);
   }
 
-  Congruence<Number> to_congruence(const LinearExpressionT& e) const override {
+  Congruence< Number > to_congruence(
+      const LinearExpressionT& e) const override {
     return this->_ptr->to_congruence(e);
   }
 
-  IntervalCongruence<Number> to_interval_congruence(VariableRef x) const override {
+  IntervalCongruence< Number > to_interval_congruence(
+      VariableRef x) const override {
     return this->_ptr->to_interval_congruence(x);
   }
 
-  IntervalCongruence<Number> to_interval_congruence(
+  IntervalCongruence< Number > to_interval_congruence(
       const LinearExpressionT& e) const override {
     return this->_ptr->to_interval_congruence(e);
+  }
+
+  /// \todo By zoush99
+  LinearConstraintSystemT to_linear_constraint_system() const{
+    if (this->is_bottom()) {
+      return LinearConstraintSystemT(LinearConstraintT::contradiction());
+    }
+
+    LinearConstraintSystemT csts;
+    for (auto it = this->begin(), et = this->end(); it != et; ++it) {
+      csts.add(within_interval(it->first, it->second));
+    }
+
+    return csts;
   }
 
   /// @}

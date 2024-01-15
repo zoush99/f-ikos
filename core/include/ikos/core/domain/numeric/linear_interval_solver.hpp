@@ -84,7 +84,13 @@ inline QInterval trim_bound(const QInterval& i, const QBound&) {
   return i;
 }
 
-/// \todo?
+/// \todo This is just a copy of the implementation for rational numbers,
+/// without ensuring its correctness. It still needs modification.
+/// \brief Trim the bounds of the given interval
+inline FInterval trim_bound(const FInterval& i, const FBound&) {
+  // No refinement possible for disequations over rational numbers
+  return i;
+}
 
 /// \brief Linear interval solver
 ///

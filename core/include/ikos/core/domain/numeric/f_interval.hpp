@@ -178,7 +178,9 @@ public:
     this->_inv.narrow_threshold_with(other._inv, threshold);
   }
 
+/*
   void assign(VariableRef x, int n) override { this->_inv.assign(x, n); }
+*/
 
   void assign(VariableRef x, const Number& n) override {
     this->_inv.assign(x, n);
@@ -233,8 +235,9 @@ public:
     solver.run(*this);
   }
 
-  /// \todo
-  /// By zoush99
+  /// \todo(Further modifications are needed here, as this was copied without
+  /// changes from machine integer types. Some of the involved functions do not
+  /// exist, and correctness has not been considered.)By zoush99
   /// { @
   /// \brief Add the constraint `x pred y`
   void add(Predicate pred, VariableRef x, VariableRef y) override{
