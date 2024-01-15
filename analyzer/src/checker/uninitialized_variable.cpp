@@ -76,6 +76,7 @@ void UninitializedVariableChecker::check(ar::Statement* stmt,
   // Exempt "And" and "Or" if one operand is constant.
   if (ar::BinaryOperation* inst = dyn_cast< ar::BinaryOperation >(stmt)) {
     auto op = inst->op();
+    /// \todo(floating point)
     switch (op) {
       case ar::BinaryOperation::Operator::UAnd:
       case ar::BinaryOperation::Operator::UOr:

@@ -104,7 +104,9 @@ AssertProverChecker::CheckResult AssertProverChecker::check_assert(
     flag = IntInterval(cond.machine_int());
   } else if (cond.is_machine_int_var()) {
     flag = inv.normal().int_to_interval(cond.var());
-  } else {
+  } else 
+  /// \todo(Consider floating-point types.)
+  {
     log::error("unexpected argument to __ikos_assert()");
     return {CheckKind::UnexpectedOperand, Result::Error};
   }
@@ -117,7 +119,7 @@ AssertProverChecker::CheckResult AssertProverChecker::check_assert(
       *msg << ": ∀x ∈ " << cond << ", x == 0\n";
     }
     return {CheckKind::Assert, Result::Error};
-  } else if (flag.contains(MachineInt::zero(32, Unsigned))) {
+  } else if (flag.contains(MachineInt::zero(32, Unsigned))) {  /// \todo(floating point)
     // The condition may be 0
     if (auto msg = this->display_assert_check(Result::Warning, call)) {
       *msg << ": (∃x ∈ " << cond << ", x == 0) and (∃x ∈ " << cond

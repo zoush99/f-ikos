@@ -44,6 +44,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 
 #include <ikos/analyzer/analysis/option.hpp>
+/// \todo("Does this place need to include the numerical abstraction domain?)
 #include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
 #include <ikos/analyzer/database/output.hpp>
 
@@ -73,6 +74,7 @@ void AnalysisOptions::save(SettingsTable& table) {
                                                           .end(),
                                                       function_name)));
 
+  /// \todo?
   table.insert("machine-int-domain",
                machine_int_domain_option_str(this->machine_int_domain));
 

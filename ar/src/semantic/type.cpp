@@ -369,7 +369,7 @@ SequentialType::SequentialType(TypeKind kind,
 }
 
 // ArrayType
-
+/// \todo(Here, only ZNumber type is considered; later on, FNumber type needs to be added.)
 ArrayType::ArrayType(Type* element_type, ZNumber num_element)
     : SequentialType(ArrayKind, element_type, std::move(num_element)) {}
 
@@ -386,7 +386,7 @@ void ArrayType::dump(std::ostream& o) const {
 }
 
 // VectorType
-
+/// \todo(Here, only ZNumber type is considered; later on, FNumber type needs to be added.)
 VectorType::VectorType(ScalarType* element_type, ZNumber num_element)
     : SequentialType(VectorKind, element_type, std::move(num_element)) {}
 

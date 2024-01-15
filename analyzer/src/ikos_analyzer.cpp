@@ -225,6 +225,11 @@ static llvm::cl::opt< analyzer::MachineIntDomainOption > Domain(
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::Interval),
                    "Interval domain"),
+        /// \todo(floating point interval domain)
+        // clEnumValN(analyzer::MachineIntDomainOption::FInterval,
+        //            machine_int_domain_option_str(
+        //                analyzer::MachineIntDomainOption::FInterval),
+        //            "FInterval domain"),
         clEnumValN(analyzer::MachineIntDomainOption::Congruence,
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::Congruence),
