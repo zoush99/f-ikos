@@ -44,8 +44,6 @@
  *
  ******************************************************************************/
 
-/// \todo
-#include <ikos/core/domain/machine_int/numeric_domain_adapter.hpp>
 #include <ikos/core/domain/numeric/f_interval.hpp>
 #include <ikos/analyzer/analysis/value/numeric_domain.hpp>
 
@@ -55,19 +53,18 @@ namespace value {
 
 namespace {
 
+/// \todo(How should this place be defined?)
 using RuntimeNumericDomain = core::numeric::IntervalDomain<FNumber,Variable*>; // By zoush99
-using RuntimeMachineIntDomain =
-    core::machine_int::NumericDomainAdapter< Variable*, RuntimeNumericDomain >;
 
 } // end anonymous namespace
 
 /// \todo
 NumericAbstractDomain make_top_numeric_interval() { // By zoush99
-  return RuntimeMachineIntDomain(RuntimeNumericDomain::top());
+  return NumericAbstractDomain(RuntimeNumericDomain::top());
 }
 
 NumericAbstractDomain make_bottom_numeric_interval() {  // By zoush99
-  return RuntimeMachineIntDomain(RuntimeNumericDomain::bottom());
+  return NumericAbstractDomain(RuntimeNumericDomain::bottom());
 }
 
 } // end namespace value
