@@ -344,7 +344,6 @@ public:
   }
   /// @ }
 
-
   void set(VariableRef x, const IntervalT& value) override {
     this->_inv.set(x, value);
   }

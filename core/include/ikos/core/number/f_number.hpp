@@ -41,7 +41,11 @@ public:
   /// @{
 
   /// \brief Default constructor
-  FNumber() = delete;
+  FNumber(){
+    _n.f=1;
+    _bit_width=32;
+    _sign=Signedness::Signed;
+  }
 
   /// \brief Create a floating point number from a type
   template <

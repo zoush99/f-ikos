@@ -96,11 +96,9 @@ public:
     tmp.narrow_threshold_with(other, threshold);
     return tmp;
   }
-/*
 
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, int n) = 0;
-*/
 
 /*
   /// \todo Is it useful?

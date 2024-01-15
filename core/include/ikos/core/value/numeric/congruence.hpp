@@ -835,6 +835,130 @@ inline Congruence< QNumber > operator/(const Congruence< QNumber >& lhs,
   return Congruence< QNumber >(lhs.to_constant() / rhs.to_constant());
 }
 
+/// \brief By zoush99
+/// \brief Congruence on floating point numbers
+///
+/// We do not try to define the congruence domain on floating point numbers.
+/// We instead implement this as the constant domain, for simplicity.
+template <>
+class Congruence< FNumber > final
+    : public core::AbstractDomain< Congruence< FNumber > > {
+public:
+  using NumberT = FNumber;
+
+private:
+  FConstant _cst;
+
+public:
+  static Congruence top() { return Congruence(FConstant::top()); }
+
+  static Congruence bottom() { return Congruence(FConstant::bottom()); }
+
+  explicit Congruence(int n) : _cst(n) {}
+
+  explicit Congruence(FNumber n) : _cst(std::move(n)) {}
+
+  explicit Congruence(FConstant cst) : _cst(std::move(cst)) {}
+
+  Congruence(const FNumber&, const FNumber&) : _cst(FConstant::top()) {}
+
+  Congruence(const Congruence&) = default;
+
+  Congruence(Congruence&&) = default;
+
+  Congruence& operator=(const Congruence&) = default;
+
+  Congruence& operator=(Congruence&&) noexcept = default;
+
+  ~Congruence() override = default;
+
+  void normalize() override { this->_cst.normalize(); }
+
+  bool is_bottom() const override { return this->_cst.is_bottom(); }
+
+  bool is_top() const override { return this->_cst.is_top(); }
+
+  bool is_zero() const { return this->_cst.is_zero(); }
+
+  void set_to_bottom() override { this->_cst.set_to_bottom(); }
+
+  void set_to_top() override { this->_cst.set_to_top(); }
+
+  bool leq(const Congruence& other) const override {
+    return this->_cst.leq(other._cst);
+  }
+
+  bool equals(const Congruence& other) const override {
+    return this->_cst.equals(other._cst);
+  }
+
+  void join_with(const Congruence& other) override {
+    this->_cst.join_with(other._cst);
+  }
+
+  void widen_with(const Congruence& other) override {
+    this->_cst.widen_with(other._cst);
+  }
+
+  void widen_threshold_with(const Congruence& other, const FNumber& threshold) {
+    this->_cst.widen_threshold_with(other._cst, threshold);
+  }
+
+  void meet_with(const Congruence& other) override {
+    this->_cst.meet_with(other._cst);
+  }
+
+  void narrow_with(const Congruence& other) override {
+    this->_cst.narrow_with(other._cst);
+  }
+
+  void narrow_threshold_with(const Congruence& other,
+                             const FNumber& threshold) {
+    this->_cst.narrow_threshold_with(other._cst, threshold);
+  }
+
+  Congruence operator-() const { return Congruence(-this->_cst); }
+
+  void operator+=(const Congruence& other) { this->_cst += other._cst; }
+
+  void operator-=(const Congruence& other) { this->_cst -= other._cst; }
+
+  const FConstant& to_constant() const { return this->_cst; }
+
+  boost::optional< FNumber > singleton() const {
+    return this->_cst.singleton();
+  }
+
+  bool contains(int n) const { return this->_cst.contains(n); }
+
+  bool contains(const FNumber& n) const { return this->_cst.contains(n); }
+
+  void dump(std::ostream& o) const override { this->_cst.dump(o); }
+
+  static std::string name() { return "congruence"; }
+
+}; // end class Congruence< QNumber >
+
+inline Congruence< FNumber > operator+(const Congruence< FNumber >& lhs,
+                                       const Congruence< FNumber >& rhs) {
+  return Congruence< FNumber >(lhs.to_constant() + rhs.to_constant());
+}
+
+inline Congruence< FNumber > operator-(const Congruence< FNumber >& lhs,
+                                       const Congruence< FNumber >& rhs) {
+  return Congruence< FNumber >(lhs.to_constant() - rhs.to_constant());
+}
+
+inline Congruence< FNumber > operator*(const Congruence< FNumber >& lhs,
+                                       const Congruence< FNumber >& rhs) {
+  return Congruence< FNumber >(lhs.to_constant() * rhs.to_constant());
+}
+
+inline Congruence< FNumber > operator/(const Congruence< FNumber >& lhs,
+                                       const Congruence< FNumber >& rhs) {
+  return Congruence< FNumber >(lhs.to_constant() / rhs.to_constant());
+}
+
 /// \brief Write a congruence on a stream
 template < typename Number >
 inline std::ostream& operator<<(std::ostream& o,
@@ -849,6 +973,8 @@ using ZCongruence = Congruence< ZNumber >;
 /// \brief Congruence on unlimited precision rationals
 using QCongruence = Congruence< QNumber >;
 
+/// \brief Congruence on floating point numbers
+using FCongruence = Congruence< FNumber >;
 } // end namespace numeric
 } // end namespace core
 } // end namespace ikos

@@ -566,6 +566,132 @@ inline IntervalCongruence< QNumber > operator/(
   return IntervalCongruence< QNumber >(lhs.interval() / rhs.interval());
 }
 
+/// \brief By zoush99
+/// \brief Interval-Congruence abstract value on floating point numbers
+///
+/// The congruence domain on floating point numbers is just a wrapper of the constant domain.
+/// We instead implement this as the interval domain alone.
+template <>
+class IntervalCongruence< FNumber > final
+    : public core::AbstractDomain< IntervalCongruence< FNumber > > {
+public:
+  using NumberT = FNumber;
+
+private:
+  FInterval _i;
+
+public:
+  static IntervalCongruence top() {
+    return IntervalCongruence(FInterval::top());
+  }
+
+  static IntervalCongruence bottom() {
+    return IntervalCongruence(FInterval::bottom());
+  }
+
+  explicit IntervalCongruence(int n) : _i(n) {}
+
+  explicit IntervalCongruence(const FNumber& n) : _i(n) {}
+
+  IntervalCongruence(FInterval i, const FCongruence&) : _i(std::move(i)) {}
+
+  explicit IntervalCongruence(FInterval i) : _i(std::move(i)) {}
+
+  explicit IntervalCongruence(const FCongruence&) : _i(FInterval::top()) {}
+
+  IntervalCongruence(const IntervalCongruence&) = default;
+
+  IntervalCongruence(IntervalCongruence&&) = default;
+
+  IntervalCongruence& operator=(const IntervalCongruence&) = default;
+
+  IntervalCongruence& operator=(IntervalCongruence&&) = default;
+
+  ~IntervalCongruence() override = default;
+
+  const FInterval& interval() const { return this->_i; }
+
+  FCongruence congruence() const { return FCongruence::top(); }
+
+  void normalize() override {}
+
+  bool is_bottom() const override { return this->_i.is_bottom(); }
+
+  bool is_top() const override { return this->_i.is_top(); }
+
+  void set_to_bottom() override { this->_i.set_to_bottom(); }
+
+  void set_to_top() override { this->_i.set_to_top(); }
+
+  bool leq(const IntervalCongruence& other) const override {
+    return this->_i.leq(other._i);
+  }
+
+  bool equals(const IntervalCongruence& other) const override {
+    return this->_i.equals(other._i);
+  }
+
+  void join_with(const IntervalCongruence& other) override {
+    this->_i.join_with(other._i);
+  }
+
+  void widen_with(const IntervalCongruence& other) override {
+    this->_i.widen_with(other._i);
+  }
+
+  void widen_threshold_with(const IntervalCongruence& other,
+                            const FNumber& threshold) {
+    this->_i.widen_threshold_with(other._i, threshold);
+  }
+
+  void meet_with(const IntervalCongruence& other) override {
+    this->_i.meet_with(other._i);
+  }
+
+  void narrow_with(const IntervalCongruence& other) override {
+    this->_i.narrow_with(other._i);
+  }
+
+  IntervalCongruence operator-() const { return IntervalCongruence(-this->_i); }
+
+  void operator+=(const IntervalCongruence& other) { this->_i += other._i; }
+
+  boost::optional< FNumber > singleton() const { return this->_i.singleton(); }
+
+  bool contains(int n) const { return this->_i.contains(n); }
+
+  bool contains(const FNumber& n) const { return this->_i.contains(n); }
+
+  void dump(std::ostream& o) const override { this->_i.dump(o); }
+
+  static std::string name() { return "interval-congruence"; }
+
+}; // end class IntervalCongruence< QNumber >
+
+inline IntervalCongruence< FNumber > operator+(
+    const IntervalCongruence< FNumber >& lhs,
+    const IntervalCongruence< FNumber >& rhs) {
+  return IntervalCongruence< FNumber >(lhs.interval() + rhs.interval());
+}
+
+inline IntervalCongruence< FNumber > operator-(
+    const IntervalCongruence< FNumber >& lhs,
+    const IntervalCongruence< FNumber >& rhs) {
+  return IntervalCongruence< FNumber >(lhs.interval() - rhs.interval());
+}
+
+inline IntervalCongruence< FNumber > operator*(
+    const IntervalCongruence< FNumber >& lhs,
+    const IntervalCongruence< FNumber >& rhs) {
+  return IntervalCongruence< FNumber >(lhs.interval() * rhs.interval());
+}
+
+inline IntervalCongruence< FNumber > operator/(
+    const IntervalCongruence< FNumber >& lhs,
+    const IntervalCongruence< FNumber >& rhs) {
+  return IntervalCongruence< FNumber >(lhs.interval() / rhs.interval());
+}
+
 /// \brief Write an interval-congruence on a stream
 template < typename Number >
 inline std::ostream& operator<<(std::ostream& o,
