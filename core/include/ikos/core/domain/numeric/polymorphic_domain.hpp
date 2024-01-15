@@ -28,7 +28,7 @@
  * TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM TO SPECIFICATIONS,
  * ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
  * OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE
- * ERROR FREE, OR ANY WARRANTY THAT DOCUMENTATION, IF PROVIDED, WILL CONFORM TO
+ * ERROR FREE, OR ANY WARRANTY THAT narrowing_thresholdDOCUMENTATION, IF PROVIDED, WILL CONFORM TO
  * THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN
  * ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS,
  * RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS
@@ -208,6 +208,10 @@ private:
     /// @}
     /// \name Floating point abstract domain methods
     /// @{
+
+    /// By zoush99
+    /// \brief Assign `x = n`
+    virtual void assign(VariableRef x, int n) = 0;
 
     /// \brief Assign `x = n`
     virtual void assign(VariableRef x, const Number& n) = 0;
@@ -522,6 +526,11 @@ private:
     /// \name Floating point abstract domain methods
     /// @{
 
+    /// By zoush99
+    void assign(VariableRef x, int n) override {
+      this->_inv.assign(x, n);
+    }
+
     void assign(VariableRef x, const Number& n) override {
       this->_inv.assign(x, n);
     }
@@ -795,6 +804,11 @@ public:
   /// @}
   /// \name Floating point abstract domain methods
   /// @{
+
+  /// By zoush99
+  void assign(VariableRef x, int n) override {
+    this->_ptr->assign(x, n);
+  }
 
   void assign(VariableRef x, const Number& n) override {
     this->_ptr->assign(x, n);

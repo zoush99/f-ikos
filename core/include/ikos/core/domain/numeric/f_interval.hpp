@@ -178,9 +178,7 @@ public:
     this->_inv.narrow_threshold_with(other._inv, threshold);
   }
 
-/*
   void assign(VariableRef x, int n) override { this->_inv.assign(x, n); }
-*/
 
   void assign(VariableRef x, const Number& n) override {
     this->_inv.assign(x, n);
