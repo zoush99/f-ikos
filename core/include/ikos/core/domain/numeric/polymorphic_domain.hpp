@@ -942,6 +942,7 @@ public:
   }
 
   /// \todo bugs here!!! By zoush99
+  /// \brief How to construct a polymorphic abstract domain?
   LinearConstraintSystemT to_linear_constraint_system() const{
     if (this->is_bottom()) {
       return LinearConstraintSystemT(LinearConstraintT::contradiction());
