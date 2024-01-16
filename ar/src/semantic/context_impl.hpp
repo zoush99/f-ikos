@@ -253,8 +253,10 @@ public:
   /// \brief Get or create an integer constant
   IntegerConstant* integer_cst(IntegerType* type, const MachineInt& value);
 
+/*
   /// \brief Get or create a float constant
   FloatConstant* float_cst(FloatType* type, const std::string& value);
+*/
 
   /// \todo
   /// \brief Get or create a float constant

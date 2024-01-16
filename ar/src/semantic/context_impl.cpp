@@ -190,7 +190,7 @@ IntegerConstant* ContextImpl::integer_cst(IntegerType* type,
 }
 
 /// \todo(floating point)
-  FloatConstant* ContextImpl::float_cst(FloatType* type,
+/*  FloatConstant* ContextImpl::float_cst(FloatType* type,
                                       const std::string& value) {
   auto it = this->_float_constants.find(std::make_tuple(type, value));
   if (it == this->_float_constants.end()) {
@@ -202,7 +202,7 @@ IntegerConstant* ContextImpl::integer_cst(IntegerType* type,
   } else {
     return it->second.get();
   }
-}
+}*/
 
 FloatConstant* ContextImpl::float_cst(FloatType* type,
                                       const FNumber& value) {

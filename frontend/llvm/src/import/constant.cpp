@@ -226,20 +226,22 @@ ar::IntegerConstant* ConstantImporter::translate_constant_int(
 
 /// \todo(floating point)
 /// \brief Convert the 'llvm::APFloat' type to a string type and pass it to AR
-// ar::FloatConstant* ConstantImporter::translate_constant_fp(
-//     llvm::ConstantFP* cst, ar::FloatType* type) {
-//   const llvm::APFloat& f = cst->getValueAPF();
-//   llvm::SmallString< 16 > str;
-//   f.toString(str, /*FormatPrecision = */ 0, /*FormatMaxPadding = */ 0);
-//   return ar::FloatConstant::get(this->_context, type, str.c_str());
-// }
+/*
+   ar::FloatConstant* ConstantImporter::translate_constant_fp(
+     llvm::ConstantFP* cst, ar::FloatType* type) {
+   const llvm::APFloat& f = cst->getValueAPF();
+   llvm::SmallString< 16 > str;
+   f.toString(str, *//*FormatPrecision = *//* 0, *//*FormatMaxPadding = *//* 0);
+   return ar::FloatConstant::get(this->_context, type, str.c_str());
+ }
+ */
 
 ar::FloatConstant* ConstantImporter::translate_constant_fp(
     llvm::ConstantFP* cst, ar::FloatType* type) {
-  const llvm::APFloat& f = cst->getValueAPF();
   ar::FNumber n= to_floating_point(cst->getValueAPF());
   return ar::FloatConstant::get(this->_context,type,n);
 }
+
 ar::NullConstant* ConstantImporter::translate_constant_ptr_null(
     llvm::ConstantPointerNull* /*cst*/, ar::PointerType* type) {
   return ar::NullConstant::get(this->_context, type);

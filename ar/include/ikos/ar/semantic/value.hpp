@@ -287,19 +287,23 @@ private:
   // Decimal representation, in scientific notation
   // TODO(marthaud): use a better representation (see llvm::APFloat for example)
   // Note: QNumber cannot be used (no representation for +Inf, -Inf, NaN, etc.)
-  std::string _value;
+//  std::string _value;
+  FNumber _value;
 
 private:
   /// \brief Private constructor
-  FloatConstant(FloatType* type, std::string value);
+//  FloatConstant(FloatType* type, std::string value);
+  FloatConstant(FloatType* type, FNumber value);
 
 public:
   /// \brief Static constructor
   ///
   /// \param value Decimal representation, in scientific notation
+/*
   static FloatConstant* get(Context& ctx,
                             FloatType* type,
                             const std::string& value);
+*/
 
   static FloatConstant* get(Context& ctx,
                             FloatType* type,
@@ -307,13 +311,14 @@ public:
   /// \brief Static constructor
   ///
   /// \param value Decimal representation, in scientific notation
-  static FloatConstant* get(Context& ctx, FloatType* type, const char* value);
+//  static FloatConstant* get(Context& ctx, FloatType* type, const char* value);
 
   /// \brief Get the type
   FloatType* type() const { return cast< FloatType >(this->_type); }
 
   /// \brief Get the decimal representation, in scientific notation
-  const std::string& value() const { return this->_value; }
+//  const std::string& value() const { return this->_value; }
+  const FNumber& value() const { return this->_value; }
 
   /// \brief Dump the value for debugging purpose
   void dump(std::ostream&) const override;

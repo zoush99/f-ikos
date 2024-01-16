@@ -110,14 +110,21 @@ void IntegerConstant::dump(std::ostream& o) const {
 /// \todo(floating point)
 /// \todo(Here, floating-point types are treated as string representations;
 /// later on, I will represent floating-point types as FNumber types.)
+/*
 FloatConstant::FloatConstant(FloatType* type, std::string value)
     : Constant(FloatConstantKind, type), _value(std::move(value)) {}
+*/
 
+FloatConstant::FloatConstant(FloatType* type, FNumber value)
+    : Constant(FloatConstantKind, type), _value(std::move(value)) {}
+
+/*
 FloatConstant* FloatConstant::get(Context& ctx,
                                   FloatType* type,
                                   const std::string& value) {
   return ctx_impl(ctx).float_cst(type, value);
 }
+*/
 
 FloatConstant* FloatConstant::get(Context& ctx,
                                   FloatType* type,
@@ -125,11 +132,13 @@ FloatConstant* FloatConstant::get(Context& ctx,
   return ctx_impl(ctx).float_cst(type, value);
 }
 
+/*
 FloatConstant* FloatConstant::get(Context& ctx,
                                   FloatType* type,
                                   const char* value) {
   return ctx_impl(ctx).float_cst(type, value);
 }
+*/
 
 void FloatConstant::dump(std::ostream& o) const {
   o << this->_value;
