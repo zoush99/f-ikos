@@ -135,7 +135,13 @@ private:
       _integer_constants;
 
   // Float constants
-  boost::container::flat_map< std::tuple< FloatType*, std::string >,
+  /*
+   boost::container::flat_map< std::tuple< FloatType*, std::string >,
+                              std::unique_ptr< FloatConstant > >
+      _float_constants;
+  */
+
+  boost::container::flat_map< std::tuple< FloatType*, FNumber >,
                               std::unique_ptr< FloatConstant > >
       _float_constants;
 
