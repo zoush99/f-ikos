@@ -190,8 +190,24 @@ IntegerConstant* ContextImpl::integer_cst(IntegerType* type,
 }
 
 /// \todo(floating point)
-FloatConstant* ContextImpl::float_cst(FloatType* type,
+/*
+  FloatConstant* ContextImpl::float_cst(FloatType* type,
                                       const std::string& value) {
+  auto it = this->_float_constants.find(std::make_tuple(type, value));
+  if (it == this->_float_constants.end()) {
+    auto cst = std::unique_ptr< FloatConstant >(new FloatConstant(type, value));
+    auto res = this->_float_constants.emplace(std::make_tuple(type, value),
+                                              std::move(cst));
+    ikos_assert(res.second);
+    return res.first->second.get();
+  } else {
+    return it->second.get();
+  }
+}
+ */
+
+FloatConstant* ContextImpl::float_cst(FloatType* type,
+                                      const FNumber& value) {
   auto it = this->_float_constants.find(std::make_tuple(type, value));
   if (it == this->_float_constants.end()) {
     auto cst = std::unique_ptr< FloatConstant >(new FloatConstant(type, value));

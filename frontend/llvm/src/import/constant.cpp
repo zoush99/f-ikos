@@ -80,6 +80,17 @@ static ar::MachineInt to_machine_int(const llvm::APInt& n,
   }
 }
 
+/// \brief Convert a llvm::APFloat into an ar::FNumber. By zoush99
+static ar::FNumber to_floating_point(const llvm::APFloat& n) {
+  llvm::APFloat nTemp(n);
+  const llvm::fltSemantics& semantics = n.getSemantics();
+  if (&semantics == &llvm::APFloat::IEEEsingle()) { // float
+    return ar::FNumber(nTemp.convertToFloat());
+  } else { // double
+    return ar::FNumber(nTemp.convertToDouble());
+  }
+}
+
 ar::Value* ConstantImporter::translate_constant(llvm::Constant* cst,
                                                 ar::Type* type,
                                                 ar::BasicBlock* bb) {
@@ -215,14 +226,20 @@ ar::IntegerConstant* ConstantImporter::translate_constant_int(
 
 /// \todo(floating point)
 /// \brief Convert the 'llvm::APFloat' type to a string type and pass it to AR
+// ar::FloatConstant* ConstantImporter::translate_constant_fp(
+//     llvm::ConstantFP* cst, ar::FloatType* type) {
+//   const llvm::APFloat& f = cst->getValueAPF();
+//   llvm::SmallString< 16 > str;
+//   f.toString(str, /*FormatPrecision = */ 0, /*FormatMaxPadding = */ 0);
+//   return ar::FloatConstant::get(this->_context, type, str.c_str());
+// }
+
 ar::FloatConstant* ConstantImporter::translate_constant_fp(
     llvm::ConstantFP* cst, ar::FloatType* type) {
   const llvm::APFloat& f = cst->getValueAPF();
-  llvm::SmallString< 16 > str;
-  f.toString(str, /*FormatPrecision = */ 0, /*FormatMaxPadding = */ 0);
-  return ar::FloatConstant::get(this->_context, type, str.c_str());
+  ar::FNumber n= to_floating_point(cst->getValueAPF());
+  return ar::FloatConstant::get(this->_context,type,n);
 }
-
 ar::NullConstant* ConstantImporter::translate_constant_ptr_null(
     llvm::ConstantPointerNull* /*cst*/, ar::PointerType* type) {
   return ar::NullConstant::get(this->_context, type);
