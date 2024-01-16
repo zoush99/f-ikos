@@ -121,6 +121,12 @@ FloatConstant* FloatConstant::get(Context& ctx,
 
 FloatConstant* FloatConstant::get(Context& ctx,
                                   FloatType* type,
+                                  const FNumber& value) {
+  return ctx_impl(ctx).float_cst(type, value);
+}
+
+FloatConstant* FloatConstant::get(Context& ctx,
+                                  FloatType* type,
                                   const char* value) {
   return ctx_impl(ctx).float_cst(type, value);
 }

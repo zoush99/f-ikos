@@ -301,6 +301,9 @@ public:
                             FloatType* type,
                             const std::string& value);
 
+  static FloatConstant* get(Context& ctx,
+                            FloatType* type,
+                            const FNumber& value);
   /// \brief Static constructor
   ///
   /// \param value Decimal representation, in scientific notation
