@@ -357,7 +357,7 @@ void StructType::dump(std::ostream& o) const {
 }
 
 // SequentialType
-
+/// \todo(Here, only ZNumber type is considered; later on, FNumber type needs to be added.)
 SequentialType::SequentialType(TypeKind kind,
                                Type* element_type,
                                ZNumber num_element)

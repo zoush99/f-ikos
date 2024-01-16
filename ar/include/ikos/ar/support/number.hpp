@@ -48,8 +48,10 @@
 
 #pragma once
 
+#include <ikos/core/number/f_number.hpp> // By zoush99
 #include <ikos/core/number/machine_int.hpp>
 #include <ikos/core/number/supported_integral.hpp>
+#include <ikos/core/number/supported_integralorfloat.hpp> // By zoush99
 #include <ikos/core/number/z_number.hpp>
 
 namespace ikos {
@@ -67,5 +69,7 @@ using ZNumber = ikos::core::ZNumber;
 /// \brief Class for arbitrary precision machine integers
 using MachineInt = ikos::core::MachineInt;
 
+/// \brief Class for floating point numbers
+using FNumber = ikos::core::FNumber;
 } // end namespace ar
 } // end namespace ikos
