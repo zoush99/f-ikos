@@ -340,7 +340,7 @@ private:
   class PolymorphicDerived final : public PolymorphicBase {
   public:
     static_assert(
-        numeric::IsAbstractDomain< Number, RuntimeDomain, VariableRef >::value,
+        numeric::IsAbstractDomain<RuntimeDomain,Number, VariableRef >::value,
         "RuntimeDomain must implement Number::AbstractDomain");
 
   private:
@@ -955,7 +955,7 @@ public:
   /// \todo bugs here!!! By zoush99
   /// \brief How to construct a polymorphic abstract domain? By zoush99
   LinearConstraintSystemT to_linear_constraint_system() const{
-    return this->_ptr->to_interval_congruence();
+    return this->_ptr->to_linear_constraint_system();
   }
 
   /// @}
