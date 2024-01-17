@@ -252,7 +252,7 @@ public:
         this->_inv.set(x, i);
         this->_inv.set(y, i);
       } break;
-/*      case Predicate::NE: {
+      case Predicate::NE: {
         if (x == y) {
           this->set_to_bottom();
           return;
@@ -270,6 +270,7 @@ public:
       case Predicate::GE: {
         this->add(Predicate::LE, y, x);
       } break;
+        /// \brief Key factors. By zoush99
       case Predicate::LT: {
         if (x == y) {
           this->set_to_bottom();
@@ -288,10 +289,13 @@ public:
       case Predicate::LE: {
         this->_inv.refine(x, yi.lower_half_line());
         this->_inv.refine(y, xi.upper_half_line());
-      } break;*/
+      } break;
     }
   }
 
+  /// \todo(Further modifications are needed here, as this was copied without
+  /// changes from machine integer types. Some of the involved functions do not
+  /// exist, and correctness has not been considered.)By zoush99
   /// \brief Add the constraint `x pred y`
   void add(Predicate pred, VariableRef x, const Number& y) override{
     if (this->is_bottom()) {
@@ -306,7 +310,7 @@ public:
         Interval<Number> i = xi.meet(yi);
         this->_inv.set(x, i);
       } break;
-/*      case Predicate::NE: {
+      case Predicate::NE: {
         this->_inv.set(x, trim_bound(xi, y));
       } break;
       case Predicate::GT: {
@@ -332,7 +336,7 @@ public:
       } break;
       case Predicate::LE: {
         this->_inv.refine(x, yi.lower_half_line());
-      } break;*/
+      } break;
     }
   }
 
