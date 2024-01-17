@@ -245,6 +245,15 @@ private:
                        const Number& y,
                        VariableRef z) = 0;
 
+    /// By zoush99
+    /// { @
+    /// \brief Add a linear constraint
+    virtual void add(const LinearConstraintT& cst) =0;
+
+    /// \brief Add a linear constraint system
+    virtual void add(const LinearConstraintSystemT& csts) =0;
+    /// @ }
+
     /// \brief Add the constraint `x pred y`
     virtual void add(Predicate pred, VariableRef x, VariableRef y) = 0;
 
@@ -338,6 +347,7 @@ private:
     using PolymorphicDerivedT = PolymorphicDerived< RuntimeDomain >;
 
   private:
+    /// \brief Specified abstract domain.
     RuntimeDomain _inv;
 
   public:
@@ -567,6 +577,19 @@ private:
                VariableRef z) override {
       this->_inv.apply(op, x, y, z);
     }
+
+    /// By zoush99
+    /// { @
+    /// \brief Add a linear constraint
+    void add(const LinearConstraintT& cst) override {
+      this->_inv.add(cst);
+    }
+
+    /// \brief Add a linear constraint system
+    void add(const LinearConstraintSystemT& csts) override {
+      this->_inv.add(csts);
+    }
+    /// @ }
 
     void add(Predicate pred, VariableRef x, VariableRef y) override {
       this->_inv.add(pred, x, y);
@@ -853,24 +876,12 @@ public:
   /// { @
   /// \brief Add a linear constraint
   void add(const LinearConstraintT& cst) override {
-    if (this->is_bottom()) {
-      return;
-    }
-
-    LinearIntervalSolverT solver(MaxReductionCycles);
-    solver.add(cst);
-    solver.run(*this);
+    this->_ptr->add(cst);
   }
 
   /// \brief Add a linear constraint system
   void add(const LinearConstraintSystemT& csts) override {
-    if (this->is_bottom()) {
-      return;
-    }
-
-    LinearIntervalSolverT solver(MaxReductionCycles);
-    solver.add(csts);
-    solver.run(*this);
+    this->_ptr->add(csts);
   }
 
   /// @ }
@@ -944,16 +955,7 @@ public:
   /// \todo bugs here!!! By zoush99
   /// \brief How to construct a polymorphic abstract domain? By zoush99
   LinearConstraintSystemT to_linear_constraint_system() const{
-    if (this->is_bottom()) {
-      return LinearConstraintSystemT(LinearConstraintT::contradiction());
-    }
-
-    LinearConstraintSystemT csts;
-    for (auto it = this->begin(), et = this->end(); it != et; ++it) {
-      csts.add(within_interval(it->first, it->second));
-    }
-
-    return csts;
+    return this->_ptr->to_interval_congruence();
   }
 
   /// @}

@@ -44,7 +44,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 
 #include <ikos/analyzer/analysis/option.hpp>
-/// \todo("Does this place need to include the numerical abstraction domain?)
+/// \todo(Does this place need to include the numerical abstraction domain?)
 #include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
 #include <ikos/analyzer/database/output.hpp>
 

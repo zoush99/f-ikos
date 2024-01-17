@@ -315,6 +315,7 @@ private:
     using PolymorphicDerivedT = PolymorphicDerived< RuntimeDomain >;
 
   private:
+    /// \brief Specified abstract domain.
     RuntimeDomain _inv;
 
   public:
