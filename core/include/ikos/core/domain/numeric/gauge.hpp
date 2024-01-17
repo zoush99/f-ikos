@@ -995,6 +995,20 @@ public:
     this->_intervals.add(counters_csts);
   }
 
+  /// \todo(Rewrote the `add` function to be empty; will proceed with further
+  /// modifications.) By zoush99
+  /// { @
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, VariableRef y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, const Number& y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, const Number& x, VariableRef y) override { return; }
+
+  /// @ }
+
   /// \brief Set the gauge for the variable `x`
   void set(VariableRef x, const GaugeT& value) {
     if (this->is_bottom()) {

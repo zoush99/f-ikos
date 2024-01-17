@@ -28,13 +28,14 @@
  * TO, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL CONFORM TO SPECIFICATIONS,
  * ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE,
  * OR FREEDOM FROM INFRINGEMENT, ANY WARRANTY THAT THE SUBJECT SOFTWARE WILL BE
- * ERROR FREE, OR ANY WARRANTY THAT narrowing_thresholdDOCUMENTATION, IF PROVIDED, WILL CONFORM TO
- * THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN ANY MANNER, CONSTITUTE AN
- * ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR RECIPIENT OF ANY RESULTS,
- * RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR ANY OTHER APPLICATIONS
- * RESULTING FROM USE OF THE SUBJECT SOFTWARE.  FURTHER, GOVERNMENT AGENCY
- * DISCLAIMS ALL WARRANTIES AND LIABILITIES REGARDING THIRD-PARTY SOFTWARE,
- * IF PRESENT IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES IT "AS IS."
+ * ERROR FREE, OR ANY WARRANTY THAT narrowing_thresholdDOCUMENTATION, IF
+ *PROVIDED, WILL CONFORM TO THE SUBJECT SOFTWARE. THIS AGREEMENT DOES NOT, IN
+ *ANY MANNER, CONSTITUTE AN ENDORSEMENT BY GOVERNMENT AGENCY OR ANY PRIOR
+ *RECIPIENT OF ANY RESULTS, RESULTING DESIGNS, HARDWARE, SOFTWARE PRODUCTS OR
+ *ANY OTHER APPLICATIONS RESULTING FROM USE OF THE SUBJECT SOFTWARE.  FURTHER,
+ *GOVERNMENT AGENCY DISCLAIMS ALL WARRANTIES AND LIABILITIES REGARDING
+ *THIRD-PARTY SOFTWARE, IF PRESENT IN THE ORIGINAL SOFTWARE, AND DISTRIBUTES IT
+ *"AS IS."
  *
  * Waiver and Indemnity:  RECIPIENT AGREES TO WAIVE ANY AND ALL CLAIMS AGAINST
  * THE UNITED STATES GOVERNMENT, ITS CONTRACTORS AND SUBCONTRACTORS, AS WELL
@@ -79,9 +80,7 @@ public:
       LinearConstraint< Number, VariableRef >; // By zoush99
   using LinearConstraintSystemT =
       LinearConstraintSystem< Number, VariableRef >; // By zoush99
-  using LinearIntervalSolverT =
-      LinearIntervalSolver< Number, VariableRef, PolymorphicDomain >; // By
-                                                                      // zoush99
+
 private:
   /// Type erasure idiom
   ///
@@ -248,10 +247,10 @@ private:
     /// By zoush99
     /// { @
     /// \brief Add a linear constraint
-    virtual void add(const LinearConstraintT& cst) =0;
+    virtual void add(const LinearConstraintT& cst) = 0;
 
     /// \brief Add a linear constraint system
-    virtual void add(const LinearConstraintSystemT& csts) =0;
+    virtual void add(const LinearConstraintSystemT& csts) = 0;
     /// @ }
 
     /// \brief Add the constraint `x pred y`
@@ -340,7 +339,7 @@ private:
   class PolymorphicDerived final : public PolymorphicBase {
   public:
     static_assert(
-        numeric::IsAbstractDomain<RuntimeDomain,Number, VariableRef >::value,
+        numeric::IsAbstractDomain< RuntimeDomain, Number, VariableRef >::value,
         "RuntimeDomain must implement Number::AbstractDomain");
 
   private:
@@ -537,9 +536,7 @@ private:
     /// @{
 
     /// By zoush99
-    void assign(VariableRef x, int n) override {
-      this->_inv.assign(x, n);
-    }
+    void assign(VariableRef x, int n) override { this->_inv.assign(x, n); }
 
     void assign(VariableRef x, const Number& n) override {
       this->_inv.assign(x, n);
@@ -581,9 +578,7 @@ private:
     /// By zoush99
     /// { @
     /// \brief Add a linear constraint
-    void add(const LinearConstraintT& cst) override {
-      this->_inv.add(cst);
-    }
+    void add(const LinearConstraintT& cst) override { this->_inv.add(cst); }
 
     /// \brief Add a linear constraint system
     void add(const LinearConstraintSystemT& csts) override {
@@ -829,9 +824,7 @@ public:
   /// @{
 
   /// By zoush99
-  void assign(VariableRef x, int n) override {
-    this->_ptr->assign(x, n);
-  }
+  void assign(VariableRef x, int n) override { this->_ptr->assign(x, n); }
 
   void assign(VariableRef x, const Number& n) override {
     this->_ptr->assign(x, n);
@@ -875,9 +868,7 @@ public:
   /// \todo By zoush99
   /// { @
   /// \brief Add a linear constraint
-  void add(const LinearConstraintT& cst) override {
-    this->_ptr->add(cst);
-  }
+  void add(const LinearConstraintT& cst) override { this->_ptr->add(cst); }
 
   /// \brief Add a linear constraint system
   void add(const LinearConstraintSystemT& csts) override {
@@ -954,7 +945,7 @@ public:
 
   /// \todo bugs here!!! By zoush99
   /// \brief How to construct a polymorphic abstract domain? By zoush99
-  LinearConstraintSystemT to_linear_constraint_system() const{
+  LinearConstraintSystemT to_linear_constraint_system() const {
     return this->_ptr->to_linear_constraint_system();
   }
 

@@ -1478,6 +1478,20 @@ public:
     }
   } // Sets state to not normalized.
 
+  /// \todo(Rewrote the `add` function to be empty; will proceed with further
+  /// modifications.) By zoush99
+  /// { @
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, VariableRef y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, const Number& y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, const Number& x, VariableRef y) override { return; }
+
+  /// @ }
+
   void set(VariableRef x, const IntervalT& value) override {
     if (this->_is_bottom) {
       return;

@@ -323,6 +323,20 @@ public:
     this->_product.second().add(csts);
   }
 
+  /// \todo(Rewrote the `add` function to be empty; will proceed with further
+  /// modifications.) By zoush99
+  /// { @
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, VariableRef y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, const Number& y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, const Number& x, VariableRef y) override { return; }
+
+  /// @ }
+
   void set(VariableRef x, const IntervalT& value) override {
     this->_product.first().set(x, value);
     this->_product.second().set(x, value);
@@ -699,6 +713,20 @@ public:
   void add(const LinearConstraintSystemT& csts) override {
     this->_product.add(csts);
   }
+
+  /// \todo(Rewrote the `add` function to be empty; will proceed with further
+  /// modifications.) By zoush99
+  /// { @
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, VariableRef y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, VariableRef x, const Number& y) override { return; }
+
+  /// \brief Add the constraint `x pred y`
+  void add(Predicate pred, const Number& x, VariableRef y) override { return; }
+
+  /// @ }
 
   void set(VariableRef x, const IntervalT& value) override {
     this->_product.set(x, value);
