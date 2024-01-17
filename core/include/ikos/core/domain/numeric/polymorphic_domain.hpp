@@ -307,6 +307,9 @@ private:
     virtual IntervalCongruence< Number > to_interval_congruence(
         const LinearExpressionT& e) const = 0;
 
+    /// \todo(annotate)
+    virtual LinearConstraintSystemT to_linear_constraint_system() const =0;
+
     /// @}
     /// \name Non-negative loop counter abstract domain methods
     /// @{
@@ -651,6 +654,11 @@ private:
     IntervalCongruence< Number > to_interval_congruence(
         const LinearExpressionT& e) const override {
       return this->_inv.to_interval_congruence(e);
+    }
+
+    /// \todo(annotate)
+    LinearConstraintSystemT to_linear_constraint_system() const {
+      return this->_inv.to_linear_constraint_system();
     }
 
     /// @}
