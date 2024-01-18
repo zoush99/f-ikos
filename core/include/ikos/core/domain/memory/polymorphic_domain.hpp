@@ -2097,12 +2097,6 @@ public:
     this->_ptr->scalar_assign_nondet(x);
   }
 
-  void scalar_pointer_to_int(VariableRef x,
-                             VariableRef p,
-                             MemoryLocationRef absolute_zero) override {
-    this->_ptr->scalar_pointer_to_int(x, p, absolute_zero);
-  }
-
   void scalar_float_to_int(VariableRef f, VariableRef x) override{
     this->_ptr->scalar_float_to_int(f, x);
   }
@@ -2111,6 +2105,11 @@ public:
     this->_ptr->scalar_int_to_float(x, f);
   }
 
+  void scalar_pointer_to_int(VariableRef x,
+                             VariableRef p,
+                             MemoryLocationRef absolute_zero) override {
+    this->_ptr->scalar_pointer_to_int(x, p, absolute_zero);
+  }
 
   void scalar_int_to_pointer(VariableRef p,
                              VariableRef x,

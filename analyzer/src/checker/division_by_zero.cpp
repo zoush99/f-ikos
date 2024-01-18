@@ -68,7 +68,9 @@ void DivisionByZeroChecker::check(ar::Statement* stmt,
     if (bin->op() == ar::BinaryOperation::UDiv ||
         bin->op() == ar::BinaryOperation::SDiv ||
         bin->op() == ar::BinaryOperation::URem ||
-        bin->op() == ar::BinaryOperation::SRem) {
+        bin->op() == ar::BinaryOperation::SRem ||
+        bin->op() == ar::BinaryOperation::FDiv ||
+        bin->op() == ar::BinaryOperation::FRem) {
       CheckResult check = this->check_division(bin, inv);
       this->display_invariant(check.result, stmt, inv);
       this->_checks.insert(check.kind,
@@ -104,25 +106,34 @@ DivisionByZeroChecker::CheckResult DivisionByZeroChecker::check_division(
   }
 
   auto divisor = IntInterval::bottom(1, Signed);
+  auto fdivisor = FnuInterval::bottom();
+
   if (lit.is_machine_int()) {
     divisor = IntInterval(lit.machine_int());
   } else if (lit.is_machine_int_var()) {
     divisor = inv.normal().int_to_interval(lit.var());
+  } else if (lit.is_floating_point()) {
+    fdivisor = FnuInterval(lit.floating_point());
+  } else if (lit.is_floating_point_var()) {
+    fdivisor = inv.normal().float_to_interval(lit.var());
   } else {
     log::error("unexpected operand to binary operation");
     return {CheckKind::UnexpectedOperand, Result::Error, {}};
   }
 
   boost::optional< MachineInt > d = divisor.singleton();
+  boost::optional< FNumber > fd = fdivisor.singleton();
 
-  if (d && (*d).is_zero()) {
+  if ((d && (*d).is_zero()) || (fd && (*fd).is_zero())) {
     // The second operand is definitely 0
     if (auto msg = this->display_division_check(Result::Error, stmt)) {
       *msg << ": ∀d ∈ divisor, d == 0\n";
     }
     return {CheckKind::DivisionByZero, Result::Error, {}};
-  } else if (divisor.contains(
-                 MachineInt::zero(divisor.bit_width(), divisor.sign()))) {
+  } else if ((divisor.contains(
+                 MachineInt::zero(divisor.bit_width(), divisor.sign()))) ||
+             (fdivisor.contains(
+                 FNumber ::zero(32, Signedness::Signed) ))){
     // The second operand may be 0
     if (auto msg = this->display_division_check(Result::Warning, stmt)) {
       *msg << ": ∃d ∈ divisor, d == 0\n";

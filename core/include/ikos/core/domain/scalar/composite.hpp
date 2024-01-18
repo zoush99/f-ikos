@@ -122,6 +122,14 @@ public:
   using PointerAbsValueT = PointerAbsValue< MemoryLocationRef >;
   using PointerSetT = PointerSet< MemoryLocationRef >;
 
+  // By zoush99
+  using FnuBinaryOperator = numeric::BinaryOperator;
+  using FnuPredicate = numeric::Predicate;
+  using FnuLinearExpression = LinearExpression< FNumber, VariableRef >;
+  using FnuInterval = numeric::Interval<FNumber>;
+  using FnuCongruence = numeric::Congruence<FNumber>;
+  using FnuIntervalCongruence = numeric::IntervalCongruence<FNumber>;
+
 private:
   using PointsToMap = SeparateDomain< VariableRef, PointsToSetT >;
   using IntVariableTrait = machine_int::VariableTraits< VariableRef >;
@@ -940,7 +948,7 @@ public:
   /// @}
   /// \name Implement floating point abstract domain methods
   /// @{
-
+/*
   void float_assign_undef(VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
@@ -964,6 +972,117 @@ public:
     ikos_assert(ScalarVariableTrait::is_float(x));
 
     this->_uninitialized.forget(x);
+  }*/
+
+  void float_assign(VariableRef x, const FNumber& n) override {
+    this->_ptr->float_assign(x, n);
+  }
+
+  void float_assign_undef(VariableRef x) override {
+    this->_ptr->float_assign_undef(x);
+  }
+
+  void float_assign_nondet(VariableRef x) override {
+    this->_ptr->float_assign_nondet(x);
+  }
+
+  void float_assign(VariableRef x, VariableRef y) override {
+    this->_ptr->float_assign(x, y);
+  }
+
+  void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+    this->_ptr->float_assign(x, e);
+  }
+
+  /*
+  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override {
+    this->_ptr->float_apply(op, x, y);
+  }
+*/
+
+  void float_apply(FnuBinaryOperator op,
+                   VariableRef x,
+                   VariableRef y,
+                   VariableRef z) override {
+    this->_ptr->float_apply(op, x, y, z);
+  }
+
+  void float_apply(FnuBinaryOperator op,
+                   VariableRef x,
+                   VariableRef y,
+                   const FNumber& z) override {
+    this->_ptr->float_apply(op, x, y, z);
+  }
+
+  void float_apply(FnuBinaryOperator op,
+                   VariableRef x,
+                   const FNumber& y,
+                   VariableRef z) override {
+    this->_ptr->float_apply(op, x, y, z);
+  }
+
+  void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
+    this->_ptr->float_add(pred, x, y);
+  }
+
+  void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
+    this->_ptr->float_add(pred, x, y);
+  }
+
+  void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
+    this->_ptr->float_add(pred, x, y);
+  }
+
+  void float_set(VariableRef x, const FnuInterval& value) override {
+    this->_ptr->float_set(x, value);
+  }
+
+  void float_set(VariableRef x, const FnuCongruence& value) override {
+    this->_ptr->float_set(x, value);
+  }
+
+  void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
+    this->_ptr->float_set(x, value);
+  }
+
+  void float_refine(VariableRef x, const FnuInterval& value) override {
+    this->_ptr->float_refine(x, value);
+  }
+
+  void float_refine(VariableRef x, const FnuCongruence& value) override {
+    this->_ptr->float_refine(x, value);
+  }
+
+  void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
+    this->_ptr->float_refine(x, value);
+  }
+
+  void float_forget(VariableRef x) override { this->_ptr->float_forget(x); }
+
+  FnuInterval float_to_interval(VariableRef x) const override {
+    return this->_ptr->float_to_interval(x);
+  }
+
+  FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
+    return this->_ptr->float_to_interval(e);
+  }
+
+  FnuCongruence float_to_congruence(VariableRef x) const override {
+    return this->_ptr->float_to_congruence(x);
+  }
+
+  FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
+    return this->_ptr->float_to_congruence(e);
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      VariableRef x) const override {
+    return this->_ptr->float_to_interval_congruence(x);
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      const FnuLinearExpression& e) const override {
+    return this->_ptr->float_to_interval_congruence(e);
   }
 
   /// @}
@@ -1705,6 +1824,16 @@ public:
     } else {
       ikos_unreachable("unexpected type");
     }
+  }
+
+  void scalar_float_to_int(VariableRef f, VariableRef x) override{
+//    this->_ptr->scalar_float_to_int(f, x);
+    return;
+  }
+
+  void scalar_int_to_float(VariableRef x, VariableRef f) override{
+//    this->_ptr->scalar_int_to_float(x, f);
+    return;
   }
 
   void scalar_pointer_to_int(VariableRef x,

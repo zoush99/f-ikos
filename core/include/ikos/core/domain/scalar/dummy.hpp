@@ -70,6 +70,14 @@ public:
   using PointerAbsValueT = PointerAbsValue< MemoryLocationRef >;
   using PointerSetT = PointerSet< MemoryLocationRef >;
 
+  // By zoush99
+  using FnuBinaryOperator = numeric::BinaryOperator;
+  using FnuPredicate = numeric::Predicate;
+  using FnuLinearExpression = LinearExpression< FNumber, VariableRef >;
+  using FnuInterval = numeric::Interval< FNumber >;
+  using FnuCongruence = numeric::Congruence< FNumber >;
+  using FnuIntervalCongruence = numeric::IntervalCongruence< FNumber >;
+
 private:
   using IntVariableTrait = machine_int::VariableTraits< VariableRef >;
   using ScalarVariableTrait = scalar::VariableTraits< VariableRef >;
@@ -334,6 +342,17 @@ public:
   /// @}
   /// \name Implement floating point abstract domain methods
   /// @{
+  /*
+    void float_assign_undef(VariableRef) override {}
+
+    void float_assign_nondet(VariableRef) override {}
+
+    void float_assign(VariableRef, VariableRef) override {}
+
+    void float_forget(VariableRef) override {}
+  */
+
+  void float_assign(VariableRef, const FNumber&) override {}
 
   void float_assign_undef(VariableRef) override {}
 
@@ -341,7 +360,125 @@ public:
 
   void float_assign(VariableRef, VariableRef) override {}
 
+  void float_assign(VariableRef, const FnuLinearExpression&) override {}
+
+  //  void float_apply(FnuUnaryOperator, VariableRef, VariableRef) override {}
+
+  void float_apply(FnuBinaryOperator,
+                   VariableRef,
+                   VariableRef,
+                   VariableRef) override {}
+
+  void float_apply(FnuBinaryOperator,
+                   VariableRef,
+                   VariableRef,
+                   const FNumber&) override {}
+
+  void float_apply(FnuBinaryOperator,
+                   VariableRef,
+                   const FNumber&,
+                   VariableRef) override {}
+
+  void float_add(FnuPredicate, VariableRef, VariableRef) override {}
+
+  void float_add(FnuPredicate, VariableRef, const FNumber&) override {}
+
+  void float_add(FnuPredicate, const FNumber&, VariableRef) override {}
+
+  void float_set(VariableRef, const FnuInterval& value) override {
+    if (value.is_bottom()) {
+      this->_is_bottom = true;
+    }
+  }
+
+  void float_set(VariableRef, const FnuCongruence& value) override {
+    if (value.is_bottom()) {
+      this->_is_bottom = true;
+    }
+  }
+
+  void float_set(VariableRef, const FnuIntervalCongruence& value) override {
+    if (value.is_bottom()) {
+      this->_is_bottom = true;
+    }
+  }
+
+  void float_refine(VariableRef, const FnuInterval& value) override {
+    if (value.is_bottom()) {
+      this->_is_bottom = true;
+    }
+  }
+
+  void float_refine(VariableRef, const FnuCongruence& value) override {
+    if (value.is_bottom()) {
+      this->_is_bottom = true;
+    }
+  }
+
+  void float_refine(VariableRef, const FnuIntervalCongruence& value) override {
+    if (value.is_bottom()) {
+      this->_is_bottom = true;
+    }
+  }
+
   void float_forget(VariableRef) override {}
+
+  FnuInterval float_to_interval(VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+
+    if (this->_is_bottom) {
+      return FnuInterval::bottom();
+    } else {
+      return FnuInterval::top();
+    }
+  }
+
+  FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
+    if (this->_is_bottom) {
+      return FnuInterval::bottom();
+    } else {
+      return FnuInterval::top();
+    }
+  }
+
+  FnuCongruence float_to_congruence(VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+
+    if (this->_is_bottom) {
+      return FnuCongruence::bottom();
+    } else {
+      return FnuCongruence::top();
+    }
+  }
+
+  FnuCongruence float_to_congruence(
+      const FnuLinearExpression& e) const override {
+    if (this->_is_bottom) {
+      return FnuCongruence::bottom();
+    } else {
+      return FnuCongruence::top();
+    }
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+
+    if (this->_is_bottom) {
+      return FnuIntervalCongruence::bottom();
+    } else {
+      return FnuIntervalCongruence::top();
+    }
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      const FnuLinearExpression& e) const override {
+    if (this->_is_bottom) {
+      return FnuIntervalCongruence::bottom();
+    } else {
+      return FnuIntervalCongruence::top();
+    }
+  }
 
   /// @}
   /// \name Implement nullity abstract domain methods
@@ -536,6 +673,10 @@ public:
   void scalar_assign_undef(VariableRef) override {}
 
   void scalar_assign_nondet(VariableRef) override {}
+
+  void scalar_float_to_int(VariableRef x, VariableRef f) override {}
+
+  void scalar_int_to_float(VariableRef f, VariableRef x) override {}
 
   void scalar_pointer_to_int(VariableRef,
                              VariableRef,
