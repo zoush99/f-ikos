@@ -516,7 +516,6 @@ inline Interval< QNumber > operator/(const Interval< QNumber >& lhs,
   }
 }
 
-/// \todo (floating point)
 /// \brief Divide intervals
 inline Interval< FNumber > operator/(const Interval< FNumber >& lhs,
                                      const Interval< FNumber >& rhs) {
@@ -526,16 +525,20 @@ inline Interval< FNumber > operator/(const Interval< FNumber >& lhs,
   if (lhs.is_bottom() || rhs.is_bottom()) {
     return IntervalT::bottom();
   } else {
-    if (rhs.contains(0)) {
-      IntervalT l(rhs.lb(), BoundT(-1));
-      IntervalT u(BoundT(1), rhs.ub());
-      return (lhs / l).join(lhs / u);
-    } else if (lhs.contains(0)) {
-      IntervalT l(lhs.lb(), BoundT(-1));
-      IntervalT u(BoundT(1), lhs.ub());
-      return (l / rhs).join(u / rhs).join(IntervalT(0));
+    boost::optional< FNumber > d = rhs.singleton();
+    if (d && *d == 0) {
+      // [_, _] / 0 = ⊥
+      return IntervalT::bottom();
+    } else if (rhs.contains(0)) {
+      boost::optional< FNumber > n = lhs.singleton();
+      if (n && *n == 0) {
+        // 0 / [_, _] = 0
+        return IntervalT(0);
+      } else {
+        // ([_,_]) / ([_,0] join [0,_]) = top
+        return IntervalT::top();
+      }
     } else {
-      // Neither the dividend nor the divisor contains 0
       BoundT ll = lhs.lb() / rhs.lb();
       BoundT lu = lhs.lb() / rhs.ub();
       BoundT ul = lhs.ub() / rhs.lb();
