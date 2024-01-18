@@ -1585,8 +1585,8 @@ public:
     }
   }
 
-  void scalar_float_to_int(VariableRef x,
-                             VariableRef f) override {
+  void scalar_float_to_int(VariableRef f,
+                             VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_int(x));
     ikos_assert(ScalarVariableTrait::is_float(f));
 
@@ -1599,8 +1599,8 @@ public:
     this->_integer.forget(x);
   }
 
-  void scalar_int_to_float(VariableRef f,
-                             VariableRef x) override {
+  void scalar_int_to_float(VariableRef x,
+                             VariableRef f) override {
     ikos_assert(ScalarVariableTrait::is_float(f));
     ikos_assert(ScalarVariableTrait::is_int(x));
 
