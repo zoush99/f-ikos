@@ -280,11 +280,10 @@ public:
           this->set_to_bottom();
           return;
         }
-        MachineInt int_min = MachineInt::min(xi.bit_width(), xi.sign());
-        MachineInt int_max = MachineInt::max(xi.bit_width(), xi.sign());
-        MachineInt one(1, xi.bit_width(), xi.sign());
-        this->_inv.refine(x, Interval<Number>(int_min, yi.ub() - one));
-        this->_inv.refine(y, Interval<Number>(xi.lb() + one, int_max));
+        FNumber flo_min = FNumber::min(xi.bit_width(), xi.sign());  // By zoush99
+        FNumber flo_max = FNumber::max(xi.bit_width(), xi.sign());
+        this->_inv.refine(x, Interval<Number>(flo_min, yi.ub()));
+        this->_inv.refine(y, Interval<Number>(xi.lb(), flo_max));
       } break;
       case Predicate::LE: {
         this->_inv.refine(x, yi.lower_half_line());
@@ -318,9 +317,8 @@ public:
           this->set_to_bottom();
           return;
         }
-        MachineInt int_max = MachineInt::max(xi.bit_width(), xi.sign());
-        MachineInt one(1, xi.bit_width(), xi.sign());
-        this->_inv.refine(x, Interval<Number>(y + one, int_max));
+        FNumber flo_max = FNumber::max(xi.bit_width(), xi.sign());
+        this->_inv.refine(x, Interval<Number>(y, flo_max));
       } break;
       case Predicate::GE: {
         this->_inv.refine(x, yi.upper_half_line());
@@ -330,9 +328,8 @@ public:
           this->set_to_bottom();
           return;
         }
-        MachineInt int_min = MachineInt::min(xi.bit_width(), xi.sign());
-        MachineInt one(1, xi.bit_width(), xi.sign());
-        this->_inv.refine(x, Interval<Number>(int_min, y - one));
+        FNumber flo_min = FNumber::min(xi.bit_width(), xi.sign());  // By zoush99
+        this->_inv.refine(x, Interval<Number>(flo_min, y));
       } break;
       case Predicate::LE: {
         this->_inv.refine(x, yi.lower_half_line());

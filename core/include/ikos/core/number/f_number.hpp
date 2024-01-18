@@ -132,11 +132,29 @@ public:
   /// \brief Destructor
   ~FNumber() = default;
 
-  /// \brief Create the minimum floating point number for the given bit width
-  /// and sign
+  /// \brief It is aimed at normalized numbers and does not consider denormalized numbers.
+  /// \brief Create the minimum machine integer for the given bit width and sign
+  static FNumber min(uint64_t bit_width, Signedness sign) {
+    ikos_assert_msg(bit_width > 0, "invalid bit width");
+    // By default, all are signed.
+    if(bit_width==32){  // fl
+      FNumber(-3.4028235E38,32,sign,NormalizedTag{});
+    }else{  // do
+      FNumber(-1.7976931348623157E308,64,sign,NormalizedTag{});
+    }
+  }
 
-  /// \brief Create the maximum floating point number for the given bit width
-  /// and sign
+  /// \brief Create the maximum machine integer for the given bit width and sign
+  static FNumber max(uint64_t bit_width, Signedness sign) {
+    ikos_assert_msg(bit_width > 0, "invalid bit width");
+    // By default, all are signed.
+      if(bit_width==32){  // fl
+      FNumber(3.4028235E38,32,sign,NormalizedTag{});
+      }else{  // do
+      FNumber(1.7976931348623157E308,64,sign,NormalizedTag{});
+      }
+  }
+
 
   /// \brief Create the null floating point number for the given bit width and
   /// sign
@@ -283,9 +301,24 @@ public:
   /// \name Value tests
   /// @{
 
+  /// \brief It is aimed at normalized numbers and does not consider denormalized numbers.
   /// \brief Return true if this is the minimum machine integer
+  bool is_min() const {
+        if (this->_bit_width==32) { // fl
+        return this->_n.f==-3.4028235E38;
+        } else {  // do
+        return this->_n.d==-1.7976931348623157E308;
+        }
+  }
 
   /// \brief Return true if this is the maximum machine integer
+  bool is_max() const {
+        if (this->_bit_width==32) { // fl
+        return this->_n.f==3.4028235E38;
+        } else {  // do
+        return this->_n.d==1.7976931348623157E308;
+        }
+  }
 
   /// \brief Return true if the machine integer is 0
   bool is_zero() const {
