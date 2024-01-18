@@ -215,6 +215,7 @@ add_executable(ikos-analyzer
   src/analysis/value/intraprocedural/sequential/analysis.cpp
   src/analysis/value/intraprocedural/sequential/function_fixpoint.cpp
   src/analysis/value/machine_int_domain.cpp
+  src/analysis/value/numeric_domain.cpp # By zoush99
   src/analysis/value/machine_int_domain/apron_interval.cpp
   src/analysis/value/machine_int_domain/apron_octagon.cpp
   src/analysis/value/machine_int_domain/apron_pkgrid_polyhedra_lin_cong.cpp
@@ -236,6 +237,7 @@ add_executable(ikos-analyzer
   src/analysis/value/machine_int_domain/var_pack_apron_ppl_polyhedra.cpp
   src/analysis/value/machine_int_domain/var_pack_dbm.cpp
   src/analysis/value/machine_int_domain/var_pack_dbm_congruence.cpp
+  src/analysis/value/numeric/f_interval.cpp # By zoush99
   src/analysis/variable.cpp
   src/analysis/widening_hint.cpp
   src/checker/assert_prover.cpp
@@ -276,9 +278,7 @@ add_executable(ikos-analyzer
   src/util/progress.cpp
   src/util/source_location.cpp
   src/util/timer.cpp
-        src/analysis/value/numeric_domain.cpp
-        ../core/include/ikos/core/domain/numeric/f_interval.hpp
-        src/analysis/value/numeric/f_interval.cpp
+  src/analysis/value/numeric_domain.cpp
 )
 if (IKOS_LINK_LLVM_DYLIB)
   set(IKOS_ANALYZER_LLVM_LIBS "LLVM")
