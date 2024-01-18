@@ -84,10 +84,10 @@ static ar::MachineInt to_machine_int(const llvm::APInt& n,
 static ar::FNumber to_floating_point(const llvm::APFloat& n) {
   llvm::APFloat nTemp(n);
   const llvm::fltSemantics& semantics = n.getSemantics();
-  if (&semantics == &llvm::APFloat::IEEEsingle()) { // float
-    return ar::FNumber(nTemp.convertToFloat());
-  } else { // double
-    return ar::FNumber(nTemp.convertToDouble());
+  if (&semantics == &llvm::APFloat::IEEEsingle()) { // fl
+    return ar::FNumber(nTemp.convertToFloat(),32,core::Signed);
+  } else { // do
+    return ar::FNumber(nTemp.convertToDouble(),64,core::Signed);
   }
 }
 

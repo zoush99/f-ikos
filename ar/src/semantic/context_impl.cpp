@@ -89,7 +89,20 @@ IntegerType* ContextImpl::integer_type(uint64_t bit_width, Signedness sign) {
   }
 }
 
-/// \todo(floating point)
+/// \brief By zoush99
+FloatType* ContextImpl::float_type(uint64_t bit_width, FloatSemantic float_sem) {
+  auto it = this->_float_types.find(std::make_tuple(bit_width, float_sem));
+  if (it == this->_float_types.end()) {
+    auto type =
+        std::unique_ptr< FloatType >(new FloatType(bit_width, float_sem));
+    auto res = this->_float_types.emplace(std::make_tuple(bit_width, float_sem),
+                                            std::move(type));
+    ikos_assert(res.second);
+    return res.first->second.get();
+  } else {
+    return it->second.get();
+  }
+}
 
 PointerType* ContextImpl::pointer_type(Type* pointee) {
   auto it = this->_pointer_types.find(pointee);

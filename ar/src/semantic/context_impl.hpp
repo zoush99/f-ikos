@@ -101,6 +101,10 @@ private:
       _integer_types;
 
   /// \todo(floating point)
+  // Floating point types
+  boost::container::flat_map< std::tuple< uint64_t, FloatSemantic >,
+                              std::unique_ptr< FloatType > >
+      _float_types;
 
   // Pointer types
   boost::container::flat_map< Type*, std::unique_ptr< PointerType > >
@@ -231,6 +235,8 @@ public:
   IntegerType* integer_type(uint64_t bit_width, Signedness sign);
 
   /// \todo(floating point)
+  /// \brief Get or create an floating point type
+  FloatType* float_type(uint64_t bit_width,FloatSemantic float_sem);
 
   /// \brief Get or create a pointer type
   PointerType* pointer_type(Type* pointee);

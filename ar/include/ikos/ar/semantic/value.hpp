@@ -280,7 +280,6 @@ public:
 
 }; // end class IntegerConstant
 
-/// \todo(floating point)
 /// \brief Floating point constant
 class FloatConstant final : public Constant {
 private:
