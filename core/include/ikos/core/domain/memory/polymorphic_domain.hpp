@@ -386,7 +386,7 @@ private:
     /// @}
     /// \name Floating point abstract domain methods
     /// @{
-
+/*
     /// \brief Assign `x = undefined`
     virtual void float_assign_undef(VariableRef x) = 0;
 
@@ -398,6 +398,130 @@ private:
 
     /// \brief Forget a floating point variable
     virtual void float_forget(VariableRef x) = 0;
+*/
+
+
+    /// \details(floating point)
+    /// \brief Assign `x = n`
+    virtual void float_assign(VariableRef x, const FNumber& n) = 0;
+
+    /// \brief Assign `x = undefined`
+    virtual void float_assign_undef(VariableRef x) = 0;
+
+    /// \brief Assign `x` to a non deterministic integer
+    virtual void float_assign_nondet(VariableRef x) = 0;
+
+    /// \brief Assign `x = y`
+    virtual void float_assign(VariableRef x, VariableRef y) = 0;
+
+    /// \brief Assign `x = e`
+    ///
+    /// Note that it wraps on integer overflow.
+    /// Note that it will automatically cast variables to the type of `x`.
+    virtual void float_assign(VariableRef x, const FnuLinearExpression& e) = 0;
+
+    /// \brief Apply `x = op y`
+    // virtual void float_apply(IntUnaryOperator op, VariableRef x, VariableRef y)
+    // = 0;
+
+    /// \brief Apply `x = y op z`
+    virtual void float_apply(FnuBinaryOperator op,
+                             VariableRef x,
+                             VariableRef y,
+                             VariableRef z) = 0;
+
+    /// \brief Apply `x = y op z`
+    virtual void float_apply(FnuBinaryOperator op,
+                             VariableRef x,
+                             VariableRef y,
+                             const FNumber& z) = 0;
+
+    /// \brief Apply `x = y op z`
+    virtual void float_apply(FnuBinaryOperator op,
+                             VariableRef x,
+                             const FNumber& y,
+                             VariableRef z) = 0;
+
+    // \brief Add the constraint `x pred y`
+    virtual void float_add(FnuPredicate pred, VariableRef x, VariableRef y) = 0;
+
+    // \brief Add the constraint `x pred y`
+    virtual void float_add(FnuPredicate pred,
+                           VariableRef x,
+                           const FNumber& y) = 0;
+
+    // \brief Add the constraint `x pred y`
+    virtual void float_add(FnuPredicate pred,
+                           const FNumber& x,
+                           VariableRef y) = 0;
+
+    /// \brief Set the interval value of a variable
+    virtual void float_set(VariableRef x, const FnuInterval& value) = 0;
+
+    /// \brief Set the congruence value of a variable
+    virtual void float_set(VariableRef x, const FnuCongruence& value) = 0;
+
+    /// \brief Set the interval-congruence value of a variable
+    virtual void float_set(VariableRef x, const FnuIntervalCongruence& value) = 0;
+
+    /// \brief Refine the value of a variable with an interval
+    virtual void float_refine(VariableRef x, const FnuInterval& value) = 0;
+
+    /// \brief Refine the value of a variable with a congruence
+    virtual void float_refine(VariableRef x, const FnuCongruence& value) = 0;
+
+    /// \brief Refine the value of a variable with an interval-congruence
+    virtual void float_refine(VariableRef x,
+                              const FnuIntervalCongruence& value) = 0;
+
+    /// \brief Forget an integer variable
+    virtual void float_forget(VariableRef x) = 0;
+
+    /// \brief Projection to an interval
+    ///
+    /// Return an overapproximation of the value of `x` as an interval
+    virtual FnuInterval float_to_interval(VariableRef x) const = 0;
+
+    /// \brief Projection to an interval
+    ///
+    /// Return an overapproximation of the linear expression `e` as an interval
+    ///
+    /// Note that it wraps on integer overflow.
+    /// Note that it will automatically cast variables to the type of
+    /// `e.constant()`.
+    virtual FnuInterval float_to_interval(const FnuLinearExpression& e) const = 0;
+
+    /// \brief Projection to a congruence
+    ///
+    /// Return an overapproximation of the value of `x` as a congruence
+    virtual FnuCongruence float_to_congruence(VariableRef x) const = 0;
+
+    /// \brief Projection to a congruence
+    ///
+    /// Return an overapproximation of the linear expression `e` as a congruence
+    ///
+    /// Note that it wraps on integer overflow.
+    /// Note that it will automatically cast variables to the type of
+    /// `e.constant()`.
+    virtual FnuCongruence float_to_congruence(
+        const FnuLinearExpression& e) const = 0;
+
+    /// \brief Projection to an interval-congruence
+    ///
+    /// Return an overapproximation of the value of `x` as an interval-congruence
+    virtual FnuIntervalCongruence float_to_interval_congruence(
+        VariableRef x) const = 0;
+
+    /// \brief Projection to an interval-congruence
+    ///
+    /// Return an overapproximation of the linear expression `e` as an
+    /// interval-congruence
+    ///
+    /// Note that it wraps on integer overflow.
+    /// Note that it will automatically cast variables to the type of
+    /// `e.constant()`.
+    virtual FnuIntervalCongruence float_to_interval_congruence(
+        const FnuLinearExpression& e) const = 0;
 
     /// @}
     /// \name Nullity abstract domain methods
@@ -569,6 +693,12 @@ private:
 
     /// \brief Assign `x` to a non deterministic value
     virtual void scalar_assign_nondet(VariableRef x) = 0;
+
+    /// \brief Assign 'x = fl-to-int f'
+    virtual void scalar_float_to_int(VariableRef x, VariableRef f) = 0;
+
+    /// \brief Assign 'f = x-to-fl x'
+    virtual void scalar_int_to_float(VariableRef f, VariableRef x) = 0;
 
     /// \brief Assign `x = ptr-to-int p`
     virtual void scalar_pointer_to_int(VariableRef x,
@@ -1105,7 +1235,7 @@ private:
     /// @}
     /// \name Floating point abstract domain methods
     /// @{
-
+/*
     void float_assign_undef(VariableRef x) override {
       this->_inv.float_assign_undef(x);
     }
@@ -1119,6 +1249,118 @@ private:
     }
 
     void float_forget(VariableRef x) override { this->_inv.float_forget(x); }
+*/
+
+    void float_assign(VariableRef x, const FNumber& n) override {
+      this->_inv->float_assign(x, n);
+    }
+
+    void float_assign_undef(VariableRef x) override {
+      this->_inv->float_assign_undef(x);
+    }
+
+    void float_assign_nondet(VariableRef x) override {
+      this->_inv->float_assign_nondet(x);
+    }
+
+    void float_assign(VariableRef x, VariableRef y) override {
+      this->_inv->float_assign(x, y);
+    }
+
+    void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+      this->_inv->float_assign(x, e);
+    }
+
+    /*
+    void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override {
+      this->_ptr->float_apply(op, x, y);
+    }
+  */
+
+    void float_apply(FnuBinaryOperator op,
+                     VariableRef x,
+                     VariableRef y,
+                     VariableRef z) override {
+      this->_inv->float_apply(op, x, y, z);
+    }
+
+    void float_apply(FnuBinaryOperator op,
+                     VariableRef x,
+                     VariableRef y,
+                     const FNumber& z) override {
+      this->_inv->float_apply(op, x, y, z);
+    }
+
+    void float_apply(FnuBinaryOperator op,
+                     VariableRef x,
+                     const FNumber& y,
+                     VariableRef z) override {
+      this->_inv->float_apply(op, x, y, z);
+    }
+
+    void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
+      this->_inv->float_add(pred, x, y);
+    }
+
+    void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
+      this->_inv->float_add(pred, x, y);
+    }
+
+    void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
+      this->_inv->float_add(pred, x, y);
+    }
+
+    void float_set(VariableRef x, const FnuInterval& value) override {
+      this->_inv->float_set(x, value);
+    }
+
+    void float_set(VariableRef x, const FnuCongruence& value) override {
+      this->_inv->float_set(x, value);
+    }
+
+    void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
+      this->_inv->float_set(x, value);
+    }
+
+    void float_refine(VariableRef x, const FnuInterval& value) override {
+      this->_inv->float_refine(x, value);
+    }
+
+    void float_refine(VariableRef x, const FnuCongruence& value) override {
+      this->_inv->float_refine(x, value);
+    }
+
+    void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
+      this->_inv->float_refine(x, value);
+    }
+
+    void float_forget(VariableRef x) override { this->_inv->float_forget(x); }
+
+    FnuInterval float_to_interval(VariableRef x) const override {
+      return this->_inv->float_to_interval(x);
+    }
+
+    FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
+      return this->_inv->float_to_interval(e);
+    }
+
+    FnuCongruence float_to_congruence(VariableRef x) const override {
+      return this->_inv->float_to_congruence(x);
+    }
+
+    FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
+      return this->_inv->float_to_congruence(e);
+    }
+
+    FnuIntervalCongruence float_to_interval_congruence(
+        VariableRef x) const override {
+      return this->_inv->float_to_interval_congruence(x);
+    }
+
+    FnuIntervalCongruence float_to_interval_congruence(
+        const FnuLinearExpression& e) const override {
+      return this->_inv->float_to_interval_congruence(e);
+    }
 
     /// @}
     /// \name Nullity abstract domain methods
@@ -1327,6 +1569,14 @@ private:
 
     void scalar_assign_nondet(VariableRef x) override {
       this->_inv.scalar_assign_nondet(x);
+    }
+
+    void scalar_float_to_int(VariableRef f, VariableRef x)override{
+      this->_inv.scalar_float_to_int(f,x);
+    }
+
+    void scalar_int_to_float(VariableRef x, VariableRef f) override{
+      this->_inv.scalar_int_to_float(x,f);
     }
 
     void scalar_pointer_to_int(VariableRef x,
