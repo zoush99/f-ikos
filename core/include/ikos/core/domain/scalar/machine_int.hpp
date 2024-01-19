@@ -901,8 +901,9 @@ public:
     this->_integer.assign(x, e);
   }
 
-/*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override
-*/
+/*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override{
+
+  }*/
 
   void float_apply(FnuBinaryOperator op,
                  VariableRef x,
@@ -991,7 +992,7 @@ public:
     this->_integer.add(pred, x, y);
   }
 
-  void float_add(IntPredicate pred, VariableRef x, const FNumber& y) override {
+  void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
@@ -1008,7 +1009,7 @@ public:
     this->_integer.add(pred, x, y);
   }
 
-  void float_add(IntPredicate pred, const FNumber& x, VariableRef y) override {
+  void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
     ikos_assert(ScalarVariableTrait::is_float(y));
 
     if (this->is_bottom_fast()) {
@@ -1036,7 +1037,7 @@ public:
     this->_integer.set(x, value);
   }
 
-  void float_set(VariableRef x, const IntCongruence& value) override {
+  void float_set(VariableRef x, const FnuCongruence& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {

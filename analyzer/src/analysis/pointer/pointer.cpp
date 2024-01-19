@@ -78,6 +78,7 @@ namespace {
 
 /// \brief Numerical abstract domain for the intra-procedural pointer analysis
 using MachineIntAbstractDomain = core::machine_int::IntervalDomain< Variable* >;
+//using NumericAbstractDomain = core::numeric::IntervalDomain< Variable* >;
 
 /// \brief Uninitialized abstract domain for the intra-procedural pointer
 /// analysis

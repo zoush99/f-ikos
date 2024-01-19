@@ -49,6 +49,7 @@
 #include <unordered_map>
 
 #include <ikos/core/value/machine_int/interval.hpp>
+#include <ikos/core/value/numeric/interval.hpp> // By zoush99
 #include <ikos/core/value/pointer/pointer.hpp>
 #include <ikos/core/value/pointer/points_to_set.hpp>
 
@@ -65,6 +66,9 @@ using PointsToSet = core::PointsToSet< MemoryLocation* >;
 
 /// \brief Machine integer interval
 using MachineIntInterval = core::machine_int::Interval;
+
+/// \brief floating point interval
+using NumericInterval = core::numeric::Interval<FNumber>;
 
 /// \brief Pointer abstraction using a points-to set and an interval
 using PointerAbsValue = core::PointerAbsValue< MemoryLocation* >;

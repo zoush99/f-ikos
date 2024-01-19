@@ -483,7 +483,7 @@ private:
 
     void floating_point(const FNumber& rhs) {
       /// \todo(floating point)
-      this->_inv.normal().float_assign_nondet(this->_lhs);
+      this->_inv.normal().float_assign(this->_lhs,rhs);
     }
 
     void memory_location(MemoryLocation*) { ikos_unreachable("unreachable"); }
@@ -621,7 +621,8 @@ private:
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
     void floating_point(const FNumber& rhs) {
-      ikos_assert(this->_type->bit_width() == rhs.bit_width());
+      /// \todo(floating point)
+//      ikos_assert(this->_type->bit_width() == rhs.bit_width());
       this->_inv.normal().float_assign(this->_lhs, rhs);
     }
 
@@ -1414,7 +1415,7 @@ private:
 
     if (left.is_floating_point()) {
       if (right.is_floating_point()) {
-        this->_inv.normal().float_assign(lhs.var(), left.machine_int());
+        this->_inv.normal().float_assign(lhs.var(), left.floating_point());
         this->_inv.normal().float_apply(op,
                                         lhs.var(),
                                         lhs.var(),

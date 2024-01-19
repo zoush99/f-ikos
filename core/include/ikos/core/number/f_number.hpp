@@ -138,9 +138,9 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
     if(bit_width==32){  // fl
-      FNumber(-3.4028235E38,32,sign,NormalizedTag{});
+      return FNumber(-3.4028235E38,32,sign,NormalizedTag{});
     }else{  // do
-      FNumber(-1.7976931348623157E308,64,sign,NormalizedTag{});
+      return FNumber(-1.7976931348623157E308,64,sign,NormalizedTag{});
     }
   }
 
@@ -149,9 +149,9 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
       if(bit_width==32){  // fl
-      FNumber(3.4028235E38,32,sign,NormalizedTag{});
+      return FNumber(3.4028235E38,32,sign,NormalizedTag{});
       }else{  // do
-      FNumber(1.7976931348623157E308,64,sign,NormalizedTag{});
+      return FNumber(1.7976931348623157E308,64,sign,NormalizedTag{});
       }
   }
 
@@ -337,6 +337,7 @@ public:
 
   /// \brief Return a string representation of the floating point number in the
   /// given base
+  /// \todo(Not sure if this function is still needed, I'll keep it for now.)
   std::string str(int base = 10) const {
     if (this->is_fl()) {
       return std::to_string(this->_n.f);
