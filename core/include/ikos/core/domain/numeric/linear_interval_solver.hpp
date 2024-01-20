@@ -79,7 +79,7 @@ inline ZInterval trim_bound(const ZInterval& i, const ZBound& b) {
 }
 
 /// \brief Trim the bounds of the given interval
-inline QInterval trim_bound(const QInterval& i, const QBound&) {
+inline QInterval trim_bound(const QInterval& i, const QBound& b) {
   // No refinement possible for disequations over rational numbers
   return i;
 }
@@ -87,7 +87,7 @@ inline QInterval trim_bound(const QInterval& i, const QBound&) {
 /// \brief This is just a copy of the implementation for rational numbers,
 /// without ensuring its correctness. It still needs modification.
 /// \brief Trim the bounds of the given interval
-inline FInterval trim_bound(const FInterval& i, const FBound&) {
+inline FInterval trim_bound(const FInterval& i, const FBound& b) {
   // No refinement possible for disequations over floating point numbers
   return i;
 }
