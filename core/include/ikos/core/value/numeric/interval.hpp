@@ -141,6 +141,12 @@ public:
   /// \brief Destructor
   ~Interval() override = default;
 
+  /// \brief Return the bit width of the interval
+  uint64_t bit_width() const { return this->_lb.get_number().bit_width(); }
+
+  /// \brief Return the signedness (Signed or Unsigned) of the interval
+  Signedness sign() const { return this->_lb.get_number().sign(); }
+
   /// \brief Return the lower bound
   const BoundT& lb() const {
     ikos_assert(!this->is_bottom());

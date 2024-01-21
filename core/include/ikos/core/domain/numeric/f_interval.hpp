@@ -63,6 +63,14 @@ namespace ikos {
 namespace core {
 namespace numeric {
 
+/// \brief Trim the bounds of the given interval
+template < typename Number>
+inline Interval<Number> trim_bound(const Interval<Number>& i, const Number& b) {
+  assert_compatible(i, b);
+  ikos_assert(!i.is_bottom());
+  return i;
+}
+
 /// \brief Interval abstract domain
 template < typename Number,
            typename VariableRef,
@@ -276,12 +284,13 @@ public:
           this->set_to_bottom();
           return;
         }
-        if (yi.ub().is_min() || xi.lb().is_max()) {
+        /// \todo do some changes
+        if (yi.ub().get_number().is_min() || xi.lb().get_number().is_max()) {
           this->set_to_bottom();
           return;
         }
-        FNumber flo_min = FNumber::min(xi.bit_width(), xi.sign());  // By zoush99
-        FNumber flo_max = FNumber::max(xi.bit_width(), xi.sign());
+        FNumber flo_min = FNumber::min(64, Signedness::Signed);  // By zoush99
+        FNumber flo_max = FNumber::max(64, Signedness::Signed);
         this->_inv.refine(x, Interval<Number>(flo_min, yi.ub()));
         this->_inv.refine(y, Interval<Number>(xi.lb(), flo_max));
       } break;

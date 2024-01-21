@@ -138,9 +138,9 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
     if(bit_width==32){  // fl
-      return FNumber(-3.4028235E38,32,sign,NormalizedTag{});
+      return FNumber(-3.4028235E38,32,sign);
     }else{  // do
-      return FNumber(-1.7976931348623157E308,64,sign,NormalizedTag{});
+      return FNumber(-1.7976931348623157E308,64,sign);
     }
   }
 
