@@ -951,7 +951,6 @@ public:
     return this->_ptr->to_interval_congruence(e);
   }
 
-  /// \todo bugs here!!! By zoush99
   /// \brief How to construct a polymorphic abstract domain? By zoush99
   LinearConstraintSystemT to_linear_constraint_system() const {
     return this->_ptr->to_linear_constraint_system();

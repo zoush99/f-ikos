@@ -1,3 +1,7 @@
+//
+// Created by zou on 1/21/24.
+//
+
 /*******************************************************************************
  *
  * \file
@@ -43,7 +47,6 @@
 
 #pragma once
 
-#include <ikos/core/domain/machine_int/abstract_domain.hpp>
 #include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/domain/scalar/abstract_domain.hpp>
 #include <ikos/core/domain/uninitialized/abstract_domain.hpp>
@@ -59,31 +62,24 @@ namespace scalar {
 template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
-           typename MachineIntDomainT >
-class MachineIntDomain final
+           typename NumericDomainT >
+class NumericDomain final
     : public scalar::AbstractDomain< VariableRef,
                                      MemoryLocationRef,
-                                     MachineIntDomain< VariableRef,
-                                                       MemoryLocationRef,
-                                                       UninitializedDomain,
-                                                       MachineIntDomainT > > {
+                                     NumericDomain< VariableRef,
+                                                    MemoryLocationRef,
+                                                    UninitializedDomain,
+                                                    NumericDomainT > > {
 public:
   static_assert(
       uninitialized::IsAbstractDomain< UninitializedDomain,
                                        VariableRef >::value,
       "UninitializedDomain must implement uninitialized::AbstractDomain");
   static_assert(
-      machine_int::IsAbstractDomain< MachineIntDomainT, VariableRef >::value,
+      numeric::IsAbstractDomain< NumericDomainT, FNumber, VariableRef >::value,
       "MachineIntDomain must implement machine_int::AbstractDomain");
 
 public:
-  using IntUnaryOperator = machine_int::UnaryOperator;
-  using IntBinaryOperator = machine_int::BinaryOperator;
-  using IntPredicate = machine_int::Predicate;
-  using IntLinearExpression = LinearExpression< MachineInt, VariableRef >;
-  using IntInterval = machine_int::Interval;
-  using IntCongruence = machine_int::Congruence;
-  using IntIntervalCongruence = machine_int::IntervalCongruence;
   using PointerPredicate = pointer::Predicate;
   using PointsToSetT = PointsToSet< MemoryLocationRef >;
   using PointerAbsValueT = PointerAbsValue< MemoryLocationRef >;
@@ -106,42 +102,42 @@ private:
   UninitializedDomain _uninitialized;
 
   /// \brief Underlying machine integer abstract domains
-  MachineIntDomainT _integer;
+  NumericDomainT _numeric;
 
 public:
   /// \brief Create an abstract value with the given underlying abstract values
   ///
   /// \param uninitialized The uninitialized abstract value
   /// \param integer The machine integer abstract value
-  MachineIntDomain(UninitializedDomain uninitialized, MachineIntDomainT integer)
-      : _uninitialized(std::move(uninitialized)), _integer(std::move(integer)) {
+  NumericDomain(UninitializedDomain uninitialized, NumericDomainT numeric)
+      : _uninitialized(std::move(uninitialized)), _numeric(std::move(numeric)) {
     this->normalize();
   }
 
   /// \brief Copy constructor
-  MachineIntDomain(const MachineIntDomain&) noexcept(
+  NumericDomain(const NumericDomain&) noexcept(
       (std::is_nothrow_copy_constructible< UninitializedDomain >::value) &&
-      (std::is_nothrow_copy_constructible< MachineIntDomainT >::value)) =
+      (std::is_nothrow_copy_constructible< NumericDomainT >::value)) =
       default;
 
   /// \brief Move constructor
-  MachineIntDomain(MachineIntDomain&&) noexcept(
+  NumericDomain(NumericDomain&&) noexcept(
       (std::is_nothrow_move_constructible< UninitializedDomain >::value) &&
-      (std::is_nothrow_move_constructible< MachineIntDomainT >::value)) =
+      (std::is_nothrow_move_constructible< NumericDomainT >::value)) =
       default;
 
   /// \brief Copy assignment operator
-  MachineIntDomain& operator=(const MachineIntDomain&) noexcept(
+  NumericDomain& operator=(const NumericDomain&) noexcept(
       (std::is_nothrow_copy_assignable< UninitializedDomain >::value) &&
-      (std::is_nothrow_copy_assignable< MachineIntDomainT >::value)) = default;
+      (std::is_nothrow_copy_assignable< NumericDomainT >::value)) = default;
 
   /// \brief Move assignment operator
-  MachineIntDomain& operator=(MachineIntDomain&&) noexcept(
+  NumericDomain& operator=(NumericDomain&&) noexcept(
       (std::is_nothrow_move_assignable< UninitializedDomain >::value) &&
-      (std::is_nothrow_move_assignable< MachineIntDomainT >::value)) = default;
+      (std::is_nothrow_move_assignable< NumericDomainT >::value)) = default;
 
   /// \brief Destructor
-  ~MachineIntDomain() override = default;
+  ~NumericDomain() override = default;
 
   /// \name Implement core abstract domain methods
   /// @{
@@ -149,12 +145,12 @@ public:
   void normalize() override {
     this->_uninitialized.normalize();
     if (this->_uninitialized.is_bottom()) {
-      this->_integer.set_to_bottom();
+      this->_numeric.set_to_bottom();
       return;
     }
 
-    this->_integer.normalize();
-    if (this->_integer.is_bottom()) {
+    this->_numeric.normalize();
+    if (this->_numeric.is_bottom()) {
       this->_uninitialized.set_to_bottom();
       return;
     }
@@ -163,51 +159,51 @@ public:
 private:
   /// \brief Return true if the abstract value is bottom
   ///
-  /// This is not always correct since it doesn't check this->_integer
+  /// This is not always correct since it doesn't check this->_numeric
   bool is_bottom_fast() const { return this->_uninitialized.is_bottom(); }
 
 public:
   bool is_bottom() const override {
-    return this->_uninitialized.is_bottom() || this->_integer.is_bottom();
+    return this->_uninitialized.is_bottom() || this->_numeric.is_bottom();
   }
 
   bool is_top() const override {
-    return this->_uninitialized.is_top() && this->_integer.is_top();
+    return this->_uninitialized.is_top() && this->_numeric.is_top();
   }
 
   void set_to_bottom() override {
     this->_uninitialized.set_to_bottom();
-    this->_integer.set_to_bottom();
+    this->_numeric.set_to_bottom();
   }
 
   void set_to_top() override {
     this->_uninitialized.set_to_top();
-    this->_integer.set_to_top();
+    this->_numeric.set_to_top();
   }
 
-  bool leq(const MachineIntDomain& other) const override {
+  bool leq(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return true;
     } else if (other.is_bottom()) {
       return false;
     } else {
       return this->_uninitialized.leq(other._uninitialized) &&
-             this->_integer.leq(other._integer);
+             this->_numeric.leq(other._numeric);
     }
   }
 
-  bool equals(const MachineIntDomain& other) const override {
+  bool equals(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return other.is_bottom();
     } else if (other.is_bottom()) {
       return false;
     } else {
       return this->_uninitialized.equals(other._uninitialized) &&
-             this->_integer.equals(other._integer);
+             this->_numeric.equals(other._numeric);
     }
   }
 
-  void join_with(MachineIntDomain&& other) override {
+  void join_with(NumericDomain&& other) override {
     this->normalize();
     other.normalize();
     if (this->is_bottom()) {
@@ -216,11 +212,11 @@ public:
       return;
     } else {
       this->_uninitialized.join_with(std::move(other._uninitialized));
-      this->_integer.join_with(std::move(other._integer));
+      this->_numeric.join_with(std::move(other._numeric));
     }
   }
 
-  void join_with(const MachineIntDomain& other) override {
+  void join_with(const NumericDomain& other) override {
     this->normalize();
     if (this->is_bottom()) {
       this->operator=(other);
@@ -228,11 +224,11 @@ public:
       return;
     } else {
       this->_uninitialized.join_with(other._uninitialized);
-      this->_integer.join_with(other._integer);
+      this->_numeric.join_with(other._numeric);
     }
   }
 
-  void join_loop_with(MachineIntDomain&& other) override {
+  void join_loop_with(NumericDomain&& other) override {
     this->normalize();
     other.normalize();
     if (this->is_bottom()) {
@@ -241,11 +237,11 @@ public:
       return;
     } else {
       this->_uninitialized.join_loop_with(std::move(other._uninitialized));
-      this->_integer.join_loop_with(std::move(other._integer));
+      this->_numeric.join_loop_with(std::move(other._numeric));
     }
   }
 
-  void join_loop_with(const MachineIntDomain& other) override {
+  void join_loop_with(const NumericDomain& other) override {
     this->normalize();
     if (this->is_bottom()) {
       this->operator=(other);
@@ -253,11 +249,11 @@ public:
       return;
     } else {
       this->_uninitialized.join_loop_with(other._uninitialized);
-      this->_integer.join_loop_with(other._integer);
+      this->_numeric.join_loop_with(other._numeric);
     }
   }
 
-  void join_iter_with(MachineIntDomain&& other) override {
+  void join_iter_with(NumericDomain&& other) override {
     this->normalize();
     other.normalize();
     if (this->is_bottom()) {
@@ -266,11 +262,11 @@ public:
       return;
     } else {
       this->_uninitialized.join_iter_with(std::move(other._uninitialized));
-      this->_integer.join_iter_with(std::move(other._integer));
+      this->_numeric.join_iter_with(std::move(other._numeric));
     }
   }
 
-  void join_iter_with(const MachineIntDomain& other) override {
+  void join_iter_with(const NumericDomain& other) override {
     this->normalize();
     if (this->is_bottom()) {
       this->operator=(other);
@@ -278,11 +274,11 @@ public:
       return;
     } else {
       this->_uninitialized.join_iter_with(other._uninitialized);
-      this->_integer.join_iter_with(other._integer);
+      this->_numeric.join_iter_with(other._numeric);
     }
   }
 
-  void widen_with(const MachineIntDomain& other) override {
+  void widen_with(const NumericDomain& other) override {
     this->normalize();
     if (this->is_bottom()) {
       this->operator=(other);
@@ -290,12 +286,12 @@ public:
       return;
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
-      this->_integer.widen_with(other._integer);
+      this->_numeric.widen_with(other._numeric);
     }
   }
 
-  void widen_threshold_with(const MachineIntDomain& other,
-                            const MachineInt& threshold) override {
+  void widen_threshold_with(const NumericDomain& other,
+                            const FNumber& threshold) override {
     this->normalize();
     if (this->is_bottom()) {
       this->operator=(other);
@@ -303,11 +299,11 @@ public:
       return;
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
-      this->_integer.widen_threshold_with(other._integer, threshold);
+      this->_numeric.widen_threshold_with(other._numeric, threshold);
     }
   }
 
-  void meet_with(const MachineIntDomain& other) override {
+  void meet_with(const NumericDomain& other) override {
     this->normalize();
     if (this->is_bottom()) {
       return;
@@ -315,11 +311,11 @@ public:
       this->set_to_bottom();
     } else {
       this->_uninitialized.meet_with(other._uninitialized);
-      this->_integer.meet_with(other._integer);
+      this->_numeric.meet_with(other._numeric);
     }
   }
 
-  void narrow_with(const MachineIntDomain& other) override {
+  void narrow_with(const NumericDomain& other) override {
     this->normalize();
     if (this->is_bottom()) {
       return;
@@ -327,11 +323,11 @@ public:
       this->set_to_bottom();
     } else {
       this->_uninitialized.narrow_with(other._uninitialized);
-      this->_integer.narrow_with(other._integer);
+      this->_numeric.narrow_with(other._numeric);
     }
   }
 
-  void narrow_threshold_with(const MachineIntDomain& other,
+  void narrow_threshold_with(const NumericDomain& other,
                              const MachineInt& threshold) override {
     this->normalize();
     if (this->is_bottom()) {
@@ -340,106 +336,106 @@ public:
       this->set_to_bottom();
     } else {
       this->_uninitialized.narrow_with(other._uninitialized);
-      this->_integer.narrow_threshold_with(other._integer, threshold);
+      this->_numeric.narrow_threshold_with(other._numeric, threshold);
     }
   }
 
-  MachineIntDomain join(const MachineIntDomain& other) const override {
+  NumericDomain join(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return other;
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      return MachineIntDomain(this->_uninitialized.join(other._uninitialized),
-                              this->_integer.join(other._integer));
+      return NumericDomain(this->_uninitialized.join(other._uninitialized),
+                              this->_numeric.join(other._numeric));
     }
   }
 
-  MachineIntDomain join_loop(const MachineIntDomain& other) const override {
+  NumericDomain join_loop(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return other;
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      return MachineIntDomain(this->_uninitialized.join_loop(
+      return NumericDomain(this->_uninitialized.join_loop(
                                   other._uninitialized),
-                              this->_integer.join_loop(other._integer));
+                              this->_numeric.join_loop(other._numeric));
     }
   }
 
-  MachineIntDomain join_iter(const MachineIntDomain& other) const override {
+  NumericDomain join_iter(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return other;
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      return MachineIntDomain(this->_uninitialized.join_iter(
+      return NumericDomain(this->_uninitialized.join_iter(
                                   other._uninitialized),
-                              this->_integer.join_iter(other._integer));
+                              this->_numeric.join_iter(other._numeric));
     }
   }
 
-  MachineIntDomain widening(const MachineIntDomain& other) const override {
+  NumericDomain widening(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return other;
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      return MachineIntDomain(this->_uninitialized.widening(
+      return NumericDomain(this->_uninitialized.widening(
                                   other._uninitialized),
-                              this->_integer.widening(other._integer));
+                              this->_numeric.widening(other._numeric));
     }
   }
 
-  MachineIntDomain widening_threshold(
-      const MachineIntDomain& other,
-      const MachineInt& threshold) const override {
+  NumericDomain widening_threshold(
+      const NumericDomain& other,
+      const FNumber& threshold) const override {
     if (this->is_bottom()) {
       return other;
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      return MachineIntDomain(this->_uninitialized.widening(
+      return NumericDomain(this->_uninitialized.widening(
                                   other._uninitialized),
-                              this->_integer.widening_threshold(other._integer,
+                              this->_numeric.widening_threshold(other._numeric,
                                                                 threshold));
     }
   }
 
-  MachineIntDomain meet(const MachineIntDomain& other) const override {
+  NumericDomain meet(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return *this;
     } else if (other.is_bottom()) {
       return other;
     } else {
-      return MachineIntDomain(this->_uninitialized.meet(other._uninitialized),
-                              this->_integer.meet(other._integer));
+      return NumericDomain(this->_uninitialized.meet(other._uninitialized),
+                              this->_numeric.meet(other._numeric));
     }
   }
 
-  MachineIntDomain narrowing(const MachineIntDomain& other) const override {
+  NumericDomain narrowing(const NumericDomain& other) const override {
     if (this->is_bottom()) {
       return *this;
     } else if (other.is_bottom()) {
       return other;
     } else {
-      return MachineIntDomain(this->_uninitialized.narrowing(
+      return NumericDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
-                              this->_integer.narrowing(other._integer));
+                              this->_numeric.narrowing(other._numeric));
     }
   }
 
-  MachineIntDomain narrowing_threshold(
-      const MachineIntDomain& other,
-      const MachineInt& threshold) const override {
+  NumericDomain narrowing_threshold(
+      const NumericDomain& other,
+      const FNumber& threshold) const override {
     if (this->is_bottom()) {
       return *this;
     } else if (other.is_bottom()) {
       return other;
     } else {
-      return MachineIntDomain(this->_uninitialized.narrowing(
+      return NumericDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
-                              this->_integer.narrowing_threshold(other._integer,
+                              this->_numeric.narrowing_threshold(other._numeric,
                                                                  threshold));
     }
   }
@@ -472,60 +468,60 @@ public:
   /// \name Implement machine integer abstract domain methods
   /// @{
 
-  void int_assign(VariableRef x, const MachineInt& n) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_assign(VariableRef x, const FNumber& n) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.assign(x, n);
+    this->_numeric.assign(x, n);
   }
 
-  void int_assign_undef(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_assign_undef(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.assign_uninitialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
-  void int_assign_nondet(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_assign_nondet(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
-  void int_assign(VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(y));
+  void float_assign(VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
+    this->_numeric.assign(x, y);
   }
 
-  void int_assign(VariableRef x, const IntLinearExpression& e) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     for (const auto& term : e) {
-      ikos_assert(ScalarVariableTrait::is_int(term.first));
+      ikos_assert(ScalarVariableTrait::is_float(term.first));
       this->_uninitialized.assert_initialized(term.first);
     }
 
@@ -535,12 +531,13 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.assign(x, e);
+    this->_numeric.assign(x, e);
   }
 
-  void int_apply(IntUnaryOperator op, VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(y));
+/*
+  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
 
     if (this->is_bottom_fast()) {
       return;
@@ -554,16 +551,17 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y);
+    this->_numeric.apply(op, x, y);
   }
+*/
 
-  void int_apply(IntBinaryOperator op,
+  void float_apply(FnuBinaryOperator op,
                  VariableRef x,
                  VariableRef y,
                  VariableRef z) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(y));
-    ikos_assert(ScalarVariableTrait::is_int(z));
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
+    ikos_assert(ScalarVariableTrait::is_float(z));
 
     if (this->is_bottom_fast()) {
       return;
@@ -578,15 +576,15 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y, z);
+    this->_numeric.apply(op, x, y, z);
   }
 
-  void int_apply(IntBinaryOperator op,
+  void float_apply(FnuBinaryOperator op,
                  VariableRef x,
                  VariableRef y,
-                 const MachineInt& z) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(y));
+                 const FNumber& z) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
 
     if (this->is_bottom_fast()) {
       return;
@@ -600,15 +598,15 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y, z);
+    this->_numeric.apply(op, x, y, z);
   }
 
-  void int_apply(IntBinaryOperator op,
+  void float_apply(FnuBinaryOperator op,
                  VariableRef x,
-                 const MachineInt& y,
+                 const FNumber& y,
                  VariableRef z) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(z));
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(z));
 
     if (this->is_bottom_fast()) {
       return;
@@ -622,12 +620,12 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y, z);
+    this->_numeric.apply(op, x, y, z);
   }
 
-  void int_add(IntPredicate pred, VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-    ikos_assert(ScalarVariableTrait::is_int(y));
+  void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
 
     if (this->is_bottom_fast()) {
       return;
@@ -641,11 +639,11 @@ public:
       return;
     }
 
-    this->_integer.add(pred, x, y);
+    this->_numeric.add(pred, x, y);
   }
 
-  void int_add(IntPredicate pred, VariableRef x, const MachineInt& y) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
@@ -658,11 +656,11 @@ public:
       return;
     }
 
-    this->_integer.add(pred, x, y);
+    this->_numeric.add(pred, x, y);
   }
 
-  void int_add(IntPredicate pred, const MachineInt& x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_int(y));
+  void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(y));
 
     if (this->is_bottom_fast()) {
       return;
@@ -675,10 +673,10 @@ public:
       return;
     }
 
-    this->_integer.add(pred, x, y);
+    this->_numeric.add(pred, x, y);
   }
 
-  void int_set(VariableRef x, const IntInterval& value) override {
+  void float_set(VariableRef x, const FnuInterval& value) override {
     ikos_assert(ScalarVariableTrait::is_int(x));
 
     if (this->is_bottom_fast()) {
@@ -686,90 +684,90 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.set(x, value);
+    this->_numeric.set(x, value);
   }
 
-  void int_set(VariableRef x, const IntCongruence& value) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_set(VariableRef x, const FnuCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.set(x, value);
+    this->_numeric.set(x, value);
   }
 
-  void int_set(VariableRef x, const IntIntervalCongruence& value) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.set(x, value);
+    this->_numeric.set(x, value);
   }
 
-  void int_refine(VariableRef x, const IntInterval& value) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_refine(VariableRef x, const FnuInterval& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.refine(x, value);
+    this->_numeric.refine(x, value);
   }
 
-  void int_refine(VariableRef x, const IntCongruence& value) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_refine(VariableRef x, const FnuCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.refine(x, value);
+    this->_numeric.refine(x, value);
   }
 
-  void int_refine(VariableRef x, const IntIntervalCongruence& value) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.refine(x, value);
+    this->_numeric.refine(x, value);
   }
 
-  void int_forget(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void float_forget(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
       return;
     }
 
     this->_uninitialized.forget(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
-  IntInterval int_to_interval(VariableRef x) const override {
+  FnuInterval float_to_interval(VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+
+    return this->_numeric.to_interval(x);
+  }
+
+  FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
+    return this->_numeric.to_interval(e);
+  }
+
+  FnuCongruence float_to_congruence(VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_int(x));
 
-    return this->_integer.to_interval(x);
+    return this->_numeric.to_congruence(x);
   }
 
-  IntInterval int_to_interval(const IntLinearExpression& e) const override {
-    return this->_integer.to_interval(e);
+  FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
+    return this->_numeric.to_congruence(e);
   }
 
-  IntCongruence int_to_congruence(VariableRef x) const override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
-
-    return this->_integer.to_congruence(x);
-  }
-
-  IntCongruence int_to_congruence(const IntLinearExpression& e) const override {
-    return this->_integer.to_congruence(e);
-  }
-
-  IntIntervalCongruence int_to_interval_congruence(
+  FnuIntervalCongruence float_to_interval_congruence(
       VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_int(x));
 
-    return this->_integer.to_interval_congruence(x);
+    return this->_numeric.to_interval_congruence(x);
   }
 
-  IntIntervalCongruence int_to_interval_congruence(
-      const IntLinearExpression& e) const override {
-    return this->_integer.to_interval_congruence(e);
+  FnuIntervalCongruence float_to_interval_congruence(
+      const FnuLinearExpression& e) const override {
+    return this->_numeric.to_interval_congruence(e);
   }
 
   /// @}
@@ -777,64 +775,64 @@ public:
   /// @{
 
   void counter_mark(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.counter_mark(x);
+    this->_numeric.counter_mark(x);
   }
 
   void counter_unmark(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.counter_unmark(x);
+    this->_numeric.counter_unmark(x);
   }
 
-  void counter_init(VariableRef x, const MachineInt& c) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void counter_init(VariableRef x, const FNumber& c) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.counter_init(x, c);
+    this->_numeric.counter_init(x, c);
   }
 
-  void counter_incr(VariableRef x, const MachineInt& k) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+  void counter_incr(VariableRef x, const FNumber& k) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.counter_incr(x, k);
+    this->_numeric.counter_incr(x, k);
   }
 
   void counter_forget(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_int(x));
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.counter_forget(x);
+    this->_numeric.counter_forget(x);
   }
 
   /// @}
   /// \name Implement floating point abstract domain methods
   /// @{
-/*
-  void float_assign_undef(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_uninitialized.assign_uninitialized(x);
-  }
+  /// \todo(floating point)
+  /*  void float_assign_undef(VariableRef x) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
 
-  void float_assign_nondet(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
+      this->_uninitialized.assign_uninitialized(x);
+    }
 
-    this->_uninitialized.assign_initialized(x);
-  }
+    void float_assign_nondet(VariableRef x) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
 
-  void float_assign(VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-    ikos_assert(ScalarVariableTrait::is_float(y));
+      this->_uninitialized.assign_initialized(x);
+    }
 
-    this->_uninitialized.assign(x, y);
-  }
+    void float_assign(VariableRef x, VariableRef y) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
+      ikos_assert(ScalarVariableTrait::is_float(y));
 
-  void float_forget(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
+      this->_uninitialized.assign(x, y);
+    }
 
-    this->_uninitialized.forget(x);
-  }
-*/
+    void float_forget(VariableRef x) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
+
+      this->_uninitialized.forget(x);
+    }*/
 
   void float_assign(VariableRef x, const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
@@ -1296,7 +1294,7 @@ public:
 
     this->_uninitialized.assert_initialized(p);
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   IntInterval pointer_offset_to_interval(VariableRef p) const override {
@@ -1384,9 +1382,9 @@ public:
 
     this->_uninitialized.assign(x, y);
     if (IntVariableTrait::sign(x) == IntVariableTrait::sign(y)) {
-      this->_integer.assign(x, y);
+      this->_numeric.assign(x, y);
     } else {
-      this->_integer.apply(IntUnaryOperator::SignCast, x, y);
+      this->_numeric.apply(IntUnaryOperator::SignCast, x, y);
     }
   }
 
@@ -1398,7 +1396,7 @@ public:
     }
 
     this->_uninitialized.assign_uninitialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_write_nondet(VariableRef x) override {
@@ -1409,7 +1407,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_write_int(VariableRef x, const MachineInt& n) override {
@@ -1422,9 +1420,9 @@ public:
 
     this->_uninitialized.assign_initialized(x);
     if (IntVariableTrait::sign(x) == n.sign()) {
-      this->_integer.assign(x, n);
+      this->_numeric.assign(x, n);
     } else {
-      this->_integer.assign(x, n.sign_cast(IntVariableTrait::sign(x)));
+      this->_numeric.assign(x, n.sign_cast(IntVariableTrait::sign(x)));
     }
   }
 
@@ -1436,7 +1434,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_write_int(VariableRef x, VariableRef y) override {
@@ -1451,9 +1449,9 @@ public:
 
     this->_uninitialized.assign(x, y);
     if (IntVariableTrait::sign(x) == IntVariableTrait::sign(y)) {
-      this->_integer.assign(x, y);
+      this->_numeric.assign(x, y);
     } else {
-      this->_integer.apply(IntUnaryOperator::SignCast, x, y);
+      this->_numeric.apply(IntUnaryOperator::SignCast, x, y);
     }
   }
 
@@ -1465,7 +1463,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_write_null(VariableRef x) override {
@@ -1476,7 +1474,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_write_pointer(VariableRef x,
@@ -1489,7 +1487,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_write_pointer(VariableRef x, VariableRef y) override {
@@ -1501,7 +1499,7 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void dynamic_read_int(VariableRef x, VariableRef y) override {
@@ -1516,9 +1514,9 @@ public:
 
     this->_uninitialized.assign(x, y);
     if (IntVariableTrait::sign(x) == IntVariableTrait::sign(y)) {
-      this->_integer.assign(x, y);
+      this->_numeric.assign(x, y);
     } else {
-      this->_integer.apply(IntUnaryOperator::SignCast, x, y);
+      this->_numeric.apply(IntUnaryOperator::SignCast, x, y);
     }
   }
 
@@ -1532,7 +1530,7 @@ public:
   bool dynamic_is_zero(VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_dynamic(x));
 
-    IntInterval value = this->_integer.to_interval(x);
+    IntInterval value = this->_numeric.to_interval(x);
     return value.is_bottom() || value.is_zero();
   }
 
@@ -1551,7 +1549,7 @@ public:
     }
 
     this->_uninitialized.forget(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   /// @}
@@ -1590,8 +1588,7 @@ public:
     }
   }
 
-  void scalar_float_to_int(VariableRef f,
-                             VariableRef x) override {
+  void scalar_float_to_int(VariableRef f, VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_int(x));
     ikos_assert(ScalarVariableTrait::is_float(f));
 
@@ -1601,11 +1598,10 @@ public:
 
     this->_uninitialized.assert_initialized(f);
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
-  void scalar_int_to_float(VariableRef x,
-                             VariableRef f) override {
+  void scalar_int_to_float(VariableRef x, VariableRef f) override {
     ikos_assert(ScalarVariableTrait::is_float(f));
     ikos_assert(ScalarVariableTrait::is_int(x));
 
@@ -1630,7 +1626,7 @@ public:
 
     this->_uninitialized.assert_initialized(p);
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_numeric.forget(x);
   }
 
   void scalar_int_to_pointer(VariableRef p,
@@ -1672,14 +1668,14 @@ public:
       o << "(";
       this->_uninitialized.dump(o);
       o << ", ";
-      this->_integer.dump(o);
+      this->_numeric.dump(o);
       o << ")";
     }
   }
 
   static std::string name() {
     return "machine integer scalar domain using " +
-           UninitializedDomain::name() + " and " + MachineIntDomainT::name();
+           UninitializedDomain::name() + " and " + NumericDomainT::name();
   }
 
 }; // end class MachineIntDomain

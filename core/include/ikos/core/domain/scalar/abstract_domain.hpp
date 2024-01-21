@@ -190,15 +190,15 @@ public:
                          const MachineInt& y,
                          VariableRef z) = 0;
 
-  // \brief Add the constraint `x pred y`
+  /// \brief Add the constraint `x pred y`
   virtual void int_add(IntPredicate pred, VariableRef x, VariableRef y) = 0;
 
-  // \brief Add the constraint `x pred y`
+  /// \brief Add the constraint `x pred y`
   virtual void int_add(IntPredicate pred,
                        VariableRef x,
                        const MachineInt& y) = 0;
 
-  // \brief Add the constraint `x pred y`
+  /// \brief Add the constraint `x pred y`
   virtual void int_add(IntPredicate pred,
                        const MachineInt& x,
                        VariableRef y) = 0;
