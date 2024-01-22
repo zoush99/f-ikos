@@ -1079,10 +1079,12 @@ public:
     this->_scalar.scalar_assign_nondet(x);
   }
 
+  /// \brief By zoush99
   void scalar_float_to_int(VariableRef f, VariableRef x) override{
     this->_scalar->scalar_float_to_int(f, x);
   }
 
+  /// \brief By zoush99
   void scalar_int_to_float(VariableRef x, VariableRef f) override{
     this->_scalar->scalar_int_to_float(x, f);
   }
@@ -1118,8 +1120,7 @@ private:
 
     Signedness machine_int(const MachineInt& i) const { return i.sign(); }
 
-    /// \todo(floating point)
-    Signedness floating_point(const DummyNumber&) const { return Signed; }
+    Signedness floating_point(const FNumber&) const { return Signed; }
 
     Signedness memory_location(MemoryLocationRef) const { return Unsigned; }
 
@@ -1402,9 +1403,14 @@ private:
       }
     }
 
-    /// \todo(floating point)
-    void floating_point(const DummyNumber&) {
-      this->_scalar.dynamic_write_nondet_float(this->_lhs);
+    /// \brief (floating point) By zoush99
+    void floating_point(const FNumber& rhs) {
+//      this->_scalar.dynamic_write_nondet_float(this->_lhs);
+      if (ScalarVariableTrait::is_float(rhs)) {
+        this->_scalar.dynamic_write_float(this->_lhs, rhs);
+      } else {
+        this->_scalar.dynamic_write_nondet_float(this->_lhs);
+      }
     }
 
     void memory_location(MemoryLocationRef addr) {
@@ -1426,8 +1432,14 @@ private:
       }
     }
 
-    void floating_point_var(VariableRef /*rhs*/) {
-      this->_scalar.dynamic_write_nondet_float(this->_lhs);
+    /// \brief(floating point) By zoush99
+    void floating_point_var(VariableRef rhs) {
+//      this->_scalar.dynamic_write_nondet_float(this->_lhs);
+      if (ScalarVariableTrait::is_float(rhs)) {
+        this->_scalar.dynamic_write_float(this->_lhs, rhs);
+      } else {
+        this->_scalar.dynamic_write_nondet_float(this->_lhs);
+      }
     }
 
     void pointer_var(VariableRef rhs) {
@@ -1453,8 +1465,7 @@ private:
       ikos_unreachable("trying to assign a machine integer");
     }
 
-    /// \todo(floating point)
-    void floating_point(const DummyNumber&) {
+    void floating_point(const FNumber&) {
       ikos_unreachable("trying to assign a floating point");
     }
 
@@ -1482,7 +1493,17 @@ private:
     }
 
     void floating_point_var(VariableRef lhs) {
-      this->_scalar.float_assign_nondet(lhs);
+//      this->_scalar.float_assign_nondet(lhs);
+      // If the right hand side is a null pointer, assign the floating point number
+      // to zero (implicit cast from pointer to int)
+      if (this->_scalar.dynamic_is_null(this->_rhs)) {
+        auto zero = FNumber(0.0,64,Signedness::Signed);
+        this->_scalar.float_assign(lhs, zero);
+      } else if (ScalarVariableTrait::is_float(lhs)) {
+        this->_scalar.dynamic_read_float(lhs, this->_rhs);
+      } else {
+        this->_scalar.float_assign_nondet(lhs);
+      }
     }
 
     void pointer_var(VariableRef lhs) {

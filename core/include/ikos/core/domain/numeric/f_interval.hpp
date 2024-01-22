@@ -289,7 +289,8 @@ public:
           return;
         }
         /// \todo do some changes by zoush99
-        if (yi.ub().is_bottom() || xi.lb().is_top()) {
+        /// \todo bugs here!!!
+        if (yi.ub().is_minus_infinity() || xi.lb().is_plus_infinity()) {
           this->set_to_bottom();
           return;
         }
@@ -321,7 +322,7 @@ public:
         this->_inv.set(x, i);
       } break;
       case Predicate::NE: {
-        this->_inv.set(x, trim_bound(xi, y));
+        this->_inv.set(x, /*xi = */trim_bound(xi, y));
       } break;
       case Predicate::GT: {
         if (y.is_max()) {

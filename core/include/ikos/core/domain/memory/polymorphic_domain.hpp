@@ -166,6 +166,8 @@ private:
     /// \brief Perform the widening of two abstract values
     virtual void widen_with(const PolymorphicBase& other) = 0;
 
+    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual void widen_threshold_with(const PolymorphicBase& other,
                                       const MachineInt& threshold) = 0;
@@ -176,6 +178,8 @@ private:
     /// \brief Perform the narrowing of two abstract values
     virtual void narrow_with(const PolymorphicBase& other) = 0;
 
+    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the narrowing of two abstract values with a threshold
     virtual void narrow_threshold_with(const PolymorphicBase& other,
                                        const MachineInt& threshold) = 0;
@@ -197,6 +201,8 @@ private:
     virtual std::unique_ptr< PolymorphicBase > widening(
         const PolymorphicBase& other) const = 0;
 
+    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > widening_threshold(
         const PolymorphicBase& other, const MachineInt& threshold) const = 0;
@@ -209,6 +215,8 @@ private:
     virtual std::unique_ptr< PolymorphicBase > narrowing(
         const PolymorphicBase& other) const = 0;
 
+    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the narrowing of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > narrowing_threshold(
         const PolymorphicBase& other, const MachineInt& threshold) const = 0;
@@ -277,15 +285,15 @@ private:
                            const MachineInt& y,
                            VariableRef z) = 0;
 
-    // \brief Add the constraint `x pred y`
+    /// \brief Add the constraint `x pred y`
     virtual void int_add(IntPredicate pred, VariableRef x, VariableRef y) = 0;
 
-    // \brief Add the constraint `x pred y`
+    /// \brief Add the constraint `x pred y`
     virtual void int_add(IntPredicate pred,
                          VariableRef x,
                          const MachineInt& y) = 0;
 
-    // \brief Add the constraint `x pred y`
+    /// \brief Add the constraint `x pred y`
     virtual void int_add(IntPredicate pred,
                          const MachineInt& x,
                          VariableRef y) = 0;
@@ -442,15 +450,15 @@ private:
                              const FNumber& y,
                              VariableRef z) = 0;
 
-    // \brief Add the constraint `x pred y`
+    /// \brief Add the constraint `x pred y`
     virtual void float_add(FnuPredicate pred, VariableRef x, VariableRef y) = 0;
 
-    // \brief Add the constraint `x pred y`
+    /// \brief Add the constraint `x pred y`
     virtual void float_add(FnuPredicate pred,
                            VariableRef x,
                            const FNumber& y) = 0;
 
-    // \brief Add the constraint `x pred y`
+    /// \brief Add the constraint `x pred y`
     virtual void float_add(FnuPredicate pred,
                            const FNumber& x,
                            VariableRef y) = 0;
