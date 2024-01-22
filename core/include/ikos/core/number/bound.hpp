@@ -256,11 +256,6 @@ public:
     }
   }
 
-  /// \brief Return the number
-  Number& get_number() const {
-      return this->_n;
-  }
-
   /// \brief Write the bound on a stream
   void dump(std::ostream& o) const {
     if (this->is_plus_infinity()) {

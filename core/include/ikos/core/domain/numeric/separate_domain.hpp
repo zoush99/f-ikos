@@ -345,6 +345,11 @@ public:
   }
 
   /// \brief Refine the abstract value of the given variable
+  /// \details In general, the goal of refinement is to refine the abstract value
+  /// of the current domain in accordance with the result of the meet operator,
+  /// based on the new abstract value for a given variable.
+  /// This helps improve the precision of the analysis, especially in
+  /// gradually refining the abstract state during the iterative process.
   void refine(VariableRef v, const Value& value) {
     if (this->is_bottom()) {
       return;

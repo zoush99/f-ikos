@@ -5,7 +5,7 @@
 /*******************************************************************************
  *
  * \file
- * \brief Polymorphic floating point number abstract domain
+ * \brief Polymorphic floating point abstract domain
  *
  * The PolymorphicDomain is a machine integer abstract domain whose behavior
  * depends on the abstract domain it is constructed with. It allows the use of
@@ -873,7 +873,7 @@ public:
     this->_ptr->apply(op, x, y, z);
   }
 
-  /// \todo By zoush99
+  /// By zoush99
   /// { @
   /// \brief Add a linear constraint
   void add(const LinearConstraintT& cst) override { this->_ptr->add(cst); }

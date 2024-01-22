@@ -64,8 +64,9 @@ namespace core {
 namespace numeric {
 
 /// \brief Trim the bounds of the given interval
-template < typename Number>
-inline Interval<Number> trim_bound(const Interval<Number>& i, const Number& b) {
+template < typename Number >
+inline Interval< Number > trim_bound(const Interval< Number >& i,
+                                     const Number& b) {
   assert_compatible(i, b);
   ikos_assert(!i.is_bottom());
   return i;
@@ -243,20 +244,20 @@ public:
 
   /// \todo(Further modifications are needed here, as this was copied without
   /// changes from machine integer types. Some of the involved functions do not
-  /// exist, and correctness has not been considered.)By zoush99
+  /// exist, and correctness has not been considered.) By zoush99
   /// { @
   /// \brief Add the constraint `x pred y`
-  void add(Predicate pred, VariableRef x, VariableRef y) override{
+  void add(Predicate pred, VariableRef x, VariableRef y) override {
     if (this->is_bottom()) {
       return;
     }
 
-    Interval<Number> xi = this->_inv.get(x);
-    Interval<Number> yi = this->_inv.get(y);
+    Interval< Number > xi = this->_inv.get(x);
+    Interval< Number > yi = this->_inv.get(y);
 
     switch (pred) {
       case Predicate::EQ: {
-        Interval<Number> i = xi.meet(yi);
+        Interval< Number > i = xi.meet(yi);
         this->_inv.set(x, i);
         this->_inv.set(y, i);
       } break;
@@ -266,10 +267,10 @@ public:
           return;
         }
         if (xi.singleton()) {
-          this->_inv.set(y, trim_bound(yi, *xi.singleton()));
+          this->_inv.set(y, /*yi = */ trim_bound(yi, *xi.singleton()));
         }
         if (yi.singleton()) {
-          this->_inv.set(x, trim_bound(xi, *yi.singleton()));
+          this->_inv.set(x, /*xi = */ trim_bound(xi, *yi.singleton()));
         }
       } break;
       case Predicate::GT: {
@@ -279,20 +280,21 @@ public:
         this->add(Predicate::LE, y, x);
       } break;
         /// \brief Key factors. By zoush99
+        /// \details It's important to note that the greater than and less than
+        /// relations must exclude equality, but currently, equality is not
+        /// excluded here. It will need to be modified later.
       case Predicate::LT: {
         if (x == y) {
           this->set_to_bottom();
           return;
         }
-        /// \todo do some changes
-        if (yi.ub().get_number().is_min() || xi.lb().get_number().is_max()) {
+        /// \todo do some changes by zoush99
+        if (yi.ub().is_bottom() || xi.lb().is_top()) {
           this->set_to_bottom();
           return;
         }
-        FNumber flo_min = FNumber::min(64, Signedness::Signed);  // By zoush99
-        FNumber flo_max = FNumber::max(64, Signedness::Signed);
-        this->_inv.refine(x, Interval<Number>(flo_min, yi.ub()));
-        this->_inv.refine(y, Interval<Number>(xi.lb(), flo_max));
+        this->_inv.refine(x, yi.lower_half_line());
+        this->_inv.refine(y, xi.upper_half_line());
       } break;
       case Predicate::LE: {
         this->_inv.refine(x, yi.lower_half_line());
@@ -303,19 +305,19 @@ public:
 
   /// \todo(Further modifications are needed here, as this was copied without
   /// changes from machine integer types. Some of the involved functions do not
-  /// exist, and correctness has not been considered.)By zoush99
+  /// exist, and correctness has not been considered.) By zoush99
   /// \brief Add the constraint `x pred y`
-  void add(Predicate pred, VariableRef x, const Number& y) override{
+  void add(Predicate pred, VariableRef x, const Number& y) override {
     if (this->is_bottom()) {
       return;
     }
 
-    Interval<Number> xi = this->_inv.get(x);
-    Interval<Number> yi(y);
+    Interval< Number > xi = this->_inv.get(x);
+    Interval< Number > yi(y);
 
     switch (pred) {
       case Predicate::EQ: {
-        Interval<Number> i = xi.meet(yi);
+        Interval< Number > i = xi.meet(yi);
         this->_inv.set(x, i);
       } break;
       case Predicate::NE: {
@@ -326,8 +328,7 @@ public:
           this->set_to_bottom();
           return;
         }
-        FNumber flo_max = FNumber::max(xi.bit_width(), xi.sign());
-        this->_inv.refine(x, Interval<Number>(y, flo_max));
+        this->_inv.refine(x, yi.upper_half_line());
       } break;
       case Predicate::GE: {
         this->_inv.refine(x, yi.upper_half_line());
@@ -337,8 +338,7 @@ public:
           this->set_to_bottom();
           return;
         }
-        FNumber flo_min = FNumber::min(xi.bit_width(), xi.sign());  // By zoush99
-        this->_inv.refine(x, Interval<Number>(flo_min, y));
+        this->_inv.refine(x, yi.lower_half_line());
       } break;
       case Predicate::LE: {
         this->_inv.refine(x, yi.lower_half_line());
@@ -347,7 +347,7 @@ public:
   }
 
   /// \brief Add the constraint `x pred y`
-  void add(Predicate pred, const Number& x, VariableRef y) override{
+  void add(Predicate pred, const Number& x, VariableRef y) override {
     Parent::add(pred, x, y);
   }
   /// @ }
@@ -460,4 +460,3 @@ public:
 } // end namespace numeric
 } // end namespace core
 } // end namespace ikos
-
