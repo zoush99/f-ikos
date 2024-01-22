@@ -58,7 +58,7 @@ namespace value {
 
 /// \brief Floating point abstract domain used for the value analysis
 using NumericAbstractDomain =
-    core::numeric::PolymorphicDomain<FNumber,Variable* >;
+    core::numeric::PolymorphicDomain< FNumber, Variable* >;
 
 /// \name Constructors of floating point abstract domains
 /// @{

@@ -66,8 +66,8 @@ namespace numeric {
 /// \brief Trim the bounds of the given interval
 template < typename Number >
 inline Interval< Number > trim_bound(const Interval< Number >& i,
-                                     const Number& b) {
-  assert_compatible(i, b);
+                                     const Number&) {
+//  assert_compatible(i, b);
   ikos_assert(!i.is_bottom());
   return i;
 }

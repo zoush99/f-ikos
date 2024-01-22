@@ -9,6 +9,7 @@
  *   * ikos/core/number/dummy_number.hpp
  *   * ikos/core/number/z_number.hpp
  *   * ikos/core/number/machine_int.hpp
+ *   * ikos/core/number/f_number.hpp
  *
  * Author: Maxime Arthaud
  *
@@ -51,11 +52,11 @@
 #pragma once
 
 #include <ikos/core/number/dummy_number.hpp>
+#include <ikos/core/number/f_number.hpp>  // By zoush99
 #include <ikos/core/number/machine_int.hpp>
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integral.hpp>
 #include <ikos/core/number/z_number.hpp>
-#include <ikos/core/number/f_number.hpp>
 
 namespace ikos {
 namespace analyzer {
