@@ -75,6 +75,9 @@ public:
   static_assert(
       machine_int::IsAbstractDomain< MachineIntDomainT, VariableRef >::value,
       "MachineIntDomain must implement machine_int::AbstractDomain");
+/*  static_assert(
+      numeric::IsAbstractDomain< NumericDomainT, FNumber, VariableRef >::value,
+      "MachineIntDomain must implement numeric::AbstractDomain");*/
 
 public:
   using IntUnaryOperator = machine_int::UnaryOperator;
@@ -844,7 +847,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.assign(x, n);
+    this->_integer.assign(x, n);
   }
 
   void float_assign_undef(VariableRef x) override {
@@ -855,7 +858,7 @@ public:
     }
 
     this->_uninitialized.assign_uninitialized(x);
-    this->_numeric.forget(x);
+    this->_integer.forget(x);
   }
 
   void float_assign_nondet(VariableRef x) override {
@@ -866,7 +869,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.forget(x);
+    this->_integer.forget(x);
   }
 
   void float_assign(VariableRef x, VariableRef y) override {
@@ -878,7 +881,7 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_numeric.assign(x, y);
+    this->_integer.assign(x, y);
   }
 
   void float_assign(VariableRef x, const FnuLinearExpression& e) override {
@@ -899,7 +902,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.assign(x, e);
+    this->_integer.assign(x, e);
   }
 
   /*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
@@ -928,7 +931,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.apply(op, x, y, z);
+    this->_integer.apply(op, x, y, z);
   }
 
   void float_apply(FnuBinaryOperator op,
@@ -950,7 +953,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.apply(op, x, y, z);
+    this->_integer.apply(op, x, y, z);
   }
 
   void float_apply(FnuBinaryOperator op,
@@ -972,7 +975,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.apply(op, x, y, z);
+    this->_integer.apply(op, x, y, z);
   }
 
   void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
@@ -991,7 +994,7 @@ public:
       return;
     }
 
-    this->_numeric.add(pred, x, y);
+    this->_integer.add(pred, x, y);
   }
 
   void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
@@ -1008,7 +1011,7 @@ public:
       return;
     }
 
-    this->_numeric.add(pred, x, y);
+    this->_integer.add(pred, x, y);
   }
 
   void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
@@ -1025,7 +1028,7 @@ public:
       return;
     }
 
-    this->_numeric.add(pred, x, y);
+    this->_integer.add(pred, x, y);
   }
 
   void float_set(VariableRef x, const FnuInterval& value) override {
@@ -1036,7 +1039,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.set(x, value);
+    this->_integer.set(x, value);
   }
 
   void float_set(VariableRef x, const FnuCongruence& value) override {
@@ -1047,7 +1050,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.set(x, value);
+    this->_integer.set(x, value);
   }
 
   void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
@@ -1058,26 +1061,26 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_numeric.set(x, value);
+    this->_integer.set(x, value);
   }
 
   void float_refine(VariableRef x, const FnuInterval& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_numeric.refine(x, value);
+    this->_integer.refine(x, value);
   }
 
   void float_refine(VariableRef x, const FnuCongruence& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_numeric.refine(x, value);
+    this->_integer.refine(x, value);
   }
 
   void float_refine(VariableRef x,
                     const FnuIntervalCongruence& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_numeric.refine(x, value);
+    this->_integer.refine(x, value);
   }
 
   void float_forget(VariableRef x) override {
@@ -1088,40 +1091,40 @@ public:
     }
 
     this->_uninitialized.forget(x);
-    this->_numeric.forget(x);
+    this->_integer.forget(x);
   }
 
   FnuInterval float_to_interval(VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    return this->_numeric.to_interval(x);
+    return this->_integer.to_interval(x);
   }
 
   FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
-    return this->_numeric.to_interval(e);
+    return this->_integer.to_interval(e);
   }
 
   FnuCongruence float_to_congruence(VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    return this->_numeric.to_congruence(x);
+    return this->_integer.to_congruence(x);
   }
 
   FnuCongruence float_to_congruence(
       const FnuLinearExpression& e) const override {
-    return this->_numeric.to_congruence(e);
+    return this->_integer.to_congruence(e);
   }
 
   FnuIntervalCongruence float_to_interval_congruence(
       VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    return this->_numeric.to_interval_congruence(x);
+    return this->_integer.to_interval_congruence(x);
   }
 
   FnuIntervalCongruence float_to_interval_congruence(
       const FnuLinearExpression& e) const override {
-    return this->_numeric.to_interval_congruence(e);
+    return this->_integer.to_interval_congruence(e);
   }
 
   /// @}

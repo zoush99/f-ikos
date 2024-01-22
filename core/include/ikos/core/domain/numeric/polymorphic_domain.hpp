@@ -5,7 +5,7 @@
 /*******************************************************************************
  *
  * \file
- * \brief Polymorphic machine integer abstract domain
+ * \brief Polymorphic floating point number abstract domain
  *
  * The PolymorphicDomain is a machine integer abstract domain whose behavior
  * depends on the abstract domain it is constructed with. It allows the use of

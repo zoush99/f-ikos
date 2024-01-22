@@ -141,6 +141,7 @@ public:
   /// \brief Destructor
   ~Interval() override = default;
 
+  /// \brief By zoush99
   /// \brief Return the bit width of the interval
   uint64_t bit_width() const { return this->_lb.get_number().bit_width(); }
 
@@ -354,7 +355,6 @@ public:
     }
   }
 
-  /// \todo (floating point)
   /// \brief Helper for mod([a, b], n)
   ///
   /// If mod([a, b], n) is equivalent to [a, b] - x, returns x

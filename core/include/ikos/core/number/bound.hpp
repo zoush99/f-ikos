@@ -143,6 +143,7 @@ public:
   ~Bound() = default;
 
 public:
+  /// \brief Represent infinity
   /// \brief Return +oo
   static Bound plus_infinity() { return Bound(true, 1); }
 

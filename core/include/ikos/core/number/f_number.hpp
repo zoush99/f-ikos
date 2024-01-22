@@ -518,7 +518,7 @@ inline FNumber operator-(const FNumber& lhs, const FNumber& rhs) {
   return sub(lhs, rhs);
 }
 
-// \brief Multiplication
+/// \brief Multiplication
 ///
 /// Returns the product of the operands, with wrapping.
 inline FNumber mul(const FNumber& lhs, const FNumber& rhs) {
@@ -548,7 +548,7 @@ inline FNumber operator*(const FNumber& lhs, const FNumber& rhs) {
   return mul(lhs, rhs);
 }
 
-// \brief Division
+/// \brief Division
 ///
 /// Returns the quotient of the operands, with wrapping.
 inline FNumber div(const FNumber& lhs, const FNumber& rhs) {
