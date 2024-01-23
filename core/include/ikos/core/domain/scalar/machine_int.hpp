@@ -840,7 +840,7 @@ public:
 */
 
   /// \todo bugs here!!!
-  void float_assign(VariableRef x, const FNumber& n) override {
+  void float_assign(VariableRef x,const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
     if (this->is_bottom_fast()) {
