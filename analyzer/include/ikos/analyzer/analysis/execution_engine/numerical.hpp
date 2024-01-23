@@ -482,7 +482,6 @@ private:
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
     void floating_point(const FNumber& rhs) {
-      /// \todo(floating point)
       this->_inv.normal().float_assign(this->_lhs,rhs);
     }
 
@@ -621,7 +620,6 @@ private:
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
     void floating_point(const FNumber& rhs) {
-      /// \todo(floating point)
 //      ikos_assert(this->_type->bit_width() == rhs.bit_width());
       this->_inv.normal().float_assign(this->_lhs, rhs);
     }
@@ -636,7 +634,7 @@ private:
 
     void floating_point_var(Variable* rhs) {
       auto rhs_type = ar::cast< ar::FloatType >(rhs->type());
-      ikos_assert(this->_type->bit_width() == rhs_type->bit_width());
+//      ikos_assert(this->_type->bit_width() == rhs_type->bit_width());
 
       this->_inv.normal().uninit_assert_initialized(rhs);
       this->_inv.normal().float_assign(this->_lhs, rhs);
@@ -1047,6 +1045,9 @@ private:
   }
 
   /// \todo(floating point)
+  /// \details This currently doesn't need modification since unary operation-related functions
+  /// are not defined. After the unary operation functions and subsequent abstract
+  /// domain entry points are handled, then this function can be rewritten.
   /// \brief Execute a floating point conversion
   void exec_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_floating_point_var(),
@@ -1055,22 +1056,12 @@ private:
       this->_inv.normal().uninit_assert_initialized(rhs.var());
     }
     this->_inv.normal().float_assign_nondet(lhs.var());
-    /*    if (rhs.is_floating_point()) { // machine integer constant
-          auto type = cast< ar::FloatType >(lhs.var()->type());
-          // question?
-          this->_inv.normal()
-              .int_assign(lhs.var(),
-                          core::machine_int::apply_unary_operator(op,
-                                                                  rhs.machine_int(),
-                                                                  type->bit_width(),
-                                                                  type->sign()));
-        } else if (rhs.is_floating_point_var()) {  // machine integer variable
-          this->_inv.normal().int_apply(op, lhs.var(), rhs.var());
-        } else {
-          ikos_unreachable("unexpected arguments");
-        }*/
   }
 
+  /// \todo(floating point)
+  /// \details This currently doesn't need modification since unary operation-related functions
+  /// are not defined. After the unary operation functions and subsequent abstract
+  /// domain entry points are handled, then this function can be rewritten.
   /// \brief Execute a conversion from floating point to integer
   void exec_float_to_int_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_machine_int_var(),
@@ -1086,6 +1077,10 @@ private:
     }
   }
 
+  /// \todo(floating point)
+  /// \details This currently doesn't need modification since unary operation-related functions
+  /// are not defined. After the unary operation functions and subsequent abstract
+  /// domain entry points are handled, then this function can be rewritten.
   /// \brief Execute a conversion from integer to floating point
   void exec_int_to_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
    ikos_assert_msg(lhs.is_floating_point_var(),
@@ -1349,7 +1344,6 @@ public:
   }
 
 private:
-  /// \todo(floating point)
   /// \brief Execute an integer binary operation
   void exec_int_bin_operation(const ScalarLit& lhs,
                               IntBinaryOperator op,
@@ -1389,7 +1383,6 @@ private:
     }
   }
 
-  /// \todo(floating point)
   /// \brief Execute a floating point binary operation
   void exec_float_bin_operation(const ScalarLit& lhs,
                                 FnuBinaryOperator op,
@@ -1408,7 +1401,7 @@ private:
           this->_inv.normal().uninit_assert_initialized(right.var());
         }
         this->_inv.normal().float_assign_nondet(lhs.var());
-        */
+*/
 
     ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not an integer variable");

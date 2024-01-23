@@ -104,6 +104,7 @@ public:
   }
 
   /// \todo(floating point)
+  /// Widening hint that the default is integer; later, add support for floating-point representation.
   boost::optional< ar::MachineInt > extract_constant(ar::BasicBlock* bb) const {
     if (bb->empty()) {
       return boost::none;

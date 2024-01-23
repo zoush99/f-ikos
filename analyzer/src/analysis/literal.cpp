@@ -194,9 +194,9 @@ public:
     return Literal(ScalarLit::machine_int(c->value()));
   }
 
-  /// \todo(error!)
-  Literal operator()(ar::FloatConstant* /*f*/) {
-    return Literal(ScalarLit::floating_point(FNumber{}));
+  /// \brief By zoush99
+  Literal operator()(ar::FloatConstant* f) {
+    return Literal(ScalarLit::floating_point(f->value()));
   }
 
   Literal operator()(ar::NullConstant* /*n*/) {
