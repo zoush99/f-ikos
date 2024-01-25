@@ -812,8 +812,7 @@ public:
   /// @}
   /// \name Implement floating point abstract domain methods
   /// @{
-/*
-  void float_assign_undef(VariableRef x) override {
+  /*void float_assign_undef(VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
     this->_uninitialized.assign_uninitialized(x);
@@ -845,8 +844,8 @@ public:
     if (this->is_bottom_fast()) {
       return;
     }
-    /// \todo bugs here!!!
     this->_uninitialized.assign_initialized(x);
+    /// \todo bugs here!!!
     this->_integer.assign(x, n);
   }
 
@@ -905,7 +904,7 @@ public:
     this->_integer.assign(x, e);
   }
 
-  /*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
+/*    void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
     override{
 
     }*/
