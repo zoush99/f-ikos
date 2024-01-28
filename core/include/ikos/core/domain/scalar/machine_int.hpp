@@ -56,6 +56,7 @@ namespace scalar {
 ///
 /// This class implements a scalar abstract domain that handles machine integers
 /// and ignore floating points and pointers safely.
+/// (Choose not to ignore floating point values, but rather pass them down.By zoush99)
 template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
@@ -846,6 +847,7 @@ public:
     }
     this->_uninitialized.assign_initialized(x);
     /// \todo bugs here!!!
+    /// \details: In template: no matching member function for call to 'assign'
     this->_integer.assign(x, n);
   }
 
