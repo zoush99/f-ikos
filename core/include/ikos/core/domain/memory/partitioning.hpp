@@ -89,6 +89,14 @@ public:
   using PointerSetT = PointerSet< MemoryLocationRef >;
   using LiteralT = Literal< VariableRef, MemoryLocationRef >;
 
+  // By zoush99
+  using FnuBinaryOperator = numeric::BinaryOperator;
+  using FnuPredicate = numeric::Predicate;
+  using FnuLinearExpression = LinearExpression< FNumber, VariableRef >;
+  using FnuInterval = numeric::Interval< FNumber >;
+  using FnuCongruence = numeric::Congruence< FNumber >;
+  using FnuIntervalCongruence = numeric::IntervalCongruence< FNumber >;
+
 private:
   using IntVariableTrait = machine_int::VariableTraits< VariableRef >;
   using ScalarVariableTrait = scalar::VariableTraits< VariableRef >;
@@ -1024,7 +1032,7 @@ public:
   /// \name Implement floating point abstract domain methods
   /// @{
 
-  void float_assign_undef(VariableRef x) override {
+/*  void float_assign_undef(VariableRef x) override {
     for (Partition& partition : this->_partitions) {
       partition.memory.float_assign_undef(x);
     }
@@ -1046,6 +1054,265 @@ public:
     for (Partition& partition : this->_partitions) {
       partition.memory.float_forget(x);
     }
+  }*/
+
+  /// \brief By zoush99
+  void float_assign(VariableRef x, const FNumber& n) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      this->_partitions[0].interval = FnuInterval(n);
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_assign(x, n);
+    }
+  }
+
+  void float_assign_undef(VariableRef x) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      this->_partitions[0].interval.set_to_top();
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_assign_undef(x);
+    }
+  }
+
+  void float_assign_nondet(VariableRef x) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      this->_partitions[0].interval.set_to_top();
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_assign_nondet(x);
+    }
+  }
+
+  void float_assign(VariableRef x, VariableRef y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_assign(x, y);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }
+
+  void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_assign(x, e);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }
+
+/*  void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_apply(op, x, y);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }*/
+
+  void float_apply(FnuBinaryOperator op,
+                 VariableRef x,
+                 VariableRef y,
+                 VariableRef z) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_apply(op, x, y, z);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }
+
+  void float_apply(FnuBinaryOperator op,
+                 VariableRef x,
+                 VariableRef y,
+                 const FNumber& z) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_apply(op, x, y, z);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }
+
+  void float_apply(FnuBinaryOperator op,
+                 VariableRef x,
+                 const FNumber& y,
+                 VariableRef z) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_apply(op, x, y, z);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }
+
+  void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_add(pred, x, y);
+    }
+  }
+
+  void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_add(pred, x, y);
+    }
+  }
+
+  void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_add(pred, x, y);
+    }
+  }
+
+  void float_set(VariableRef x, const FnuInterval& value) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      if (value.is_bottom()) {
+        this->_partitions[0].interval.set_to_top();
+      } else {
+        this->_partitions[0].interval = value;
+      }
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_set(x, value);
+    }
+  }
+
+  void float_set(VariableRef x, const FnuCongruence& value) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      if (value.is_bottom()) {
+        this->_partitions[0].interval.set_to_top();
+      } else if (value.singleton()) {
+        this->_partitions[0].interval = FnuInterval(*value.singleton());
+      } else {
+        this->_partitions[0].interval.set_to_top();
+      }
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_set(x, value);
+    }
+  }
+
+  void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      if (value.is_bottom()) {
+        this->_partitions[0].interval.set_to_top();
+      } else {
+        this->_partitions[0].interval = value.interval();
+      }
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_set(x, value);
+    }
+  }
+
+  void float_refine(VariableRef x, const FnuInterval& value) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_refine(x, value);
+    }
+  }
+
+  void float_refine(VariableRef x, const FnuCongruence& value) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_refine(x, value);
+    }
+  }
+
+  void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_refine(x, value);
+    }
+  }
+
+  void float_forget(VariableRef x) override {
+    if (this->_variable && *this->_variable == x) {
+      this->partitioning_join();
+      this->_partitions[0].interval.set_to_top();
+    }
+
+    for (Partition& partition : this->_partitions) {
+      partition.memory.float_forget(x);
+    }
+  }
+
+  FnuInterval float_to_interval(VariableRef x) const override {
+/*    auto result = IntInterval::bottom(IntVariableTrait::bit_width(x),
+                                      IntVariableTrait::sign(x));*/
+    auto result=FnuInterval::bottom();
+    for (const Partition& partition : this->_partitions) {
+      result.join_with(partition.memory.float_to_interval(x));
+    }
+    return result;
+  }
+
+  FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
+/*    auto result =
+        IntInterval::bottom(e.constant().bit_width(), e.constant().sign());*/
+    auto result=FnuInterval::bottom();
+    for (const Partition& partition : this->_partitions) {
+      result.join_with(partition.memory.float_to_interval(e));
+    }
+    return result;
+  }
+
+  FnuCongruence float_to_congruence(VariableRef x) const override {
+/*    auto result = IntCongruence::bottom(IntVariableTrait::bit_width(x),
+                                        IntVariableTrait::sign(x));*/
+    auto result=FnuCongruence::bottom();
+    for (const Partition& partition : this->_partitions) {
+      result.join_with(partition.memory.float_to_congruence(x));
+    }
+    return result;
+  }
+
+  FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
+    /*auto result =
+        IntCongruence::bottom(e.constant().bit_width(), e.constant().sign());*/
+    auto result=FnuCongruence::bottom();
+    for (const Partition& partition : this->_partitions) {
+      result.join_with(partition.memory.float_to_congruence(e));
+    }
+    return result;
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      VariableRef x) const override {
+/*    auto result = IntIntervalCongruence::bottom(IntVariableTrait::bit_width(x),
+                                                IntVariableTrait::sign(x));*/
+    auto result = FnuIntervalCongruence::bottom();
+    for (const Partition& partition : this->_partitions) {
+      result.join_with(partition.memory.float_to_interval_congruence(x));
+    }
+    return result;
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      const FnuLinearExpression& e) const override {
+/*    auto result = IntIntervalCongruence::bottom(e.constant().bit_width(),
+                                                e.constant().sign());*/
+    auto result=FnuIntervalCongruence::bottom();
+    for (const Partition& partition : this->_partitions) {
+      result.join_with(partition.memory.float_to_interval_congruence(e));
+    }
+    return result;
   }
 
   /// @}
