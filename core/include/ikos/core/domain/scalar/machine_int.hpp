@@ -838,6 +838,7 @@ public:
     this->_uninitialized.forget(x);
   }
 */
+/*
 
   void float_assign(VariableRef x,const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
@@ -906,10 +907,12 @@ public:
     this->_integer.assign(x, e);
   }
 
+*/
 /*    void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
     override{
 
-    }*/
+    }*//*
+
 
   void float_apply(FnuBinaryOperator op,
                    VariableRef x,
@@ -1126,6 +1129,132 @@ public:
   FnuIntervalCongruence float_to_interval_congruence(
       const FnuLinearExpression& e) const override {
     return this->_integer.to_interval_congruence(e);
+  }
+*/
+
+  /// \details(Set all calls to null.)
+  void float_assign(VariableRef x,const FNumber& n) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_assign_undef(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_assign_nondet(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_assign(VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
+  }
+
+  void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  /*    void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
+      override{
+
+      }*/
+
+  void float_apply(FnuBinaryOperator op,
+                   VariableRef x,
+                   VariableRef y,
+                   VariableRef z) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
+    ikos_assert(ScalarVariableTrait::is_float(z));
+  }
+
+  void float_apply(FnuBinaryOperator op,
+                   VariableRef x,
+                   VariableRef y,
+                   const FNumber& z) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
+  }
+
+  void float_apply(FnuBinaryOperator op,
+                   VariableRef x,
+                   const FNumber& y,
+                   VariableRef z) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(z));
+  }
+
+  void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
+  }
+
+  void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(y));
+  }
+
+  void float_set(VariableRef x, const FnuInterval& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_set(VariableRef x, const FnuCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_refine(VariableRef x, const FnuInterval& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_refine(VariableRef x, const FnuCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_refine(VariableRef x,
+                    const FnuIntervalCongruence& value) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  void float_forget(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+  }
+
+  FnuInterval float_to_interval(VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    return FnuInterval(1);
+  }
+
+  /// \todo(floating point)
+  FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
+      return FnuInterval(1);
+  }
+
+  FnuCongruence float_to_congruence(VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    return FnuCongruence(1);
+  }
+
+  FnuCongruence float_to_congruence(
+      const FnuLinearExpression& e) const override {
+    return FnuCongruence(1);
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      VariableRef x) const override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    return FnuIntervalCongruence(1);
+  }
+
+  FnuIntervalCongruence float_to_interval_congruence(
+      const FnuLinearExpression& e) const override {
+    return FnuIntervalCongruence(1);
   }
 
   /// @}
