@@ -299,7 +299,6 @@ public:
   /// \name Floating point abstract domain methods
   /// @{
 
-  /// \details(floating point)
   /// \brief Assign `x = n`
   virtual void float_assign(VariableRef x, const FNumber& n) = 0;
 
