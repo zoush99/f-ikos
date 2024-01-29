@@ -1529,8 +1529,18 @@ private:
       this->_inv.dynamic_write_int(x, y);
     }
 
+    /// \brief By zoush99
+    void dynamic_write_float(VariableRef x, const FNumber& n) override {
+      this->_inv.dynamic_write_float(x, n);
+    }
+
     void dynamic_write_nondet_float(VariableRef x) override {
       this->_inv.dynamic_write_nondet_float(x);
+    }
+
+    /// \brief By zoush99
+    void dynamic_write_float(VariableRef x, VariableRef y) override {
+      this->_inv.dynamic_write_float(x, y);
     }
 
     void dynamic_write_null(VariableRef x) override {
@@ -1549,6 +1559,11 @@ private:
 
     void dynamic_read_int(VariableRef x, VariableRef y) override {
       this->_inv.dynamic_read_int(x, y);
+    }
+
+    /// \brief By zoush99
+    void dynamic_read_float(VariableRef x, VariableRef y) override {
+      this->_inv.dynamic_read_float(x, y);
     }
 
     void dynamic_read_pointer(VariableRef x, VariableRef y) override {
