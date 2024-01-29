@@ -703,6 +703,11 @@ public:
     this->_scalar.dynamic_read_int(x, y);
   }
 
+  /// \brief By zoush99
+  void dynamic_read_float(VariableRef x, VariableRef y) override {
+    this->_scalar.dynamic_read_float(x, y);
+  }
+
   void dynamic_read_pointer(VariableRef x, VariableRef y) override {
     this->_scalar.dynamic_read_pointer(x, y);
   }

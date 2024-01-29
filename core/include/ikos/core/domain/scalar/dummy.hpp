@@ -662,6 +662,9 @@ public:
 
   void dynamic_read_int(VariableRef, VariableRef) override {}
 
+  /// \brief By zoush99
+  void dynamic_read_float(VariableRef, VariableRef) override {}
+
   void dynamic_read_pointer(VariableRef, VariableRef) override {}
 
   bool dynamic_is_zero(VariableRef) const override { return this->_is_bottom; }

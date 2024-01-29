@@ -1628,6 +1628,17 @@ public:
     }
   }
 
+  /// \brief By zoush99
+  void dynamic_read_float(VariableRef x, VariableRef y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.dynamic_read_float(x, y);
+    }
+
+    if (this->_variable && *this->_variable == x) {
+      this->update_partitions();
+    }
+  }
+
   void dynamic_read_pointer(VariableRef x, VariableRef y) override {
     for (Partition& partition : this->_partitions) {
       partition.memory.dynamic_read_pointer(x, y);
