@@ -49,7 +49,7 @@
 #include <ikos/core/domain/uninitialized/separate_domain.hpp>
 
 #include <ikos/analyzer/analysis/value/abstract_domain.hpp>
-/// \brief (This place should also consider the numerical abstraction domain.")
+/// \brief (This place should also consider the numerical abstraction domain.)
 #include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
 
 namespace ikos {

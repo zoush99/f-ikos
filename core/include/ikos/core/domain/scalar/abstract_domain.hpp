@@ -547,8 +547,14 @@ public:
   /// \brief Write an integer variable to a dynamically typed variable
   virtual void dynamic_write_int(VariableRef x, VariableRef y) = 0;
 
+  /// \brief Write an float to a dynamically typed variable
+  virtual void dynamic_write_float(VariableRef x, const FNumber& n) = 0;
+
   /// \brief Write a non deterministic float to a dynamically typed variable
   virtual void dynamic_write_nondet_float(VariableRef x) = 0;
+
+  /// \brief Write an float variable to a dynamically typed variable
+  virtual void dynamic_write_float(VariableRef x, VariableRef y) = 0;
 
   /// \brief Write null to a dynamically typed variable
   virtual void dynamic_write_null(VariableRef x) = 0;
@@ -563,6 +569,9 @@ public:
 
   /// \brief Read an integer variable from a dynamically typed variable
   virtual void dynamic_read_int(VariableRef x, VariableRef y) = 0;
+
+  /// \brief Read an float variable from a dynamically typed variable
+  virtual void dynamic_read_float(VariableRef x, VariableRef y) = 0;
 
   /// \brief Read a pointer variable from a dynamically typed variable
   virtual void dynamic_read_pointer(VariableRef x, VariableRef y) = 0;

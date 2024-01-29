@@ -406,6 +406,7 @@ public:
     }
   }
 
+  /// \todo Expanding the threshold can be a floating-point number.
   void widen_threshold_with(const ValueDomain& other,
                             const MachineInt& threshold) override {
     this->normalize();
@@ -449,6 +450,7 @@ public:
     }
   }
 
+  /// \todo Narrowing the threshold can be a floating-point number.
   void narrow_threshold_with(const ValueDomain& other,
                              const MachineInt& threshold) override {
     this->normalize();
@@ -520,6 +522,7 @@ public:
     }
   }
 
+  /// \todo
   ValueDomain widening_threshold(const ValueDomain& other,
                                  const MachineInt& threshold) const override {
     if (this->is_bottom()) {
@@ -564,6 +567,7 @@ public:
     }
   }
 
+  /// \todo
   ValueDomain narrowing_threshold(const ValueDomain& other,
                                   const MachineInt& threshold) const override {
     if (this->is_bottom()) {
@@ -760,28 +764,28 @@ public:
 
 
   void float_assign(VariableRef x, const FNumber& n) override {
-    this->_scalar->float_assign(x, n);
+    this->_scalar.float_assign(x, n);
   }
 
   void float_assign_undef(VariableRef x) override {
-    this->_scalar->float_assign_undef(x);
+    this->_scalar.float_assign_undef(x);
   }
 
   void float_assign_nondet(VariableRef x) override {
-    this->_scalar->float_assign_nondet(x);
+    this->_scalar.float_assign_nondet(x);
   }
 
   void float_assign(VariableRef x, VariableRef y) override {
-    this->_scalar->float_assign(x, y);
+    this->_scalar.float_assign(x, y);
   }
 
   void float_assign(VariableRef x, const FnuLinearExpression& e) override {
-    this->_scalar->float_assign(x, e);
+    this->_scalar.float_assign(x, e);
   }
 
   /*
   void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override {
-    this->_ptr->float_apply(op, x, y);
+    this->_ptr.float_apply(op, x, y);
   }
 */
 
@@ -789,85 +793,85 @@ public:
                    VariableRef x,
                    VariableRef y,
                    VariableRef z) override {
-    this->_scalar->float_apply(op, x, y, z);
+    this->_scalar.float_apply(op, x, y, z);
   }
 
   void float_apply(FnuBinaryOperator op,
                    VariableRef x,
                    VariableRef y,
                    const FNumber& z) override {
-    this->_scalar->float_apply(op, x, y, z);
+    this->_scalar.float_apply(op, x, y, z);
   }
 
   void float_apply(FnuBinaryOperator op,
                    VariableRef x,
                    const FNumber& y,
                    VariableRef z) override {
-    this->_scalar->float_apply(op, x, y, z);
+    this->_scalar.float_apply(op, x, y, z);
   }
 
   void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
-    this->_scalar->float_add(pred, x, y);
+    this->_scalar.float_add(pred, x, y);
   }
 
   void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
-    this->_scalar->float_add(pred, x, y);
+    this->_scalar.float_add(pred, x, y);
   }
 
   void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
-    this->_scalar->float_add(pred, x, y);
+    this->_scalar.float_add(pred, x, y);
   }
 
   void float_set(VariableRef x, const FnuInterval& value) override {
-    this->_scalar->float_set(x, value);
+    this->_scalar.float_set(x, value);
   }
 
   void float_set(VariableRef x, const FnuCongruence& value) override {
-    this->_scalar->float_set(x, value);
+    this->_scalar.float_set(x, value);
   }
 
   void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
-    this->_scalar->float_set(x, value);
+    this->_scalar.float_set(x, value);
   }
 
   void float_refine(VariableRef x, const FnuInterval& value) override {
-    this->_scalar->float_refine(x, value);
+    this->_scalar.float_refine(x, value);
   }
 
   void float_refine(VariableRef x, const FnuCongruence& value) override {
-    this->_scalar->float_refine(x, value);
+    this->_scalar.float_refine(x, value);
   }
 
   void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
-    this->_scalar->float_refine(x, value);
+    this->_scalar.float_refine(x, value);
   }
 
-  void float_forget(VariableRef x) override { this->_scalar->float_forget(x); }
+  void float_forget(VariableRef x) override { this->_scalar.float_forget(x); }
 
   FnuInterval float_to_interval(VariableRef x) const override {
-    return this->_scalar->float_to_interval(x);
+    return this->_scalar.float_to_interval(x);
   }
 
   FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
-    return this->_scalar->float_to_interval(e);
+    return this->_scalar.float_to_interval(e);
   }
 
   FnuCongruence float_to_congruence(VariableRef x) const override {
-    return this->_scalar->float_to_congruence(x);
+    return this->_scalar.float_to_congruence(x);
   }
 
   FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
-    return this->_scalar->float_to_congruence(e);
+    return this->_scalar.float_to_congruence(e);
   }
 
   FnuIntervalCongruence float_to_interval_congruence(
       VariableRef x) const override {
-    return this->_scalar->float_to_interval_congruence(x);
+    return this->_scalar.float_to_interval_congruence(x);
   }
 
   FnuIntervalCongruence float_to_interval_congruence(
       const FnuLinearExpression& e) const override {
-    return this->_scalar->float_to_interval_congruence(e);
+    return this->_scalar.float_to_interval_congruence(e);
   }
 
   /// @}
@@ -932,6 +936,7 @@ public:
     this->_scalar.pointer_assign(p, q, o);
   }
 
+  /// \todo
   void pointer_assign(VariableRef p,
                       VariableRef q,
                       const MachineInt& o) override {
@@ -1029,8 +1034,17 @@ public:
     this->_scalar.dynamic_write_int(x, y);
   }
 
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, const FNumber& n) override {
+    this->_scalar.dynamic_write_float(x, n);
+  }
+
   void dynamic_write_nondet_float(VariableRef x) override {
     this->_scalar.dynamic_write_nondet_float(x);
+  }
+
+  void dynamic_write_float(VariableRef x, VariableRef y) override {
+    this->_scalar.dynamic_write_float(x, y);
   }
 
   void dynamic_write_null(VariableRef x) override {
@@ -1049,6 +1063,10 @@ public:
 
   void dynamic_read_int(VariableRef x, VariableRef y) override {
     this->_scalar.dynamic_read_int(x, y);
+  }
+
+  void dynamic_read_float(VariableRef x, VariableRef y) override {
+    this->_scalar.dynamic_read_float(x, y);
   }
 
   void dynamic_read_pointer(VariableRef x, VariableRef y) override {
@@ -1079,14 +1097,15 @@ public:
     this->_scalar.scalar_assign_nondet(x);
   }
 
+  /// \todo (floating point)
   /// \brief By zoush99
   void scalar_float_to_int(VariableRef f, VariableRef x) override{
-    this->_scalar->scalar_float_to_int(f, x);
+//    this->_scalar.scalar_float_to_int(f, x);
   }
 
   /// \brief By zoush99
   void scalar_int_to_float(VariableRef x, VariableRef f) override{
-    this->_scalar->scalar_int_to_float(x, f);
+//    this->_scalar.scalar_int_to_float(x, f);
   }
 
   void scalar_pointer_to_int(VariableRef x,
@@ -1403,14 +1422,11 @@ private:
       }
     }
 
+    /// \todo bugs here!!!
     /// \brief (floating point) By zoush99
     void floating_point(const FNumber& rhs) {
 //      this->_scalar.dynamic_write_nondet_float(this->_lhs);
-      if (ScalarVariableTrait::is_float(rhs)) {
         this->_scalar.dynamic_write_float(this->_lhs, rhs);
-      } else {
-        this->_scalar.dynamic_write_nondet_float(this->_lhs);
-      }
     }
 
     void memory_location(MemoryLocationRef addr) {
