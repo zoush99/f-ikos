@@ -663,8 +663,16 @@ private:
     /// \brief Write an integer variable to a dynamically typed variable
     virtual void dynamic_write_int(VariableRef x, VariableRef y) = 0;
 
+    /// \brief By zoush99
+    /// \brief Write an float to a dynamically typed variable
+    virtual void dynamic_write_float(VariableRef x, const FNumber& n) = 0;
+
     /// \brief Write a non deterministic float to a dynamically typed variable
     virtual void dynamic_write_nondet_float(VariableRef x) = 0;
+
+    /// \brief By zoush99
+    /// \brief Write an float variable to a dynamically typed variable
+    virtual void dynamic_write_float(VariableRef x, VariableRef y) = 0;
 
     /// \brief Write null to a dynamically typed variable
     virtual void dynamic_write_null(VariableRef x) = 0;

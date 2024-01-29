@@ -983,6 +983,7 @@ public:
       }
 
       this->_uninitialized.assign_initialized(x);
+      /// \todo bugs here!!!
       this->_integer.assign(x, n);
     }
 
