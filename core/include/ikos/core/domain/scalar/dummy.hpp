@@ -647,7 +647,11 @@ public:
 
   void dynamic_write_int(VariableRef, VariableRef) override {}
 
+  void dynamic_write_float(VariableRef, const FNumber&) override {}
+
   void dynamic_write_nondet_float(VariableRef) override {}
+
+  void dynamic_write_float(VariableRef, VariableRef) override {}
 
   void dynamic_write_null(VariableRef) override {}
 

@@ -1578,9 +1578,23 @@ public:
     }
   }
 
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, const FNumber& n) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.dynamic_write_float(x, n);
+    }
+  }
+
   void dynamic_write_nondet_float(VariableRef x) override {
     for (Partition& partition : this->_partitions) {
       partition.memory.dynamic_write_nondet_float(x);
+    }
+  }
+
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, VariableRef y) override {
+    for (Partition& partition : this->_partitions) {
+      partition.memory.dynamic_write_float(x, y);
     }
   }
 

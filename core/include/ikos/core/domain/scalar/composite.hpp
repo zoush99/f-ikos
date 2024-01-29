@@ -1864,6 +1864,21 @@ public:
     this->_integer.forget(ScalarVariableTrait::offset_var(x));
   }
 
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, const FNumber& n) override {
+    ikos_assert(ScalarVariableTrait::is_dynamic(x));
+//    ikos_assert(IntVariableTrait::bit_width(x) == n.bit_width());
+    if (this->is_bottom_fast()) {
+      return;
+    }
+
+    this->_uninitialized.assign_initialized(x);
+    this->_integer.assign(x, n);
+    this->_nullity.forget(x);
+    this->_points_to_map.forget(x);
+    this->_integer.forget(ScalarVariableTrait::offset_var(x));
+  }
+
   void dynamic_write_nondet_float(VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_dynamic(x));
 
@@ -1873,6 +1888,24 @@ public:
 
     this->_uninitialized.assign_initialized(x);
     this->_integer.forget(x);
+    this->_nullity.forget(x);
+    this->_points_to_map.forget(x);
+    this->_integer.forget(ScalarVariableTrait::offset_var(x));
+  }
+
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_dynamic(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
+/*    ikos_assert(IntVariableTrait::bit_width(x) ==
+                IntVariableTrait::bit_width(y));*/
+    if (this->is_bottom_fast()) {
+      return;
+    }
+
+    this->_uninitialized.assign(x, y);
+    this->_integer.assign(x, y);
+
     this->_nullity.forget(x);
     this->_points_to_map.forget(x);
     this->_integer.forget(ScalarVariableTrait::offset_var(x));

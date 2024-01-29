@@ -671,8 +671,18 @@ public:
     this->_scalar.dynamic_write_int(x, y);
   }
 
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, const FNumber& n) override {
+    this->_scalar.dynamic_write_float(x, n);
+  }
+
   void dynamic_write_nondet_float(VariableRef x) override {
     this->_scalar.dynamic_write_nondet_float(x);
+  }
+
+  /// \brief By zoush99
+  void dynamic_write_float(VariableRef x, VariableRef y) override {
+    this->_scalar.dynamic_write_float(x, y);
   }
 
   void dynamic_write_null(VariableRef x) override {

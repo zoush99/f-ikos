@@ -1043,6 +1043,7 @@ public:
     this->_scalar.dynamic_write_nondet_float(x);
   }
 
+  /// \brief By zoush99
   void dynamic_write_float(VariableRef x, VariableRef y) override {
     this->_scalar.dynamic_write_float(x, y);
   }
