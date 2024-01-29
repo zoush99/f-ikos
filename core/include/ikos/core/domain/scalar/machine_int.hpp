@@ -1132,7 +1132,8 @@ public:
   }
 */
 
-  /// \todo
+  /// \todo Many details have been omitted, but in fact, these details should be
+  /// implemented. By zoush99
   /// \details(Set all calls to null.)
   void float_assign(VariableRef x,const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_float(x));

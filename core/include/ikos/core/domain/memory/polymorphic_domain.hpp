@@ -688,6 +688,10 @@ private:
     /// \brief Read an integer variable from a dynamically typed variable
     virtual void dynamic_read_int(VariableRef x, VariableRef y) = 0;
 
+    /// \brief By zoush99
+    /// \brief Read an integer variable from a dynamically typed variable
+    virtual void dynamic_read_float(VariableRef x, VariableRef y) = 0;
+
     /// \brief Read a pointer variable from a dynamically typed variable
     virtual void dynamic_read_pointer(VariableRef x, VariableRef y) = 0;
 
@@ -1268,23 +1272,24 @@ private:
 */
 
     void float_assign(VariableRef x, const FNumber& n) override {
-      this->_inv->float_assign(x, n);
+      /// \todo bugs here!!!
+      this->_inv.float_assign(x, n);
     }
 
     void float_assign_undef(VariableRef x) override {
-      this->_inv->float_assign_undef(x);
+      this->_inv.float_assign_undef(x);
     }
 
     void float_assign_nondet(VariableRef x) override {
-      this->_inv->float_assign_nondet(x);
+      this->_inv.float_assign_nondet(x);
     }
 
     void float_assign(VariableRef x, VariableRef y) override {
-      this->_inv->float_assign(x, y);
+      this->_inv.float_assign(x, y);
     }
 
     void float_assign(VariableRef x, const FnuLinearExpression& e) override {
-      this->_inv->float_assign(x, e);
+      this->_inv.float_assign(x, e);
     }
 
     /*
@@ -1297,85 +1302,85 @@ private:
                      VariableRef x,
                      VariableRef y,
                      VariableRef z) override {
-      this->_inv->float_apply(op, x, y, z);
+      this->_inv.float_apply(op, x, y, z);
     }
 
     void float_apply(FnuBinaryOperator op,
                      VariableRef x,
                      VariableRef y,
                      const FNumber& z) override {
-      this->_inv->float_apply(op, x, y, z);
+      this->_inv.float_apply(op, x, y, z);
     }
 
     void float_apply(FnuBinaryOperator op,
                      VariableRef x,
                      const FNumber& y,
                      VariableRef z) override {
-      this->_inv->float_apply(op, x, y, z);
+      this->_inv.float_apply(op, x, y, z);
     }
 
     void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
-      this->_inv->float_add(pred, x, y);
+      this->_inv.float_add(pred, x, y);
     }
 
     void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
-      this->_inv->float_add(pred, x, y);
+      this->_inv.float_add(pred, x, y);
     }
 
     void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
-      this->_inv->float_add(pred, x, y);
+      this->_inv.float_add(pred, x, y);
     }
 
     void float_set(VariableRef x, const FnuInterval& value) override {
-      this->_inv->float_set(x, value);
+      this->_inv.float_set(x, value);
     }
 
     void float_set(VariableRef x, const FnuCongruence& value) override {
-      this->_inv->float_set(x, value);
+      this->_inv.float_set(x, value);
     }
 
     void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
-      this->_inv->float_set(x, value);
+      this->_inv.float_set(x, value);
     }
 
     void float_refine(VariableRef x, const FnuInterval& value) override {
-      this->_inv->float_refine(x, value);
+      this->_inv.float_refine(x, value);
     }
 
     void float_refine(VariableRef x, const FnuCongruence& value) override {
-      this->_inv->float_refine(x, value);
+      this->_inv.float_refine(x, value);
     }
 
     void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
-      this->_inv->float_refine(x, value);
+      this->_inv.float_refine(x, value);
     }
 
-    void float_forget(VariableRef x) override { this->_inv->float_forget(x); }
+    void float_forget(VariableRef x) override { this->_inv.float_forget(x); }
 
     FnuInterval float_to_interval(VariableRef x) const override {
-      return this->_inv->float_to_interval(x);
+      return this->_inv.float_to_interval(x);
     }
 
     FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
-      return this->_inv->float_to_interval(e);
+      return this->_inv.float_to_interval(e);
     }
 
     FnuCongruence float_to_congruence(VariableRef x) const override {
-      return this->_inv->float_to_congruence(x);
+      return this->_inv.float_to_congruence(x);
     }
 
     FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
-      return this->_inv->float_to_congruence(e);
+      return this->_inv.float_to_congruence(e);
     }
 
     FnuIntervalCongruence float_to_interval_congruence(
         VariableRef x) const override {
-      return this->_inv->float_to_interval_congruence(x);
+      return this->_inv.float_to_interval_congruence(x);
     }
 
     FnuIntervalCongruence float_to_interval_congruence(
         const FnuLinearExpression& e) const override {
-      return this->_inv->float_to_interval_congruence(e);
+      return this->_inv.float_to_interval_congruence(e);
     }
 
     /// @}

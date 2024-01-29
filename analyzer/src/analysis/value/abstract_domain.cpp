@@ -72,6 +72,9 @@ using ScalarAbstractDomain =
                                    MemoryLocation*,
                                    UninitializedAbstractDomain,
                                    MachineIntAbstractDomain,
+                                   // using MachineIntAbstractDomain =
+                                   // core::machine_int::PolymorphicDomain<
+                                   // Variable* >;
                                    NullityAbstractDomain >;
 
 /// \brief Lifetime abstract domain
@@ -93,6 +96,7 @@ using PartitioningAbstractDomain = core::memory::
 MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
   auto inv = ValueAbstractDomain(
       ctx.var_factory,
+      /// \brief In template: no matching member function for call to 'assign'
       ScalarAbstractDomain(UninitializedAbstractDomain::bottom(),
                            make_bottom_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
@@ -100,8 +104,12 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
       LifetimeAbstractDomain::bottom());
 
   if (ctx.opts.use_partitioning_domain) {
+    /// \brief In template: no member named 'dynamic_read_float' in
+    /// 'ikos::core::memory::PolymorphicDomain<ikos::analyzer::Variable *,
+    /// ikos::analyzer::MemoryLocation *>::PolymorphicBase'
     return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
   } else {
+    /// \brief In template: only virtual member functions can be marked 'override'
     return MemoryAbstractDomain(inv);
   }
 }
