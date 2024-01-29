@@ -104,9 +104,6 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
       LifetimeAbstractDomain::bottom());
 
   if (ctx.opts.use_partitioning_domain) {
-    /// \brief In template: no member named 'dynamic_read_float' in
-    /// 'ikos::core::memory::PolymorphicDomain<ikos::analyzer::Variable *,
-    /// ikos::analyzer::MemoryLocation *>::PolymorphicBase'
     return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
   } else {
     /// \brief In template: only virtual member functions can be marked 'override'

@@ -44,8 +44,8 @@
 #pragma once
 
 #include <ikos/core/domain/machine_int/abstract_domain.hpp>
-#include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/domain/nullity/abstract_domain.hpp>
+#include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/domain/scalar/abstract_domain.hpp>
 #include <ikos/core/domain/separate_domain.hpp>
 #include <ikos/core/domain/uninitialized/abstract_domain.hpp>
@@ -508,6 +508,7 @@ public:
     }
   }
 
+  /// \todo (Expanding the threshold can be a floating-point number.)
   CompositeDomain widening_threshold(
       const CompositeDomain& other,
       const MachineInt& threshold) const override {
@@ -554,6 +555,7 @@ public:
     }
   }
 
+  /// \todo (Narrowing the threshold can be a floating-point number.)
   CompositeDomain narrowing_threshold(
       const CompositeDomain& other,
       const MachineInt& threshold) const override {
