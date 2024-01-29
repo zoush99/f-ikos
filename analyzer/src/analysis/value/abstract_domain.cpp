@@ -74,13 +74,6 @@ using ScalarAbstractDomain =
                                    MachineIntAbstractDomain,
                                    NullityAbstractDomain >;
 
-// using ScalarAbstractDomain =
-//     core::scalar::CompositeDomain< Variable*,
-//                                    MemoryLocation*,
-//                                    UninitializedAbstractDomain,
-//                                    NumericAbstractDomain,
-//                                    NullityAbstractDomain >;
-
 /// \brief Lifetime abstract domain
 using LifetimeAbstractDomain =
     core::lifetime::SeparateDomain< MemoryLocation* >;

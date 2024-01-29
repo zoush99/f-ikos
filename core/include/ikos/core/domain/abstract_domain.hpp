@@ -194,7 +194,6 @@ public:
   /// define a narrowing operator and can simply use the meet instead.
   virtual void narrow_with(const Derived& other) = 0;
 
-  /// \todo bugs here!!!
   /// \brief Perform the union of two abstract values
   virtual Derived join(const Derived& other) const {
     Derived tmp(static_cast< const Derived& >(*this));
@@ -202,7 +201,6 @@ public:
     return tmp;
   }
 
-  /// \todo bugs here!!!
   /// \brief Perform a union on a loop head
   virtual Derived join_loop(const Derived& other) const {
     Derived tmp(static_cast< const Derived& >(*this));
