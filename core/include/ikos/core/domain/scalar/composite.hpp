@@ -1123,10 +1123,10 @@ public:
       }
   */
 
-  // \brief Assert that x is initialized (throw if not), but only if the
-  // operation, op, is not logical "and" or "or" as these are used in
-  // bitfield operations which may start with uninitialized memory.
-  // Is only called if one of the operands is constant.
+  /// \brief Assert that x is initialized (throw if not), but only if the
+  /// operation, op, is not logical "and" or "or" as these are used in
+  /// bitfield operations which may start with uninitialized memory.
+  /// Is only called if one of the operands is constant.
   void assert_initialized_if_not_and_or(FnuBinaryOperator op, VariableRef x) {
     this->_uninitialized.assert_initialized(x);
   }
@@ -1823,6 +1823,7 @@ public:
   /// \name Implement dynamically typed variables abstract domain methods
   /// @{
 
+  /// \todo Only integer types were considered.
   void dynamic_assign(VariableRef x, VariableRef y) override {
     ikos_assert(ScalarVariableTrait::is_dynamic(x));
     ikos_assert(ScalarVariableTrait::is_dynamic(y));
@@ -1950,10 +1951,10 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_fnumber.forget(x);
     this->_nullity.forget(x);
     this->_points_to_map.forget(x);
-    this->_integer.forget(ScalarVariableTrait::offset_var(x));
+    this->_fnumber.forget(ScalarVariableTrait::offset_var(x));
   }
 
   /// \brief By zoush99
@@ -2057,6 +2058,7 @@ public:
     this->_uninitialized.assign(x, y);
     this->_fnumber.assign(x, y);
   }
+
   void dynamic_read_pointer(VariableRef x, VariableRef y) override {
     ikos_assert(ScalarVariableTrait::is_pointer(x));
     ikos_assert(ScalarVariableTrait::is_dynamic(y));
@@ -2094,6 +2096,7 @@ public:
 
     this->_uninitialized.forget(x);
     this->_integer.forget(x);
+    this->_fnumber.forget(x);
     this->_nullity.forget(x);
     this->_points_to_map.forget(x);
     this->_integer.forget(ScalarVariableTrait::offset_var(x));
@@ -2267,7 +2270,8 @@ public:
 
   static std::string name() {
     return "composite domain using " + UninitializedDomain::name() + ", " +
-           MachineIntDomain::name() + " and " + NullityDomain::name();
+           MachineIntDomain::name() + ", " + FNumberDomain::name() + " and " +
+           NullityDomain::name();
   }
 
 }; // end class CompositeDomain
