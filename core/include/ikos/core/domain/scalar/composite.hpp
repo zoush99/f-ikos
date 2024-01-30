@@ -48,6 +48,7 @@
 #include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/domain/scalar/abstract_domain.hpp>
 #include <ikos/core/domain/separate_domain.hpp>
+// Set the floating-point type to uninitialized.
 #include <ikos/core/domain/uninitialized/abstract_domain.hpp>
 
 namespace ikos {
@@ -94,6 +95,7 @@ template < typename VariableRef,
                                          // types.
            typename MachineIntDomain,
            typename NullityDomain >
+
 class CompositeDomain final
     : public scalar::AbstractDomain< VariableRef,
                                      MemoryLocationRef,
@@ -101,7 +103,8 @@ class CompositeDomain final
                                                       MemoryLocationRef,
                                                       UninitializedDomain,
                                                       MachineIntDomain,
-                                                      NullityDomain > > {
+                                                      NullityDomain > >
+{
 public:
   static_assert(
       uninitialized::IsAbstractDomain< UninitializedDomain,

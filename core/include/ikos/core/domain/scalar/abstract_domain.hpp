@@ -40,7 +40,6 @@
  * UNILATERAL TERMINATION OF THIS AGREEMENT.
  *
  ******************************************************************************/
-/// \todo(floating point)
 #pragma once
 
 #include <ikos/core/domain/abstract_domain.hpp>
@@ -105,6 +104,7 @@ public:
   using FnuIntervalCongruence = numeric::IntervalCongruence< FNumber >;
 
 public:
+  /// \brief Expanding the threshold can be a floating-point number.
   /// \brief Perform the widening of two abstract values with a threshold
   virtual void widen_threshold_with(const Derived& other,
                                     const MachineInt& threshold) = 0;
@@ -117,6 +117,7 @@ public:
     return tmp;
   }
 
+  /// \brief Narrowing the threshold can be a floating-point number.
   /// \brief Perform the narrowing of two abstract values with a threshold
   virtual void narrow_threshold_with(const Derived& other,
                                      const MachineInt& threshold) = 0;
@@ -547,12 +548,14 @@ public:
   /// \brief Write an integer variable to a dynamically typed variable
   virtual void dynamic_write_int(VariableRef x, VariableRef y) = 0;
 
+  /// \brief By zoush99
   /// \brief Write an float to a dynamically typed variable
   virtual void dynamic_write_float(VariableRef x, const FNumber& n) = 0;
 
   /// \brief Write a non deterministic float to a dynamically typed variable
   virtual void dynamic_write_nondet_float(VariableRef x) = 0;
 
+  /// \brief By zoush99
   /// \brief Write an float variable to a dynamically typed variable
   virtual void dynamic_write_float(VariableRef x, VariableRef y) = 0;
 
@@ -570,6 +573,7 @@ public:
   /// \brief Read an integer variable from a dynamically typed variable
   virtual void dynamic_read_int(VariableRef x, VariableRef y) = 0;
 
+  /// \brief By zoush99
   /// \brief Read an float variable from a dynamically typed variable
   virtual void dynamic_read_float(VariableRef x, VariableRef y) = 0;
 
@@ -595,6 +599,7 @@ public:
   /// \brief Assign `x` to a non deterministic value
   virtual void scalar_assign_nondet(VariableRef x) = 0;
 
+  /// \brief By zoush99
   /// \brief Assign 'x = fl-to-int f'
   virtual void scalar_float_to_int(VariableRef x, VariableRef f) = 0;
 
