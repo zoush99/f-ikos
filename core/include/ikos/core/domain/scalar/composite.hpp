@@ -94,6 +94,7 @@ template < typename VariableRef,
                                          // floating-point abstract domain
                                          // types.
            typename MachineIntDomain,
+           typename FNumberDomain,
            typename NullityDomain >
 
 class CompositeDomain final
@@ -103,8 +104,8 @@ class CompositeDomain final
                                                       MemoryLocationRef,
                                                       UninitializedDomain,
                                                       MachineIntDomain,
-                                                      NullityDomain > >
-{
+                                                      FNumberDomain,
+                                                      NullityDomain > > {
 public:
   static_assert(
       uninitialized::IsAbstractDomain< UninitializedDomain,
@@ -113,6 +114,10 @@ public:
   static_assert(
       machine_int::IsAbstractDomain< MachineIntDomain, VariableRef >::value,
       "MachineIntDomain must implement machine_int::AbstractDomain");
+  // By zoush99
+  static_assert(
+      numeric::IsAbstractDomain< FNumberDomain, FNumber, VariableRef >::value,
+      "FNumberDomain must implement numeric::AbstractDomain");
   static_assert(nullity::IsAbstractDomain< NullityDomain, VariableRef >::value,
                 "NullityDomain must implement nullity::AbstractDomain");
 
@@ -149,6 +154,9 @@ private:
   /// \brief Underlying machine integer abstract domains
   MachineIntDomain _integer;
 
+  /// \brief Underlying floating point abstract domains
+  FNumberDomain _fnumber;
+
   /// \brief Underlying nullity abstract domains
   NullityDomain _nullity;
 
@@ -159,10 +167,12 @@ private:
   /// \brief Constructor
   CompositeDomain(UninitializedDomain uninitialized,
                   MachineIntDomain integer,
+                  FNumberDomain fnumber,
                   NullityDomain nullity,
                   PointsToMap points_to_map)
       : _uninitialized(std::move(uninitialized)),
         _integer(std::move(integer)),
+        _fnumber(std::move(fnumber)),
         _nullity(std::move(nullity)),
         _points_to_map(std::move(points_to_map)) {
     this->normalize();
@@ -173,12 +183,15 @@ public:
   ///
   /// \param uninitialized The uninitialized abstract value
   /// \param integer The machine integer abstract value
+  /// \param fnumber The floating point abstract value
   /// \param nullity The nullity abstract value
   CompositeDomain(UninitializedDomain uninitialized,
                   MachineIntDomain integer,
+                  FNumberDomain fnumber,
                   NullityDomain nullity)
       : _uninitialized(std::move(uninitialized)),
         _integer(std::move(integer)),
+        _fnumber(std::move(fnumber)),
         _nullity(std::move(nullity)),
         _points_to_map(PointsToMap::top()) {
     this->normalize();
@@ -188,24 +201,28 @@ public:
   CompositeDomain(const CompositeDomain&) noexcept(
       (std::is_nothrow_copy_constructible< UninitializedDomain >::value) &&
       (std::is_nothrow_copy_constructible< MachineIntDomain >::value) &&
+      (std::is_nothrow_copy_constructible< FNumberDomain >::value) &&
       (std::is_nothrow_copy_constructible< NullityDomain >::value)) = default;
 
   /// \brief Move constructor
   CompositeDomain(CompositeDomain&&) noexcept(
       (std::is_nothrow_move_constructible< UninitializedDomain >::value) &&
       (std::is_nothrow_move_constructible< MachineIntDomain >::value) &&
+      (std::is_nothrow_move_constructible< FNumberDomain >::value) &&
       (std::is_nothrow_move_constructible< NullityDomain >::value)) = default;
 
   /// \brief Copy assignment operator
   CompositeDomain& operator=(const CompositeDomain&) noexcept(
       (std::is_nothrow_copy_assignable< UninitializedDomain >::value) &&
       (std::is_nothrow_copy_assignable< MachineIntDomain >::value) &&
+      (std::is_nothrow_copy_assignable< FNumberDomain >::value) &&
       (std::is_nothrow_copy_assignable< NullityDomain >::value)) = default;
 
   /// \brief Move assignment operator
   CompositeDomain& operator=(CompositeDomain&&) noexcept(
       (std::is_nothrow_move_assignable< UninitializedDomain >::value) &&
       (std::is_nothrow_move_assignable< MachineIntDomain >::value) &&
+      (std::is_nothrow_move_assignable< FNumberDomain >::value) &&
       (std::is_nothrow_move_assignable< NullityDomain >::value)) = default;
 
   /// \brief Destructor
@@ -238,6 +255,12 @@ public:
       this->set_to_bottom();
       return;
     }
+
+    this->_fnumber.normalize();
+    if (this->_fnumber.is_bottom()) {
+      this->set_to_bottom();
+      return;
+    }
   }
 
 private:
@@ -249,17 +272,20 @@ private:
 public:
   bool is_bottom() const override {
     return this->_uninitialized.is_bottom() || this->_nullity.is_bottom() ||
-           this->_points_to_map.is_bottom() || this->_integer.is_bottom();
+           this->_points_to_map.is_bottom() || this->_integer.is_bottom() ||
+           this->_fnumber.is_bottom();
   }
 
   bool is_top() const override {
     return this->_uninitialized.is_top() && this->_nullity.is_top() &&
-           this->_points_to_map.is_top() && this->_integer.is_top();
+           this->_points_to_map.is_top() && this->_integer.is_top() &&
+           this->_fnumber.is_top();
   }
 
   void set_to_bottom() override {
     this->_uninitialized.set_to_bottom();
     this->_integer.set_to_bottom();
+    this->_fnumber.set_to_bottom();
     this->_nullity.set_to_bottom();
     this->_points_to_map.set_to_bottom();
   }
@@ -267,6 +293,7 @@ public:
   void set_to_top() override {
     this->_uninitialized.set_to_top();
     this->_integer.set_to_top();
+    this->_fnumber.set_to_top();
     this->_nullity.set_to_top();
     this->_points_to_map.set_to_top();
   }
@@ -279,6 +306,7 @@ public:
     } else {
       return this->_uninitialized.leq(other._uninitialized) &&
              this->_integer.leq(other._integer) &&
+             this->_fnumber.leq(other._fnumber) &&
              this->_nullity.leq(other._nullity) &&
              this->_points_to_map.leq(other._points_to_map);
     }
@@ -292,6 +320,7 @@ public:
     } else {
       return this->_uninitialized.equals(other._uninitialized) &&
              this->_integer.equals(other._integer) &&
+             this->_fnumber.equals(other._fnumber) &&
              this->_nullity.equals(other._nullity) &&
              this->_points_to_map.equals(other._points_to_map);
     }
@@ -307,6 +336,7 @@ public:
     } else {
       this->_uninitialized.join_with(std::move(other._uninitialized));
       this->_integer.join_with(std::move(other._integer));
+      this->_fnumber.join_with(std::move(other._fnumber));
       this->_nullity.join_with(std::move(other._nullity));
       this->_points_to_map.join_with(std::move(other._points_to_map));
     }
@@ -321,6 +351,7 @@ public:
     } else {
       this->_uninitialized.join_with(other._uninitialized);
       this->_integer.join_with(other._integer);
+      this->_fnumber.join_with(other._fnumber);
       this->_nullity.join_with(other._nullity);
       this->_points_to_map.join_with(other._points_to_map);
     }
@@ -336,6 +367,7 @@ public:
     } else {
       this->_uninitialized.join_loop_with(std::move(other._uninitialized));
       this->_integer.join_loop_with(std::move(other._integer));
+      this->_fnumber.join_loop_with(std::move(other._fnumber));
       this->_nullity.join_loop_with(std::move(other._nullity));
       this->_points_to_map.join_loop_with(std::move(other._points_to_map));
     }
@@ -350,6 +382,7 @@ public:
     } else {
       this->_uninitialized.join_loop_with(other._uninitialized);
       this->_integer.join_loop_with(other._integer);
+      this->_fnumber.join_loop_with(other._fnumber);
       this->_nullity.join_loop_with(other._nullity);
       this->_points_to_map.join_loop_with(other._points_to_map);
     }
@@ -365,6 +398,7 @@ public:
     } else {
       this->_uninitialized.join_iter_with(std::move(other._uninitialized));
       this->_integer.join_iter_with(std::move(other._integer));
+      this->_fnumber.join_iter_with(std::move(other._fnumber));
       this->_nullity.join_iter_with(std::move(other._nullity));
       this->_points_to_map.join_iter_with(std::move(other._points_to_map));
     }
@@ -379,6 +413,7 @@ public:
     } else {
       this->_uninitialized.join_iter_with(other._uninitialized);
       this->_integer.join_iter_with(other._integer);
+      this->_fnumber.join_iter_with(other._fnumber);
       this->_nullity.join_iter_with(other._nullity);
       this->_points_to_map.join_iter_with(other._points_to_map);
     }
@@ -393,6 +428,7 @@ public:
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
       this->_integer.widen_with(other._integer);
+      this->_fnumber.widen_with(other._fnumber);
       this->_nullity.widen_with(other._nullity);
       this->_points_to_map.widen_with(other._points_to_map);
     }
@@ -409,6 +445,7 @@ public:
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
       this->_integer.widen_threshold_with(other._integer, threshold);
+      this->_fnumber.widen_threshold_with(other._fnumber, threshold);
       this->_nullity.widen_with(other._nullity);
       this->_points_to_map.widen_with(other._points_to_map);
     }
@@ -423,6 +460,7 @@ public:
     } else {
       this->_uninitialized.meet_with(other._uninitialized);
       this->_integer.meet_with(other._integer);
+      this->_fnumber.meet_with(other._fnumber);
       this->_nullity.meet_with(other._nullity);
       this->_points_to_map.meet_with(other._points_to_map);
     }
@@ -437,6 +475,7 @@ public:
     } else {
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_with(other._integer);
+      this->_fnumber.narrow_with(other._fnumber);
       this->_nullity.narrow_with(other._nullity);
       this->_points_to_map.narrow_with(other._points_to_map);
     }
@@ -453,6 +492,7 @@ public:
     } else {
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_threshold_with(other._integer, threshold);
+      this->_fnumber.narrow_threshold_with(other._fnumber, threshold);
       this->_nullity.narrow_with(other._nullity);
       this->_points_to_map.narrow_with(other._points_to_map);
     }
@@ -466,6 +506,7 @@ public:
     } else {
       return CompositeDomain(this->_uninitialized.join(other._uninitialized),
                              this->_integer.join(other._integer),
+                             this->_fnumber.join(other._fnumber),
                              this->_nullity.join(other._nullity),
                              this->_points_to_map.join(other._points_to_map));
     }
@@ -480,6 +521,7 @@ public:
       return CompositeDomain(this->_uninitialized.join_loop(
                                  other._uninitialized),
                              this->_integer.join_loop(other._integer),
+                             this->_fnumber.join_loop(other._fnumber),
                              this->_nullity.join_loop(other._nullity),
                              this->_points_to_map.join_loop(
                                  other._points_to_map));
@@ -495,6 +537,7 @@ public:
       return CompositeDomain(this->_uninitialized.join_iter(
                                  other._uninitialized),
                              this->_integer.join_iter(other._integer),
+                             this->_fnumber.join_iter(other._fnumber),
                              this->_nullity.join_iter(other._nullity),
                              this->_points_to_map.join_iter(
                                  other._points_to_map));
@@ -510,6 +553,7 @@ public:
       return CompositeDomain(this->_uninitialized.widening(
                                  other._uninitialized),
                              this->_integer.widening(other._integer),
+                             this->_fnumber.widening(other._fnumber),
                              this->_nullity.widening(other._nullity),
                              this->_points_to_map.widening(
                                  other._points_to_map));
@@ -529,6 +573,8 @@ public:
                                  other._uninitialized),
                              this->_integer.widening_threshold(other._integer,
                                                                threshold),
+                             this->_fnumber.widening_threshold(other._fnumber,
+                                                               threshold),
                              this->_nullity.widening(other._nullity),
                              this->_points_to_map.widening(
                                  other._points_to_map));
@@ -543,6 +589,7 @@ public:
     } else {
       return CompositeDomain(this->_uninitialized.meet(other._uninitialized),
                              this->_integer.meet(other._integer),
+                             this->_fnumber.meet(other._fnumber),
                              this->_nullity.meet(other._nullity),
                              this->_points_to_map.meet(other._points_to_map));
     }
@@ -557,6 +604,7 @@ public:
       return CompositeDomain(this->_uninitialized.narrowing(
                                  other._uninitialized),
                              this->_integer.narrowing(other._integer),
+                             this->_fnumber.narrowing(other._fnumber),
                              this->_nullity.narrowing(other._nullity),
                              this->_points_to_map.narrowing(
                                  other._points_to_map));
@@ -575,6 +623,8 @@ public:
       return CompositeDomain(this->_uninitialized.narrowing(
                                  other._uninitialized),
                              this->_integer.narrowing_threshold(other._integer,
+                                                                threshold),
+                             this->_fnumber.narrowing_threshold(other._fnumber,
                                                                 threshold),
                              this->_nullity.narrowing(other._nullity),
                              this->_points_to_map.narrowing(
@@ -994,7 +1044,7 @@ public:
 
     this->_uninitialized.assign_initialized(x);
     /// \todo bugs here!!!
-    this->_integer.assign(x, n);
+    this->_fnumber.assign(x, n);
   }
 
   void float_assign_undef(VariableRef x) override {
@@ -1005,7 +1055,7 @@ public:
     }
 
     this->_uninitialized.assign_uninitialized(x);
-    this->_integer.forget(x);
+    this->_fnumber.forget(x);
   }
 
   void float_assign_nondet(VariableRef x) override {
@@ -1016,7 +1066,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_fnumber.forget(x);
   }
 
   void float_assign(VariableRef x, VariableRef y) override {
@@ -1028,7 +1078,7 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
+    this->_fnumber.assign(x, y);
   }
 
   void float_assign(VariableRef x, const FnuLinearExpression& e) override {
@@ -1049,7 +1099,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.assign(x, e);
+    this->_fnumber.assign(x, e);
   }
 
   /*
@@ -1102,7 +1152,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y, z);
+    this->_fnumber.apply(op, x, y, z);
   }
 
   void float_apply(FnuBinaryOperator op,
@@ -1124,7 +1174,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y, z);
+    this->_fnumber.apply(op, x, y, z);
   }
 
   void float_apply(FnuBinaryOperator op,
@@ -1146,7 +1196,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.apply(op, x, y, z);
+    this->_fnumber.apply(op, x, y, z);
   }
 
   void float_add(FnuPredicate pred, VariableRef x, VariableRef y) override {
@@ -1165,7 +1215,7 @@ public:
       return;
     }
 
-    this->_integer.add(pred, x, y);
+    this->_fnumber.add(pred, x, y);
   }
 
   void float_add(FnuPredicate pred, VariableRef x, const FNumber& y) override {
@@ -1182,7 +1232,7 @@ public:
       return;
     }
 
-    this->_integer.add(pred, x, y);
+    this->_fnumber.add(pred, x, y);
   }
 
   void float_add(FnuPredicate pred, const FNumber& x, VariableRef y) override {
@@ -1199,7 +1249,7 @@ public:
       return;
     }
 
-    this->_integer.add(pred, x, y);
+    this->_fnumber.add(pred, x, y);
   }
 
   void float_set(VariableRef x, const FnuInterval& value) override {
@@ -1210,7 +1260,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.set(x, value);
+    this->_fnumber.set(x, value);
   }
 
   void float_set(VariableRef x, const FnuCongruence& value) override {
@@ -1221,7 +1271,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.set(x, value);
+    this->_fnumber.set(x, value);
   }
 
   void float_set(VariableRef x, const FnuIntervalCongruence& value) override {
@@ -1232,26 +1282,26 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.set(x, value);
+    this->_fnumber.set(x, value);
   }
 
   void float_refine(VariableRef x, const FnuInterval& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.refine(x, value);
+    this->_fnumber.refine(x, value);
   }
 
   void float_refine(VariableRef x, const FnuCongruence& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.refine(x, value);
+    this->_fnumber.refine(x, value);
   }
 
   void float_refine(VariableRef x,
                     const FnuIntervalCongruence& value) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    this->_integer.refine(x, value);
+    this->_fnumber.refine(x, value);
   }
 
   void float_forget(VariableRef x) override {
@@ -1262,40 +1312,40 @@ public:
     }
 
     this->_uninitialized.forget(x);
-    this->_integer.forget(x);
+    this->_fnumber.forget(x);
   }
 
   FnuInterval float_to_interval(VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    return this->_integer.to_interval(x);
+    return this->_fnumber.to_interval(x);
   }
 
   FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
-    return this->_integer.to_interval(e);
+    return this->_fnumber.to_interval(e);
   }
 
   FnuCongruence float_to_congruence(VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    return this->_integer.to_congruence(x);
+    return this->_fnumber.to_congruence(x);
   }
 
   FnuCongruence float_to_congruence(
       const FnuLinearExpression& e) const override {
-    return this->_integer.to_congruence(e);
+    return this->_fnumber.to_congruence(e);
   }
 
   FnuIntervalCongruence float_to_interval_congruence(
       VariableRef x) const override {
     ikos_assert(ScalarVariableTrait::is_float(x));
 
-    return this->_integer.to_interval_congruence(x);
+    return this->_fnumber.to_interval_congruence(x);
   }
 
   FnuIntervalCongruence float_to_interval_congruence(
       const FnuLinearExpression& e) const override {
-    return this->_integer.to_interval_congruence(e);
+    return this->_fnumber.to_interval_congruence(e);
   }
 
   /// @}
@@ -1886,10 +1936,10 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.assign(x, n);
+    this->_fnumber.assign(x, n);
     this->_nullity.forget(x);
     this->_points_to_map.forget(x);
-    this->_integer.forget(ScalarVariableTrait::offset_var(x));
+    this->_fnumber.forget(ScalarVariableTrait::offset_var(x));
   }
 
   void dynamic_write_nondet_float(VariableRef x) override {
@@ -1917,11 +1967,11 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
+    this->_fnumber.assign(x, y);
 
     this->_nullity.forget(x);
     this->_points_to_map.forget(x);
-    this->_integer.forget(ScalarVariableTrait::offset_var(x));
+    this->_fnumber.forget(ScalarVariableTrait::offset_var(x));
   }
 
   void dynamic_write_null(VariableRef x) override {
@@ -2005,7 +2055,7 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
+    this->_fnumber.assign(x, y);
   }
   void dynamic_read_pointer(VariableRef x, VariableRef y) override {
     ikos_assert(ScalarVariableTrait::is_pointer(x));
