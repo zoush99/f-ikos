@@ -60,14 +60,16 @@ namespace scalar {
 template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
-           typename MachineIntDomainT >
+           typename MachineIntDomainT,
+           typename FNumberDomainT>
 class MachineIntDomain final
     : public scalar::AbstractDomain< VariableRef,
                                      MemoryLocationRef,
                                      MachineIntDomain< VariableRef,
                                                        MemoryLocationRef,
                                                        UninitializedDomain,
-                                                       MachineIntDomainT > > {
+                                                       MachineIntDomainT,
+                                                       FNumberDomainT> > {
 public:
   static_assert(
       uninitialized::IsAbstractDomain< UninitializedDomain,
@@ -76,9 +78,10 @@ public:
   static_assert(
       machine_int::IsAbstractDomain< MachineIntDomainT, VariableRef >::value,
       "MachineIntDomain must implement machine_int::AbstractDomain");
-/*  static_assert(
-      numeric::IsAbstractDomain< NumericDomainT, FNumber, VariableRef >::value,
-      "MachineIntDomain must implement numeric::AbstractDomain");*/
+  // By zoush99
+  static_assert(
+      numeric::IsAbstractDomain< FNumberDomainT, FNumber, VariableRef >::value,
+      "MachineIntDomain must implement numeric::AbstractDomain");
 
 public:
   using IntUnaryOperator = machine_int::UnaryOperator;

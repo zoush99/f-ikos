@@ -51,6 +51,7 @@
 #include <ikos/analyzer/analysis/value/abstract_domain.hpp>
 /// \brief (This place should also consider the numerical abstraction domain.)
 #include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
+#include <ikos/analyzer/analysis/value/numeric_domain.hpp>  // By zoush99
 
 namespace ikos {
 namespace analyzer {
@@ -65,7 +66,6 @@ using UninitializedAbstractDomain =
 /// \brief Nullity abstract domain
 using NullityAbstractDomain = core::nullity::SeparateDomain< Variable* >;
 
-/// \todo(floating point)
 /// \brief Scalar abstract domain
 using ScalarAbstractDomain =
     core::scalar::CompositeDomain< Variable*,
@@ -75,6 +75,7 @@ using ScalarAbstractDomain =
                                    // using MachineIntAbstractDomain =
                                    // core::machine_int::PolymorphicDomain<
                                    // Variable* >;
+                                   NumericAbstractDomain,
                                    NullityAbstractDomain >;
 
 /// \brief Lifetime abstract domain

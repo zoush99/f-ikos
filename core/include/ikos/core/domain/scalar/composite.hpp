@@ -48,7 +48,6 @@
 #include <ikos/core/domain/numeric/abstract_domain.hpp> // By zoush99
 #include <ikos/core/domain/scalar/abstract_domain.hpp>
 #include <ikos/core/domain/separate_domain.hpp>
-// Set the floating-point type to uninitialized.
 #include <ikos/core/domain/uninitialized/abstract_domain.hpp>
 
 namespace ikos {
@@ -60,6 +59,7 @@ namespace scalar {
 /// The composite domain is a scalar domain implemented on top of:
 ///   * An uninitialized abstract domain
 ///   * A machine integer abstract domain
+///   * A floating point abstract domain
 ///   * A nullity abstract domain
 ///
 /// The composite domain can express invariants on machine integer variables,
@@ -445,7 +445,7 @@ public:
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
       this->_integer.widen_threshold_with(other._integer, threshold);
-      this->_fnumber.widen_threshold_with(other._fnumber, threshold);
+//      this->_fnumber.widen_threshold_with(other._fnumber, threshold);
       this->_nullity.widen_with(other._nullity);
       this->_points_to_map.widen_with(other._points_to_map);
     }
@@ -492,7 +492,7 @@ public:
     } else {
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_threshold_with(other._integer, threshold);
-      this->_fnumber.narrow_threshold_with(other._fnumber, threshold);
+//      this->_fnumber.narrow_threshold_with(other._fnumber, threshold);
       this->_nullity.narrow_with(other._nullity);
       this->_points_to_map.narrow_with(other._points_to_map);
     }
@@ -573,8 +573,8 @@ public:
                                  other._uninitialized),
                              this->_integer.widening_threshold(other._integer,
                                                                threshold),
-                             this->_fnumber.widening_threshold(other._fnumber,
-                                                               threshold),
+//                             this->_fnumber.widening_threshold(other._fnumber,
+//                                                               threshold),
                              this->_nullity.widening(other._nullity),
                              this->_points_to_map.widening(
                                  other._points_to_map));
@@ -624,8 +624,8 @@ public:
                                  other._uninitialized),
                              this->_integer.narrowing_threshold(other._integer,
                                                                 threshold),
-                             this->_fnumber.narrowing_threshold(other._fnumber,
-                                                                threshold),
+//                             this->_fnumber.narrowing_threshold(other._fnumber,
+//                                                                threshold),
                              this->_nullity.narrowing(other._nullity),
                              this->_points_to_map.narrowing(
                                  other._points_to_map));
