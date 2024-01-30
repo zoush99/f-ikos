@@ -106,7 +106,6 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
   if (ctx.opts.use_partitioning_domain) {
     return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
   } else {
-    /// \brief In template: only virtual member functions can be marked 'override'
     return MemoryAbstractDomain(inv);
   }
 }

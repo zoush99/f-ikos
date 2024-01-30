@@ -527,6 +527,7 @@ public:
     }
   }
 
+  /// \brief Expanding the threshold can be a floating-point number.
   void widen_threshold_with(const PartitioningDomain& other,
                             const MachineInt& threshold) override {
     if (this->is_bottom()) {
@@ -641,6 +642,7 @@ public:
     }
   }
 
+  /// \brief Narrowing the threshold can be a floating-point number.
   void narrow_threshold_with(const PartitioningDomain& other,
                              const MachineInt& threshold) override {
     if (this->is_bottom()) {
