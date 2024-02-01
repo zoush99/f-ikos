@@ -158,8 +158,9 @@ if(NOT TBB_FOUND)
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # Linux
     # set(TBB_DEFAULT_SEARCH_DIR "/opt/intel/tbb")
-    set(TBB_DEFAULT_SEARCH_DIR "/usr/local/tbb/")
-    # TODO: Check compiler version to see the suffix should be <arch>/gcc4.1 or
+    # In 104
+     set(TBB_DEFAULT_SEARCH_DIR "/usr/local/tbb/")
+    # TODO: Check compiler version to see the suffSix should be <arch>/gcc4.1 or
     #       <arch>/gcc4.1. For now, assume that the compiler is more recent than
     #       gcc 4.4.x or later.
     if(CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
