@@ -89,10 +89,7 @@ namespace scalar {
 /// uninitialized abstract domain `UninitializedDomain`.
 template < typename VariableRef,
            typename MemoryLocationRef,
-           typename UninitializedDomain, // It seems that uninitialized abstract
-                                         // domain types can be transformed into
-                                         // floating-point abstract domain
-                                         // types.
+           typename UninitializedDomain,
            typename MachineIntDomain,
            typename FNumberDomain,
            typename NullityDomain >
@@ -443,9 +440,11 @@ public:
     } else if (other.is_bottom()) {
       return;
     } else {
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       this->_uninitialized.widen_with(other._uninitialized);
       this->_integer.widen_threshold_with(other._integer, threshold);
-//      this->_fnumber.widen_threshold_with(other._fnumber, threshold);
+      this->_fnumber.widen_with(other._fnumber);
       this->_nullity.widen_with(other._nullity);
       this->_points_to_map.widen_with(other._points_to_map);
     }
@@ -490,9 +489,11 @@ public:
     } else if (other.is_bottom()) {
       this->set_to_bottom();
     } else {
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_threshold_with(other._integer, threshold);
-//      this->_fnumber.narrow_threshold_with(other._fnumber, threshold);
+      this->_fnumber.narrow_with(other._fnumber);
       this->_nullity.narrow_with(other._nullity);
       this->_points_to_map.narrow_with(other._points_to_map);
     }
@@ -569,12 +570,13 @@ public:
     } else if (other.is_bottom()) {
       return *this;
     } else {
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       return CompositeDomain(this->_uninitialized.widening(
                                  other._uninitialized),
                              this->_integer.widening_threshold(other._integer,
                                                                threshold),
-//                             this->_fnumber.widening_threshold(other._fnumber,
-//                                                               threshold),
+                             this->_fnumber.widening(other._fnumber),
                              this->_nullity.widening(other._nullity),
                              this->_points_to_map.widening(
                                  other._points_to_map));
@@ -620,12 +622,13 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       return CompositeDomain(this->_uninitialized.narrowing(
                                  other._uninitialized),
                              this->_integer.narrowing_threshold(other._integer,
                                                                 threshold),
-//                             this->_fnumber.narrowing_threshold(other._fnumber,
-//                                                                threshold),
+                             this->_fnumber.narrowing(other._fnumber),
                              this->_nullity.narrowing(other._nullity),
                              this->_points_to_map.narrowing(
                                  other._points_to_map));
