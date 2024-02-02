@@ -56,12 +56,13 @@ namespace scalar {
 ///
 /// This class implements a scalar abstract domain that handles machine integers
 /// and ignore floating points and pointers safely.
-/// (Choose not to ignore floating point values, but rather pass them down.By zoush99)
+/// (Choose not to ignore floating point values, but rather pass them down.By
+/// zoush99)
 template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
            typename MachineIntDomainT,
-           typename FNumberDomainT>
+           typename FNumberDomainT >
 class MachineIntDomain final
     : public scalar::AbstractDomain< VariableRef,
                                      MemoryLocationRef,
@@ -69,7 +70,7 @@ class MachineIntDomain final
                                                        MemoryLocationRef,
                                                        UninitializedDomain,
                                                        MachineIntDomainT,
-                                                       FNumberDomainT> > {
+                                                       FNumberDomainT > > {
 public:
   static_assert(
       uninitialized::IsAbstractDomain< UninitializedDomain,
@@ -115,37 +116,48 @@ private:
   /// \brief Underlying machine integer abstract domains
   MachineIntDomainT _integer;
 
+  /// \brief By zoush99
+  /// \brief Underlying floating point abstract domains
+  FNumberDomainT _fnumber;
+
 public:
   /// \brief Create an abstract value with the given underlying abstract values
   ///
   /// \param uninitialized The uninitialized abstract value
   /// \param integer The machine integer abstract value
-  MachineIntDomain(UninitializedDomain uninitialized, MachineIntDomainT integer)
-      : _uninitialized(std::move(uninitialized)), _integer(std::move(integer)) {
+  /// \param fnumber The floating point abstract value
+  MachineIntDomain(UninitializedDomain uninitialized,
+                   MachineIntDomainT integer,
+                   FNumberDomainT fnumber)
+      : _uninitialized(std::move(uninitialized)),
+        _integer(std::move(integer)),
+        _fnumber(std::move(fnumber)) {
     this->normalize();
   }
 
   /// \brief Copy constructor
   MachineIntDomain(const MachineIntDomain&) noexcept(
       (std::is_nothrow_copy_constructible< UninitializedDomain >::value) &&
-      (std::is_nothrow_copy_constructible< MachineIntDomainT >::value)) =
-      default;
+      (std::is_nothrow_copy_constructible< MachineIntDomainT >::value) &&
+      (std::is_nothrow_copy_constructible< FNumberDomainT >::value)) = default;
 
   /// \brief Move constructor
   MachineIntDomain(MachineIntDomain&&) noexcept(
       (std::is_nothrow_move_constructible< UninitializedDomain >::value) &&
-      (std::is_nothrow_move_constructible< MachineIntDomainT >::value)) =
-      default;
+      (std::is_nothrow_move_constructible< MachineIntDomainT >::value) &&
+      (std::is_nothrow_move_constructible< FNumberDomainT >::value)) = default;
 
   /// \brief Copy assignment operator
   MachineIntDomain& operator=(const MachineIntDomain&) noexcept(
       (std::is_nothrow_copy_assignable< UninitializedDomain >::value) &&
-      (std::is_nothrow_copy_assignable< MachineIntDomainT >::value)) = default;
+      (std::is_nothrow_copy_assignable< MachineIntDomainT >::value) &&
+      (std::is_nothrow_copy_assignable< FNumberDomainT >::value)) = default;
 
   /// \brief Move assignment operator
   MachineIntDomain& operator=(MachineIntDomain&&) noexcept(
       (std::is_nothrow_move_assignable< UninitializedDomain >::value) &&
-      (std::is_nothrow_move_assignable< MachineIntDomainT >::value)) = default;
+      (std::is_nothrow_move_assignable< MachineIntDomainT >::value) &&
+      (std::is_nothrow_move_assignable< FNumberDomainT >::value)) = default;
 
   /// \brief Destructor
   ~MachineIntDomain() override = default;
@@ -175,21 +187,25 @@ private:
 
 public:
   bool is_bottom() const override {
-    return this->_uninitialized.is_bottom() || this->_integer.is_bottom();
+    return this->_uninitialized.is_bottom() || this->_integer.is_bottom() ||
+           this->_fnumber.is_bottom();
   }
 
   bool is_top() const override {
-    return this->_uninitialized.is_top() && this->_integer.is_top();
+    return this->_uninitialized.is_top() && this->_integer.is_top() ||
+           this->_fnumber.is_top();
   }
 
   void set_to_bottom() override {
     this->_uninitialized.set_to_bottom();
     this->_integer.set_to_bottom();
+    this->_fnumber.set_to_bottom();
   }
 
   void set_to_top() override {
     this->_uninitialized.set_to_top();
     this->_integer.set_to_top();
+    this->_fnumber.set_to_top();
   }
 
   bool leq(const MachineIntDomain& other) const override {
@@ -199,7 +215,8 @@ public:
       return false;
     } else {
       return this->_uninitialized.leq(other._uninitialized) &&
-             this->_integer.leq(other._integer);
+             this->_integer.leq(other._integer) &&
+             this->_fnumber.leq(other._fnumber);
     }
   }
 
@@ -210,7 +227,8 @@ public:
       return false;
     } else {
       return this->_uninitialized.equals(other._uninitialized) &&
-             this->_integer.equals(other._integer);
+             this->_integer.equals(other._integer) &&
+             this->_fnumber.equals(other._fnumber);
     }
   }
 
@@ -224,6 +242,7 @@ public:
     } else {
       this->_uninitialized.join_with(std::move(other._uninitialized));
       this->_integer.join_with(std::move(other._integer));
+      this->_fnumber.join_with(std::move(other._fnumber));
     }
   }
 
@@ -236,6 +255,7 @@ public:
     } else {
       this->_uninitialized.join_with(other._uninitialized);
       this->_integer.join_with(other._integer);
+      this->_fnumber.join_with(other._fnumber);
     }
   }
 
@@ -249,6 +269,7 @@ public:
     } else {
       this->_uninitialized.join_loop_with(std::move(other._uninitialized));
       this->_integer.join_loop_with(std::move(other._integer));
+      this->_fnumber.join_loop_with(std::move(other._fnumber));
     }
   }
 
@@ -261,6 +282,7 @@ public:
     } else {
       this->_uninitialized.join_loop_with(other._uninitialized);
       this->_integer.join_loop_with(other._integer);
+      this->_fnumber.join_loop_with(other._fnumber);
     }
   }
 
@@ -274,6 +296,7 @@ public:
     } else {
       this->_uninitialized.join_iter_with(std::move(other._uninitialized));
       this->_integer.join_iter_with(std::move(other._integer));
+      this->_fnumber.join_iter_with(std::move(other._fnumber));
     }
   }
 
@@ -286,6 +309,7 @@ public:
     } else {
       this->_uninitialized.join_iter_with(other._uninitialized);
       this->_integer.join_iter_with(other._integer);
+      this->_fnumber.join_iter_with(other._fnumber);
     }
   }
 
@@ -298,9 +322,11 @@ public:
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
       this->_integer.widen_with(other._integer);
+      this->_fnumber.widen_with(other._fnumber);
     }
   }
 
+  /// \brief It feels a bit off, but I'm not sure if it's like that. By zoush99
   void widen_threshold_with(const MachineIntDomain& other,
                             const MachineInt& threshold) override {
     this->normalize();
@@ -310,7 +336,10 @@ public:
       return;
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       this->_integer.widen_threshold_with(other._integer, threshold);
+      this->_fnumber.widen_with(other._fnumber);
     }
   }
 
@@ -323,6 +352,7 @@ public:
     } else {
       this->_uninitialized.meet_with(other._uninitialized);
       this->_integer.meet_with(other._integer);
+      this->_fnumber.meet_with(other._fnumber);
     }
   }
 
@@ -335,6 +365,7 @@ public:
     } else {
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_with(other._integer);
+      this->_fnumber.narrow_with(other._fnumber);
     }
   }
 
@@ -346,8 +377,11 @@ public:
     } else if (other.is_bottom()) {
       this->set_to_bottom();
     } else {
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_threshold_with(other._integer, threshold);
+      this->_fnumber.widen_with(other._fnumber);
     }
   }
 
@@ -358,7 +392,8 @@ public:
       return *this;
     } else {
       return MachineIntDomain(this->_uninitialized.join(other._uninitialized),
-                              this->_integer.join(other._integer));
+                              this->_integer.join(other._integer),
+                              this->_fnumber.join(other._fnumber));
     }
   }
 
@@ -370,7 +405,8 @@ public:
     } else {
       return MachineIntDomain(this->_uninitialized.join_loop(
                                   other._uninitialized),
-                              this->_integer.join_loop(other._integer));
+                              this->_integer.join_loop(other._integer),
+                              this->_fnumber.join_loop(other._fnumber));
     }
   }
 
@@ -382,7 +418,8 @@ public:
     } else {
       return MachineIntDomain(this->_uninitialized.join_iter(
                                   other._uninitialized),
-                              this->_integer.join_iter(other._integer));
+                              this->_integer.join_iter(other._integer),
+                              this->_fnumber.join_iter(other._fnumber));
     }
   }
 
@@ -394,7 +431,8 @@ public:
     } else {
       return MachineIntDomain(this->_uninitialized.widening(
                                   other._uninitialized),
-                              this->_integer.widening(other._integer));
+                              this->_integer.widening(other._integer),
+                              this->_fnumber.widening(other._fnumber));
     }
   }
 
@@ -406,10 +444,12 @@ public:
     } else if (other.is_bottom()) {
       return *this;
     } else {
+      // I won't consider widening the threshold for floating-point types at this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.widening(
                                   other._uninitialized),
                               this->_integer.widening_threshold(other._integer,
-                                                                threshold));
+                                                                threshold),
+                              this->_fnumber.widening(other._fnumber));
     }
   }
 
@@ -420,7 +460,8 @@ public:
       return other;
     } else {
       return MachineIntDomain(this->_uninitialized.meet(other._uninitialized),
-                              this->_integer.meet(other._integer));
+                              this->_integer.meet(other._integer),
+                              this->_fnumber.meet(other._fnumber));
     }
   }
 
@@ -430,9 +471,11 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
+      // I won't consider widening the threshold for floating-point types at this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
-                              this->_integer.narrowing(other._integer));
+                              this->_integer.narrowing(other._integer),
+                              this->_fnumber.narrowing(other._fnumber));
     }
   }
 
@@ -444,10 +487,12 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
+      // I won't consider widening the threshold for floating-point types at this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
                               this->_integer.narrowing_threshold(other._integer,
-                                                                 threshold));
+                                                                 threshold),
+                              this->_fnumber.narrowing(other._fnumber));
     }
   }
 
@@ -841,80 +886,80 @@ public:
     this->_uninitialized.forget(x);
   }
 */
-/*
+  /*
 
-  void float_assign(VariableRef x,const FNumber& n) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
+    void float_assign(VariableRef x,const FNumber& n) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
 
-    if (this->is_bottom_fast()) {
-      return;
-    }
-    this->_uninitialized.assign_initialized(x);
-    /// \todo bugs here!!!
-    /// \details: In template: no matching member function for call to 'assign'
-    this->_integer.assign(x, n);
-  }
-
-  void float_assign_undef(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-
-    if (this->is_bottom_fast()) {
-      return;
+      if (this->is_bottom_fast()) {
+        return;
+      }
+      this->_uninitialized.assign_initialized(x);
+      /// \todo bugs here!!!
+      /// \details: In template: no matching member function for call to
+    'assign' this->_integer.assign(x, n);
     }
 
-    this->_uninitialized.assign_uninitialized(x);
-    this->_integer.forget(x);
-  }
+    void float_assign_undef(VariableRef x) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
 
-  void float_assign_nondet(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
+      if (this->is_bottom_fast()) {
+        return;
+      }
 
-    if (this->is_bottom_fast()) {
-      return;
+      this->_uninitialized.assign_uninitialized(x);
+      this->_integer.forget(x);
     }
 
-    this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
-  }
+    void float_assign_nondet(VariableRef x) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
 
-  void float_assign(VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-    ikos_assert(ScalarVariableTrait::is_float(y));
+      if (this->is_bottom_fast()) {
+        return;
+      }
 
-    if (this->is_bottom_fast()) {
-      return;
+      this->_uninitialized.assign_initialized(x);
+      this->_integer.forget(x);
     }
 
-    this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
-  }
+    void float_assign(VariableRef x, VariableRef y) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
+      ikos_assert(ScalarVariableTrait::is_float(y));
 
-  void float_assign(VariableRef x, const FnuLinearExpression& e) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
+      if (this->is_bottom_fast()) {
+        return;
+      }
 
-    if (this->is_bottom_fast()) {
-      return;
+      this->_uninitialized.assign(x, y);
+      this->_integer.assign(x, y);
     }
 
-    for (const auto& term : e) {
-      ikos_assert(ScalarVariableTrait::is_float(term.first));
-      this->_uninitialized.assert_initialized(term.first);
+    void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+      ikos_assert(ScalarVariableTrait::is_float(x));
+
+      if (this->is_bottom_fast()) {
+        return;
+      }
+
+      for (const auto& term : e) {
+        ikos_assert(ScalarVariableTrait::is_float(term.first));
+        this->_uninitialized.assert_initialized(term.first);
+      }
+
+      if (this->_uninitialized.is_bottom()) {
+        this->set_to_bottom();
+        return;
+      }
+
+      this->_uninitialized.assign_initialized(x);
+      this->_integer.assign(x, e);
     }
 
-    if (this->_uninitialized.is_bottom()) {
-      this->set_to_bottom();
-      return;
-    }
+  */
+  /*    void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
+      override{
 
-    this->_uninitialized.assign_initialized(x);
-    this->_integer.assign(x, e);
-  }
-
-*/
-/*    void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
-    override{
-
-    }*//*
+      }*//*
 
 
   void float_apply(FnuBinaryOperator op,
@@ -1138,7 +1183,7 @@ public:
   /// \todo Many details have been omitted, but in fact, these details should be
   /// implemented. By zoush99
   /// \details(Set all calls to null.)
-  void float_assign(VariableRef x,const FNumber& n) override {
+  void float_assign(VariableRef x, const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
   }
 
@@ -1238,7 +1283,7 @@ public:
 
   /// \todo(floating point)
   FnuInterval float_to_interval(const FnuLinearExpression& e) const override {
-      return FnuInterval(1);
+    return FnuInterval(1);
   }
 
   FnuCongruence float_to_congruence(VariableRef x) const override {
@@ -1598,7 +1643,7 @@ public:
   /// \brief By zoush99
   void dynamic_write_float(VariableRef x, const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_dynamic(x));
-//    ikos_assert(IntVariableTrait::bit_width(x) == n.bit_width());
+    //    ikos_assert(IntVariableTrait::bit_width(x) == n.bit_width());
     if (this->is_bottom_fast()) {
       return;
     }
@@ -1623,8 +1668,8 @@ public:
   void dynamic_write_float(VariableRef x, VariableRef y) override {
     ikos_assert(ScalarVariableTrait::is_dynamic(x));
     ikos_assert(ScalarVariableTrait::is_float(y));
-/*    ikos_assert(IntVariableTrait::bit_width(x) ==
-                IntVariableTrait::bit_width(y));*/
+    /*    ikos_assert(IntVariableTrait::bit_width(x) ==
+                    IntVariableTrait::bit_width(y));*/
     if (this->is_bottom_fast()) {
       return;
     }
@@ -1691,8 +1736,8 @@ public:
   void dynamic_read_float(VariableRef x, VariableRef y) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
     ikos_assert(ScalarVariableTrait::is_dynamic(y));
-/*    ikos_assert(IntVariableTrait::bit_width(x) ==
-                IntVariableTrait::bit_width(y));*/
+    /*    ikos_assert(IntVariableTrait::bit_width(x) ==
+                    IntVariableTrait::bit_width(y));*/
     if (this->is_bottom_fast()) {
       return;
     }
@@ -1769,8 +1814,7 @@ public:
     }
   }
 
-  void scalar_float_to_int(VariableRef f,
-                             VariableRef x) override {
+  void scalar_float_to_int(VariableRef f, VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_int(x));
     ikos_assert(ScalarVariableTrait::is_float(f));
 
@@ -1783,8 +1827,7 @@ public:
     this->_integer.forget(x);
   }
 
-  void scalar_int_to_float(VariableRef x,
-                             VariableRef f) override {
+  void scalar_int_to_float(VariableRef x, VariableRef f) override {
     ikos_assert(ScalarVariableTrait::is_float(f));
     ikos_assert(ScalarVariableTrait::is_int(x));
 
