@@ -2261,6 +2261,8 @@ public:
       o << ", ";
       this->_integer.dump(o);
       o << ", ";
+      this->_fnumber.dump(o);
+      o<<", ";
       this->_nullity.dump(o);
       o << ", ";
       this->_points_to_map.dump(o);
