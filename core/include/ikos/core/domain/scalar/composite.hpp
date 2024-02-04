@@ -59,7 +59,7 @@ namespace scalar {
 /// The composite domain is a scalar domain implemented on top of:
 ///   * An uninitialized abstract domain
 ///   * A machine integer abstract domain
-///   * A floating point abstract domain
+///   * A floating point abstract domain    // By zoush99
 ///   * A nullity abstract domain
 ///
 /// The composite domain can express invariants on machine integer variables,
@@ -91,7 +91,7 @@ template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
            typename MachineIntDomain,
-           typename FNumberDomain,
+           typename FNumberDomain,  // By zoush99
            typename NullityDomain >
 
 class CompositeDomain final

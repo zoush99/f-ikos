@@ -482,7 +482,7 @@ public:
                               VariableRef q,
                               const IntLinearExpression& o) = 0;
 
-  // \brief Add the constraint `p pred q`
+  /// \brief Add the constraint `p pred q`
   virtual void pointer_add(PointerPredicate pred,
                            VariableRef p,
                            VariableRef q) = 0;
