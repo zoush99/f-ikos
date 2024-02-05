@@ -203,7 +203,7 @@ public:
     }
   }
 
-  // \brief Widening interval-like
+  /// \brief Widening interval-like
   void widen_interval_with(const GaugeSemiLattice& other) {
     if (other.is_bottom()) {
       return;
@@ -222,7 +222,7 @@ public:
     }
   }
 
-  // \brief Widening interval-like with a threshold
+  /// \brief Widening interval-like with a threshold
   void widen_interval_threshold_with(const GaugeSemiLattice& other,
                                      const Number& threshold) {
     if (other.is_bottom()) {
@@ -291,7 +291,7 @@ public:
     }
   }
 
-  // \brief Narrowing interval-like with a threshold
+  /// \brief Narrowing interval-like with a threshold
   void narrow_interval_threshold_with(const GaugeSemiLattice& other,
                                       const Number& threshold) {
     if (this->is_bottom()) {
