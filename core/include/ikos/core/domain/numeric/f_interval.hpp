@@ -76,11 +76,11 @@ inline Interval< Number > trim_bound(const Interval< Number >& i,
 template < typename Number,
            typename VariableRef,
            std::size_t MaxReductionCycles = 10 >
-class IntervalDomain final
+class FIntervalDomain final
     : public numeric::AbstractDomain<
           Number,
           VariableRef,
-          IntervalDomain< Number, VariableRef, MaxReductionCycles > > {
+          FIntervalDomain< Number, VariableRef, MaxReductionCycles > > {
 public:
   using IntervalT = Interval< Number >;
   using CongruenceT = Congruence< Number >;
@@ -92,8 +92,8 @@ public:
 private:
   using SeparateDomainT = SeparateDomain< Number, VariableRef, IntervalT >;
   using LinearIntervalSolverT =
-      LinearIntervalSolver< Number, VariableRef, IntervalDomain >;
-  using Parent = numeric::AbstractDomain< Number, VariableRef, IntervalDomain >;
+      LinearIntervalSolver< Number, VariableRef, FIntervalDomain >;
+  using Parent = numeric::AbstractDomain< Number, VariableRef, FIntervalDomain >;
 
 public:
   using Iterator = typename SeparateDomainT::Iterator;
@@ -103,31 +103,31 @@ private:
 
 private:
   /// \brief Private constructor
-  explicit IntervalDomain(SeparateDomainT inv) : _inv(std::move(inv)) {}
+  explicit FIntervalDomain(SeparateDomainT inv) : _inv(std::move(inv)) {}
 
 public:
   /// \brief Create the top abstract value
-  static IntervalDomain top() { return IntervalDomain(SeparateDomainT::top()); }
+  static FIntervalDomain top() { return FIntervalDomain(SeparateDomainT::top()); }
 
   /// \brief Create the bottom abstract value
-  static IntervalDomain bottom() {
-    return IntervalDomain(SeparateDomainT::bottom());
+  static FIntervalDomain bottom() {
+    return FIntervalDomain(SeparateDomainT::bottom());
   }
 
   /// \brief Copy constructor
-  IntervalDomain(const IntervalDomain&) noexcept = default;
+  FIntervalDomain(const FIntervalDomain&) noexcept = default;
 
   /// \brief Move constructor
-  IntervalDomain(IntervalDomain&&) noexcept = default;
+  FIntervalDomain(FIntervalDomain&&) noexcept = default;
 
   /// \brief Copy assignment operator
-  IntervalDomain& operator=(const IntervalDomain&) noexcept = default;
+  FIntervalDomain& operator=(const FIntervalDomain&) noexcept = default;
 
   /// \brief Move assignment operator
-  IntervalDomain& operator=(IntervalDomain&&) noexcept = default;
+  FIntervalDomain& operator=(FIntervalDomain&&) noexcept = default;
 
   /// \brief Destructor
-  ~IntervalDomain() override = default;
+  ~FIntervalDomain() override = default;
 
   /// \brief Begin iterator over the pairs (variable, interval)
   Iterator begin() const { return this->_inv.begin(); }
@@ -145,44 +145,44 @@ public:
 
   void set_to_top() override { this->_inv.set_to_top(); }
 
-  bool leq(const IntervalDomain& other) const override {
+  bool leq(const FIntervalDomain& other) const override {
     return this->_inv.leq(other._inv);
   }
 
-  bool equals(const IntervalDomain& other) const override {
+  bool equals(const FIntervalDomain& other) const override {
     return this->_inv.equals(other._inv);
   }
 
-  void join_with(const IntervalDomain& other) override {
+  void join_with(const FIntervalDomain& other) override {
     this->_inv.join_with(other._inv);
   }
 
-  void join_loop_with(const IntervalDomain& other) override {
+  void join_loop_with(const FIntervalDomain& other) override {
     this->_inv.join_loop_with(other._inv);
   }
 
-  void join_iter_with(const IntervalDomain& other) override {
+  void join_iter_with(const FIntervalDomain& other) override {
     this->_inv.join_iter_with(other._inv);
   }
 
-  void widen_with(const IntervalDomain& other) override {
+  void widen_with(const FIntervalDomain& other) override {
     this->_inv.widen_with(other._inv);
   }
 
-  void widen_threshold_with(const IntervalDomain& other,
+  void widen_threshold_with(const FIntervalDomain& other,
                             const Number& threshold) override {
     this->_inv.widen_threshold_with(other._inv, threshold);
   }
 
-  void meet_with(const IntervalDomain& other) override {
+  void meet_with(const FIntervalDomain& other) override {
     this->_inv.meet_with(other._inv);
   }
 
-  void narrow_with(const IntervalDomain& other) override {
+  void narrow_with(const FIntervalDomain& other) override {
     this->_inv.narrow_with(other._inv);
   }
 
-  void narrow_threshold_with(const IntervalDomain& other,
+  void narrow_threshold_with(const FIntervalDomain& other,
                              const Number& threshold) override {
     this->_inv.narrow_threshold_with(other._inv, threshold);
   }
@@ -456,7 +456,7 @@ public:
 
   static std::string name() { return "interval domain"; }
 
-}; // end class IntervalDomain
+}; // end class FIntervalDomain
 
 } // end namespace numeric
 } // end namespace core
