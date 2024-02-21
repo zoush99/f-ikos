@@ -158,7 +158,7 @@ if(NOT TBB_FOUND)
   elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # Linux
     # set(TBB_DEFAULT_SEARCH_DIR "/opt/intel/tbb")
-    # In 104
+    # In 104, by zoush99
      set(TBB_DEFAULT_SEARCH_DIR "/usr/local/tbb/")
     # TODO: Check compiler version to see the suffSix should be <arch>/gcc4.1 or
     #       <arch>/gcc4.1. For now, assume that the compiler is more recent than

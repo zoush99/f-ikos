@@ -62,7 +62,6 @@ namespace ar {
 // forward declaration
 class Code;
 class Function;
-
 /// \brief Base class for values (ie., constants and variables)
 ///
 /// Note that only one instance of each value is ever created. Thus, you can
