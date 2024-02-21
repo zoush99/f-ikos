@@ -608,6 +608,7 @@ private:
   }; // end class IntegerImplicitBitcast
 
   /// \brief Floating point variable implement bitcast
+  /// Finishing modifying by zoush99
   class FloatingPointImplicitBitcast : public ScalarLit::template Visitor<> {
   private:
     Variable* _lhs;
@@ -1405,7 +1406,7 @@ private:
 */
 
     ikos_assert_msg(lhs.is_floating_point_var(),
-                    "left hand side is not an integer variable");
+                    "left hand side is not an floating point variable");
 
     if (left.is_floating_point()) {
       if (right.is_floating_point()) {

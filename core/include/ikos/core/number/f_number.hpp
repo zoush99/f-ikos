@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <llvm-14/llvm/ADT/APFloat.h> // By zoush99
+#include <llvm/ADT/APFloat.h> // By zoush99
 #include <ikos/core/number/compatibility.hpp>
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integral.hpp>
@@ -37,12 +37,12 @@ public:
   /// \name Construtors
   /// @{
 
+  /// \todo bugs here!!!
   /// \brief Default constructor
   FNumber() {
-    llvm::APFloat N(1.0f);
-    _n = N;
-    _bit_width = 32;
-    _sign = Signedness::Signed;
+    this->_n;
+    this->_bit_width = 64;
+    this->_sign = Signedness::Signed;
   }
 
   /// \brief Create a floating point number from a type
