@@ -202,7 +202,6 @@ IntegerConstant* ContextImpl::integer_cst(IntegerType* type,
   }
 }
 
-/// \todo(floating point)
 /*
   FloatConstant* ContextImpl::float_cst(FloatType* type,
                                       const std::string& value) {

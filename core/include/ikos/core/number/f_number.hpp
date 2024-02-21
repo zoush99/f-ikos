@@ -107,7 +107,8 @@ public:
   }
 
   /// \brief Create a floating point number from a llvm::APFloat class
-  FNumber(llvm::APFloat& n,uint64_t bit_width):_n(n),_bit_width(bit_width),_sign(Signedness::Signed){}
+  FNumber(llvm::APFloat& n, uint64_t bit_width)
+      : _n(n), _bit_width(bit_width), _sign(Signedness::Signed) {}
 
 public:
   /// \brief Copy constructor
@@ -237,52 +238,50 @@ public:
   /// \name Value tests
   /// @{
 
-  /// \brief It is aimed at normalized numbers and does not consider denormalized numbers.
-  /// \brief Return true if this is the minimum machine integer
+  /// \brief It is aimed at normalized numbers and does not consider
+  /// denormalized numbers. \brief Return true if this is the minimum machine
+  /// integer
   bool is_min() const {
-    if (this->_bit_width==32) { // fl
-      return this->_n==llvm::APFloat(-3.4028235E38);
-    } else {  // do
-      return this->_n==llvm::APFloat(-1.7976931348623157E308);
+    if (this->_bit_width == 32) { // fl
+      return this->_n == llvm::APFloat(-3.4028235E38);
+    } else { // do
+      return this->_n == llvm::APFloat(-1.7976931348623157E308);
     }
   }
 
   /// \brief Return true if this is the maximum machine integer
   bool is_max() const {
-    if (this->_bit_width==32) { // fl
-      return this->_n==llvm::APFloat(3.4028235E38);
-    } else {  // do
-      return this->_n==llvm::APFloat(1.7976931348623157E308);
+    if (this->_bit_width == 32) { // fl
+      return this->_n == llvm::APFloat(3.4028235E38);
+    } else { // do
+      return this->_n == llvm::APFloat(1.7976931348623157E308);
     }
   }
 
   /// \brief Return true if the machine integer is 0
-  bool is_zero() const {
-      return this->_n.isZero();
-  }
+  bool is_zero() const { return this->_n.isZero(); }
 
   /// @}
   /// \name Unary Operators
   /// @{
 
   /// \brief Set the floating point number to zero
-  void set_zero() {
-      this->_n==llvm::APFloat(0.0f);
-  }
+  void set_zero() { this->_n == llvm::APFloat(0.0f); }
 
   /// \todo
   /// \brief Unary minus
-  const FNumber operator-() {
-      llvm::APFloat nega= -this->_n;  // take the negative
-      return FNumber(nega, this->_bit_width);
+  const FNumber operator-() const {
+    llvm::APFloat nega = -this->_n; // take the negative
+    return FNumber(nega, this->_bit_width);
   }
 
+  /// \todo
   /// \brief Truncate the floating point number to the given bit width
 
   /// \brief Extend the floating point number to the given bit width
 
   /// \brief Cast the floating point number to the given bit width and sign
-  ///
+
   /// This is equivalent to trunc()/ext() + sign_cast() (in this specific order)
 
   /// @}
@@ -331,7 +330,6 @@ public:
 
 }; // end class FNumber
 
-
 /// \name Binary Operators
 /// @{
 
@@ -340,21 +338,25 @@ public:
 /// Returns the sum of the operands, with wrapping.
 inline FNumber add(const FNumber& lhs, const FNumber& rhs) {
   if (lhs.is_fl()) {
-      if (rhs.is_fl()) { // fl + fl
-      return FNumber((lhs._n + rhs._n).convertToFloat(), lhs._bit_width,lhs._sign);
-      } else { // fl + do
+    if (rhs.is_fl()) { // fl + fl
+      return FNumber(lhs._n.convertToFloat() + rhs._n.convertToFloat(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // fl + do
       return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(),
                      rhs._bit_width,
                      rhs._sign);
-      }
+    }
   } else {
-      if (rhs.is_fl()) { // do + fl
+    if (rhs.is_fl()) { // do + fl
       return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(),
                      lhs._bit_width,
                      lhs._sign);
-      } else { // do + do
-      return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(), lhs._bit_width, lhs._sign);
-      }
+    } else { // do + do
+      return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    }
   }
 }
 
@@ -363,6 +365,305 @@ inline FNumber add(const FNumber& lhs, const FNumber& rhs) {
 /// Returns the sum of the operands, with wrapping.
 inline FNumber operator+(const FNumber& lhs, const FNumber& rhs) {
   return add(lhs, rhs);
+}
+
+/// \brief Subtraction
+///
+/// Returns the difference of the operands, with wrapping.
+inline FNumber sub(const FNumber& lhs, const FNumber& rhs) {
+  if (lhs.is_fl()) {
+    if (rhs.is_fl()) { // fl - fl
+      return FNumber(lhs._n.convertToFloat() - rhs._n.convertToFloat(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // fl - do
+      return FNumber(lhs._n.convertToDouble() - rhs._n.convertToDouble(),
+                     rhs._bit_width,
+                     rhs._sign);
+    }
+  } else {
+    if (rhs.is_fl()) { // do - fl
+      return FNumber(lhs._n.convertToDouble() - rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // do - do
+      return FNumber(lhs._n.convertToDouble() - rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    }
+  }
+}
+
+/// \brief Subtraction
+///
+/// Returns the difference of the operands, with wrapping.
+inline FNumber operator-(const FNumber& lhs, const FNumber& rhs) {
+  return sub(lhs, rhs);
+}
+
+/// \brief Multiplication
+///
+/// Returns the product of the operands, with wrapping.
+inline FNumber mul(const FNumber& lhs, const FNumber& rhs) {
+  if (lhs.is_fl()) {
+    if (rhs.is_fl()) { // fl * fl
+      return FNumber(lhs._n.convertToFloat() * rhs._n.convertToFloat(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // fl * do
+      return FNumber(lhs._n.convertToDouble() * rhs._n.convertToDouble(),
+                     rhs._bit_width,
+                     rhs._sign);
+    }
+  } else {
+    if (rhs.is_fl()) { // do * fl
+      return FNumber(lhs._n.convertToDouble() * rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // do * do
+      return FNumber(lhs._n.convertToDouble() * rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    }
+  }
+}
+
+/// \brief Multiplication
+///
+/// Returns the product of the operands, with wrapping.
+inline FNumber operator*(const FNumber& lhs, const FNumber& rhs) {
+  return mul(lhs, rhs);
+}
+
+/// \brief Division
+///
+/// Returns the quotient of the operands, with wrapping.
+inline FNumber div(const FNumber& lhs, const FNumber& rhs) {
+  ikos_assert_msg(!rhs.is_zero(), "division by zero");
+  if (lhs.is_fl()) {
+    if (rhs.is_fl()) { // fl / fl
+      return FNumber(lhs._n.convertToFloat() / rhs._n.convertToFloat(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // fl / do
+      return FNumber(lhs._n.convertToDouble() / rhs._n.convertToDouble(),
+                     rhs._bit_width,
+                     rhs._sign);
+    }
+  } else {
+    if (rhs.is_fl()) { // do / fl
+      return FNumber(lhs._n.convertToDouble() / rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    } else { // do / do
+      return FNumber(lhs._n.convertToDouble() / rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+    }
+  }
+}
+
+/// \brief Division
+///
+/// Returns the quotient of the operands, with wrapping.
+inline FNumber operator/(const FNumber& lhs, const FNumber& rhs) {
+  return div(lhs, rhs);
+}
+
+/// @}
+/// \name Comparison Operators
+/// @{
+
+/// \brief Equality operator
+inline bool operator==(const FNumber& lhs, const FNumber& rhs) {
+  return lhs._n == rhs._n;
+}
+
+/// \brief Equality operator with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator==(const FNumber& lhs, T rhs) {
+  return lhs == FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Equality operator with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator==(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) == rhs;
+}
+
+/// \brief Inequality operator
+inline bool operator!=(const FNumber& lhs, const FNumber& rhs) {
+  return lhs._n != rhs._n;
+}
+
+/// \brief Inequality operator with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator!=(const FNumber& lhs, T rhs) {
+  return lhs != FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Inequality operator with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator!=(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) != rhs;
+}
+
+/// \brief Less than comparison
+inline bool operator<(const FNumber& lhs, const FNumber& rhs) {
+  return lhs._n < rhs._n;
+}
+
+/// \brief Less than comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator<(const FNumber& lhs, T rhs) {
+  return lhs < FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Less than comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator<(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) < rhs;
+}
+
+/// \brief Less or equal than comparison
+inline bool operator<=(const FNumber& lhs, const FNumber& rhs) {
+  return lhs._n <= rhs._n;
+}
+
+/// \brief Less or equal comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator<=(const FNumber& lhs, T rhs) {
+  return lhs <= FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Less or equal comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator<=(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) <= rhs;
+}
+
+/// \brief Greater than comparison
+inline bool operator>(const FNumber& lhs, const FNumber& rhs) {
+  return lhs._n > rhs._n;
+}
+
+/// \brief Greater than comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator>(const FNumber& lhs, T rhs) {
+  return lhs > FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Greater than comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator>(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) > rhs;
+}
+
+/// \brief Greater or equal comparison
+inline bool operator>=(const FNumber& lhs, const FNumber& rhs) {
+  return lhs._n >= rhs._n;
+}
+
+/// \brief Greater or equal comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator>=(const FNumber& lhs, T rhs) {
+  return lhs >= FNumber(rhs, lhs.bit_width(), lhs.sign());
+}
+
+/// \brief Greater or equal comparison with floating point number types
+template < typename T,
+           class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+inline bool operator>=(T lhs, const FNumber& rhs) {
+  return FNumber(lhs, rhs.bit_width(), rhs.sign()) >= rhs;
+}
+
+/// @}
+/// \name Utility functions (min, max, etc.)
+/// @{
+
+/// \brief Return the smaller of the given floating point numbers
+inline const FNumber& min(const FNumber& a, const FNumber& b) {
+  return (a < b) ? a : b;
+}
+
+/// \brief Return the smaller of the given numbers
+inline const FNumber& min(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c) {
+  return min(min(a, b), c);
+}
+
+/// \brief Return the smaller of the given numbers
+inline const FNumber& min(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c,
+                          const FNumber& d) {
+  return min(min(min(a, b), c), d);
+}
+
+/// \brief Return the greater of the given floating point numbers
+inline const FNumber& max(const FNumber& a, const FNumber& b) {
+  return (a < b) ? b : a;
+}
+
+/// \brief Return the greater of the given numbers
+inline const FNumber& max(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c) {
+  return max(max(a, b), c);
+}
+
+/// \brief Return the greater of the given numbers
+inline const FNumber& max(const FNumber& a,
+                          const FNumber& b,
+                          const FNumber& c,
+                          const FNumber& d) {
+  return max(max(max(a, b), c), d);
+}
+
+/// \brief Return the absolute value of the given floating point numbers
+inline FNumber abs(const FNumber& n) {
+  return n < 0 ? -n : n;
+}
+
+/// @}
+/// \name Input / Output
+/// @{
+
+/// \brief Write a floating point number on a stream
+inline std::ostream& operator<<(std::ostream& o, const FNumber& n) {
+  if (n.is_fl()) {
+    o << n._n.convertToFloat();
+  } else {
+    o << n._n.convertToDouble();
+  }
+  return o;
+}
+
+/// @}
+
+/// \brief Return the hash of a MachineInt
+inline std::size_t hash_value(const FNumber& n) {
+  std::size_t hash = 0;
+  if (n.is_fl()) {
+    boost::hash_combine(hash, n._n.convertToFloat());
+  } else {
+    boost::hash_combine(hash, n._n.convertToDouble());
+  }
+  boost::hash_combine(hash, n._bit_width);
+  boost::hash_combine(hash, n._sign);
+  return hash;
 }
 
 } // namespace core

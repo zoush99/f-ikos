@@ -100,7 +100,6 @@ private:
                               std::unique_ptr< IntegerType > >
       _integer_types;
 
-  /// \todo(floating point)
   // Floating point types
   boost::container::flat_map< std::tuple< uint64_t, FloatSemantic >,
                               std::unique_ptr< FloatType > >
@@ -145,6 +144,8 @@ private:
       _float_constants;
   */
 
+  // By zoush99
+  // Float constants
   boost::container::flat_map< std::tuple< FloatType*, FNumber >,
                               std::unique_ptr< FloatConstant > >
       _float_constants;
