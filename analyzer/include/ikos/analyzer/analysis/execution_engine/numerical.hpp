@@ -1383,6 +1383,7 @@ private:
     }
   }
 
+  /// By zoush99
   /// \brief Execute a floating point binary operation
   void exec_float_bin_operation(const ScalarLit& lhs,
                                 FnuBinaryOperator op,

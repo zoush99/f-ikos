@@ -56,6 +56,7 @@
 #include <ikos/core/number/machine_int.hpp>
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integral.hpp>
+#include <ikos/core/number/supported_integralorfloat.hpp> // By zoush99
 #include <ikos/core/number/z_number.hpp>
 
 namespace ikos {
