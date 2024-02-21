@@ -273,7 +273,8 @@ public:
   /// \todo
   /// \brief Unary minus
   const FNumber operator-() {
-      return FNumber(this->_n, this->_bit_width);
+      llvm::APFloat nega= -this->_n;  // take the negative
+      return FNumber(nega, this->_bit_width);
   }
 
   /// \brief Truncate the floating point number to the given bit width
@@ -329,6 +330,40 @@ public:
   friend std::size_t hash_value(const FNumber&);
 
 }; // end class FNumber
+
+
+/// \name Binary Operators
+/// @{
+
+/// \brief Addition
+///
+/// Returns the sum of the operands, with wrapping.
+inline FNumber add(const FNumber& lhs, const FNumber& rhs) {
+  if (lhs.is_fl()) {
+      if (rhs.is_fl()) { // fl + fl
+      return FNumber((lhs._n + rhs._n).convertToFloat(), lhs._bit_width,lhs._sign);
+      } else { // fl + do
+      return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(),
+                     rhs._bit_width,
+                     rhs._sign);
+      }
+  } else {
+      if (rhs.is_fl()) { // do + fl
+      return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(),
+                     lhs._bit_width,
+                     lhs._sign);
+      } else { // do + do
+      return FNumber(lhs._n.convertToDouble() + rhs._n.convertToDouble(), lhs._bit_width, lhs._sign);
+      }
+  }
+}
+
+/// \brief Addition
+///
+/// Returns the sum of the operands, with wrapping.
+inline FNumber operator+(const FNumber& lhs, const FNumber& rhs) {
+  return add(lhs, rhs);
+}
 
 } // namespace core
 } // namespace ikos
