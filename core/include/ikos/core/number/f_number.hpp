@@ -37,61 +37,37 @@ public:
   /// \name Construtors
   /// @{
 
-  /// \todo bugs here!!!
   /// \brief Default constructor
-  FNumber() {
-    this->_n;
-    this->_bit_width = 64;
-    this->_sign = Signedness::Signed;
-  }
+  FNumber() : _n(1.0), _bit_width(64), _sign(Signedness::Signed) {}
 
   /// \brief Create a floating point number from a type
-  template <
-      typename T,
-      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FNumber(T n, uint64_t bit_width, Signedness sign)
-      : _bit_width(bit_width), _sign(sign) {
-    ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
+  FNumber(int n, uint64_t bit_width, Signedness sign)
+      : _n(static_cast< double >(n)), _bit_width(bit_width), _sign(sign) {}
 
-    if (std::is_same< T, float >::value ||
-        std::is_same< T, int >::value) { // fl or int
-      this->_n = llvm::APFloat(static_cast< float >(n));
-    } else { // do
-      this->_n = llvm::APFloat(static_cast< double >(n));
+  /// \brief Create a floating point number from a type
+  FNumber(float n, uint64_t bit_width, Signedness sign)
+      : _n(n), _bit_width(bit_width), _sign(sign) {}
+
+  /// \brief Create a floating point number from a type
+  FNumber(double n, uint64_t bit_width, Signedness sign)
+      : _n(n), _bit_width(bit_width), _sign(sign) {}
+
+  /*  /// \brief Create a floating point number from a ZNumber
+    FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
+        : _bit_width(bit_width), _sign(sign) {
+      ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit
+    width"); this->_n = llvm::APFloat(static_cast< float >(n.to< int >()));
     }
-  }
+
+    /// \brief Create a floating point number from a ZNumber
+    FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign,
+    NormalizedTag) : _bit_width(bit_width), _sign(sign) {
+      ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit
+    width"); this->_n = llvm::APFloat(static_cast< float >(n.to< int >()));
+    }*/
 
   /// \brief Create a floating point number from a type
-  template <
-      typename T,
-      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FNumber(T n, uint64_t bit_width, Signedness sign, NormalizedTag)
-      : _bit_width(bit_width), _sign(sign) {
-    ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-
-    if (std::is_same< T, float >::value ||
-        std::is_same< T, int >::value) { // fl or int
-      this->_n = llvm::APFloat(static_cast< float >(n));
-    } else { // do
-      this->_n = llvm::APFloat(static_cast< double >(n));
-    }
-  }
-
-  /// \brief Create a floating point number from a ZNumber
-  FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
-      : _bit_width(bit_width), _sign(sign) {
-    ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    this->_n = llvm::APFloat(static_cast< float >(n.to< int >()));
-  }
-
-  /// \brief Create a floating point number from a ZNumber
-  FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign, NormalizedTag)
-      : _bit_width(bit_width), _sign(sign) {
-    ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    this->_n = llvm::APFloat(static_cast< float >(n.to< int >()));
-  }
-
-  /// \brief Create a floating point number from a type
+  /// "Curious why this place isn't throwing an error." By zoush99
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
@@ -112,9 +88,8 @@ public:
 
 public:
   /// \brief Copy constructor
-  FNumber(const FNumber& o) : _bit_width(o._bit_width), _sign(o._sign) {
-    this->_n = o._n;
-  }
+  FNumber(const FNumber& o)
+      : _n(o._n), _bit_width(o._bit_width), _sign(o._sign) {}
 
   /// \brief Move constructor
   FNumber(FNumber&& o) noexcept
@@ -132,7 +107,7 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
     if (bit_width == 32) { // fl
-      return FNumber(-3.4028235E38, 32, sign);
+      return FNumber(-3.4028235E38f, 32, sign);
     } else { // do
       return FNumber(-1.7976931348623157E308, 64, sign);
     }
@@ -143,9 +118,9 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
     if (bit_width == 32) { // fl
-      return FNumber(3.4028235E38, 32, sign, NormalizedTag{});
+      return FNumber(3.4028235E38f, 32, sign);
     } else { // do
-      return FNumber(1.7976931348623157E308, 64, sign, NormalizedTag{});
+      return FNumber(1.7976931348623157E308, 64, sign);
     }
   }
 
@@ -153,7 +128,7 @@ public:
   /// sign
   static FNumber zero(uint64_t bit_width, Signedness sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    return FNumber(0, bit_width, sign, NormalizedTag{});
+    return FNumber(0, bit_width, sign);
   }
 
   /// @}
