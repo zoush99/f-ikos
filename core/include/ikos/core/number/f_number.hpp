@@ -52,6 +52,18 @@ public:
   FNumber(double n, uint64_t bit_width, Signedness sign)
       : _n(n), _bit_width(bit_width), _sign(sign) {}
 
+  /// \brief Create a floating point number from a type
+  FNumber(int n)
+      : _n(static_cast< double >(n)), _bit_width(64), _sign(Signedness::Signed) {}
+
+  /// \brief Create a floating point number from a type
+  FNumber(float n)
+      : _n(n), _bit_width(32), _sign(Signedness::Signed) {}
+
+  /// \brief Create a floating point number from a type
+  FNumber(double n)
+      : _n(n), _bit_width(64), _sign(Signedness::Signed) {}
+
   /*  /// \brief Create a floating point number from a ZNumber
     FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
         : _bit_width(bit_width), _sign(sign) {
@@ -65,22 +77,6 @@ public:
       ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit
     width"); this->_n = llvm::APFloat(static_cast< float >(n.to< int >()));
     }*/
-
-  /// \brief Create a floating point number from a type
-  /// "Curious why this place isn't throwing an error." By zoush99
-  template <
-      typename T,
-      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FNumber(T n) : _sign(Signed) {
-    if (std::is_same< T, float >::value ||
-        std::is_same< T, int >::value) { // fl
-      _bit_width = 32;
-      this->_n = llvm::APFloat(static_cast< float >(n));
-    } else { // do
-      _bit_width = 64;
-      this->_n = llvm::APFloat(static_cast< double >(n));
-    }
-  }
 
   /// \brief Create a floating point number from a llvm::APFloat class
   FNumber(llvm::APFloat& n, uint64_t bit_width)
