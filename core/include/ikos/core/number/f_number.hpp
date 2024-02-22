@@ -7,7 +7,6 @@
 #include <llvm/ADT/APFloat.h> // By zoush99
 #include <ikos/core/number/compatibility.hpp>
 #include <ikos/core/number/signedness.hpp>
-#include <ikos/core/number/supported_integral.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
 #include <ikos/core/number/z_number.hpp>
 #include <ikos/core/support/compiler.hpp>
@@ -214,7 +213,7 @@ public:
   /// integer
   bool is_min() const {
     if (this->_bit_width == 32) { // fl
-      return this->_n == llvm::APFloat(-3.4028235E38);
+      return this->_n == llvm::APFloat(-3.4028235E38f);
     } else { // do
       return this->_n == llvm::APFloat(-1.7976931348623157E308);
     }
@@ -223,7 +222,7 @@ public:
   /// \brief Return true if this is the maximum machine integer
   bool is_max() const {
     if (this->_bit_width == 32) { // fl
-      return this->_n == llvm::APFloat(3.4028235E38);
+      return this->_n == llvm::APFloat(3.4028235E38f);
     } else { // do
       return this->_n == llvm::APFloat(1.7976931348623157E308);
     }
@@ -239,7 +238,6 @@ public:
   /// \brief Set the floating point number to zero
   void set_zero() { this->_n == llvm::APFloat(0.0f); }
 
-  /// \todo
   /// \brief Unary minus
   const FNumber operator-() const {
     llvm::APFloat nega = -this->_n; // take the negative

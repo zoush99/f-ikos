@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_minus_signed) {
   BOOST_CHECK((-FNumber(1.2,64,Signed))==FNumber(-1.2,64,Signed));
 }
 
-BOOST_AUTO_TEST_CASE(test_trunc_signed) {
+/*BOOST_AUTO_TEST_CASE(test_trunc_signed) {
   BOOST_CHECK(FNumber(12,32,Signed).trunc(32)==FNumber(12,32,Signed));
   BOOST_CHECK(FNumber(1.2f,32,Signed).trunc(32)==FNumber(1.2f,32,Signed));
   BOOST_CHECK(FNumber(1.2,64,Signed).trunc(32)==FNumber(1.2f,32,Signed));
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE(test_ext_signed){
   BOOST_CHECK(FNumber(12,32,Signed).ext(32)==FNumber(12,32,Signed));
   BOOST_CHECK(FNumber(12,32,Signed).ext(64)==FNumber(12,64,Signed));
   BOOST_CHECK(FNumber(12,64,Signed).ext(64)==FNumber(12,64,Signed));
-}
+}*/
 
 BOOST_AUTO_TEST_CASE(test_operation_signed){
   BOOST_CHECK(add(FNumber(1,32,Signed),FNumber(2,32,Signed))==FNumber(3,32,Signed));

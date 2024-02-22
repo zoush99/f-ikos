@@ -15,6 +15,7 @@ function(add_unit_test)
   target_link_libraries(${test_build_target}
     ${GMPXX_LIB}
     ${GMP_LIB}
+#    ${LLVM_LIBRARY_DIR} # By zoush99
     ${Boost_LIBRARIES})
   if (APRON_FOUND)
     target_link_libraries(${test_build_target} ${APRON_LIBRARIES})
