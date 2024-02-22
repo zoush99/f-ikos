@@ -5,7 +5,7 @@
 /*******************************************************************************
  *
  * \file
- * \brief Machine integer abstract domain used by the value analysis
+ * \brief Numeric abstract domain used by the value analysis
  *
  * Author: Maxime Arthaud
  *

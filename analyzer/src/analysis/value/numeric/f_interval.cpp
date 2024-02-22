@@ -54,7 +54,7 @@ namespace value {
 namespace {
 
 /// \todo(How should this place be defined?)
-using RuntimeNumericDomain = core::numeric::IntervalDomain<FNumber,Variable*>; // By zoush99
+using RuntimeNumericDomain = core::numeric::FIntervalDomain<FNumber,Variable*>; // By zoush99
 
 } // end anonymous namespace
 

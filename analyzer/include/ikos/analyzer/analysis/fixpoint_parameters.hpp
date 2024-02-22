@@ -55,16 +55,12 @@
 
 #include <ikos/analyzer/analysis/option.hpp>
 
-/// \brief In fixed-point iteration, some are also machine integer data types. I want to support
-/// floating-point data types, so modifications need to be made to these files.
-/// By zoush99
 namespace ikos {
 namespace analyzer {
 
 /// \brief Widening hints for a control flow graph
 class WideningHints {
 private:
-  /// \todo(floating point)
   /// \brief Map of widening hints associated to a given cycle head
   using Map = llvm::DenseMap< ar::BasicBlock*, MachineInt >;
 
