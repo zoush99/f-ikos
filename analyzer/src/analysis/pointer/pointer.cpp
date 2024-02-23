@@ -47,6 +47,7 @@
 #include <ikos/core/domain/exception/exception.hpp>
 #include <ikos/core/domain/machine_int/interval.hpp>
 #include <ikos/core/domain/memory/dummy.hpp>
+#include <ikos/core/domain/numeric/f_interval.hpp>  // By zoush99
 #include <ikos/core/domain/scalar/machine_int.hpp>  // Bugs here!!!
 #include <ikos/core/domain/uninitialized/separate_domain.hpp>
 #include <ikos/core/fixpoint/fwd_fixpoint_iterator.hpp>
@@ -85,12 +86,18 @@ using MachineIntAbstractDomain = core::machine_int::IntervalDomain< Variable* >;
 using UninitializedAbstractDomain =
     core::uninitialized::SeparateDomain< Variable* >;
 
+/// By zoush99
+using NumericAbstractDomain =
+    core::numeric::FIntervalDomain<FNumber,Variable*>;
+//using FNumberAbstractDomain=core::numeric::FIntervalDomain<FNumber,Variable*,10>; // By zoush99
+
 /// \brief Scalar abstract domain for the intra-procedural pointer analysis
 using ScalarAbstractDomain =
     core::scalar::MachineIntDomain< Variable*,
                                     MemoryLocation*,
                                     UninitializedAbstractDomain,
-                                    MachineIntAbstractDomain >;
+                                    MachineIntAbstractDomain,
+                                    NumericAbstractDomain>;
 
 /// \brief Memory abstract domain for the intra-procedural pointer analysis
 using MemoryAbstractDomain = core::memory::
@@ -103,7 +110,8 @@ using AbstractDomain = core::exception::ExceptionDomain< MemoryAbstractDomain >;
 AbstractDomain make_bottom_abstract_value() {
   auto bottom = MemoryAbstractDomain(
       ScalarAbstractDomain(UninitializedAbstractDomain::bottom(),
-                           MachineIntAbstractDomain::bottom()));
+                           MachineIntAbstractDomain::bottom(),
+                           NumericAbstractDomain::bottom()));
   return AbstractDomain(/*normal = */ bottom,
                         /*caught_exceptions = */ bottom,
                         /*propagated_exceptions = */ bottom);
@@ -113,10 +121,12 @@ AbstractDomain make_bottom_abstract_value() {
 AbstractDomain make_initial_abstract_value() {
   auto top = MemoryAbstractDomain(
       ScalarAbstractDomain(UninitializedAbstractDomain::top(),
-                           MachineIntAbstractDomain::top()));
+                           MachineIntAbstractDomain::top(),
+                           NumericAbstractDomain::bottom()));
   auto bottom = MemoryAbstractDomain(
       ScalarAbstractDomain(UninitializedAbstractDomain::bottom(),
-                           MachineIntAbstractDomain::bottom()));
+                           MachineIntAbstractDomain::bottom(),
+                           NumericAbstractDomain::bottom()));
   return AbstractDomain(/*normal = */ top,
                         /*caught_exceptions = */ bottom,
                         /*propagated_exceptions = */ bottom);

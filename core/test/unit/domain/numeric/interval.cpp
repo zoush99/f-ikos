@@ -45,7 +45,7 @@
 #include <boost/mpl/list.hpp>
 #include <boost/test/unit_test.hpp>
 
-#include <ikos/core/domain/numeric/f_interval.hpp>
+#include <ikos/core/domain/numeric/interval.hpp>
 #include <ikos/core/example/variable_factory.hpp>
 #include <ikos/core/number/z_number.hpp>
 

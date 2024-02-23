@@ -97,18 +97,21 @@ using PartitioningAbstractDomain = core::memory::
 MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
   auto inv = ValueAbstractDomain(
       ctx.var_factory,
-      /// \brief In template: no matching member function for call to 'assign'
       ScalarAbstractDomain(UninitializedAbstractDomain::bottom(),
                            make_bottom_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
+                           make_bottom_numeric_abstract_value(
+                               MachineIntDomainOption::FInterval),  // By zoush99
                            NullityAbstractDomain::bottom()),
       LifetimeAbstractDomain::bottom());
 
-  if (ctx.opts.use_partitioning_domain) {
+/*  if (ctx.opts.use_partitioning_domain) {
     return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
   } else {
     return MemoryAbstractDomain(inv);
-  }
+  }*/
+  /// \brief Division is not currently supported. It will be addressed in a future update.
+  return MemoryAbstractDomain(inv); /// By zoush99
 }
 
 /// \brief Create the top memory abstract value
@@ -118,14 +121,18 @@ MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
       ScalarAbstractDomain(UninitializedAbstractDomain::top(),
                            make_top_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
+                           make_top_numeric_abstract_value(
+                               MachineIntDomainOption::FInterval),  // By zoush99
                            NullityAbstractDomain::top()),
       LifetimeAbstractDomain::top());
 
-  if (ctx.opts.use_partitioning_domain) {
+/*  if (ctx.opts.use_partitioning_domain) {
     return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
   } else {
     return MemoryAbstractDomain(inv);
-  }
+  }*/
+  /// \brief Division is not currently supported. It will be addressed in a future update.
+  return MemoryAbstractDomain(inv); /// By zoush99
 }
 
 } // end anonymous namespace
