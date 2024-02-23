@@ -305,7 +305,7 @@ public:
   /// \brief Return true if this is the minimum machine integer
   bool is_min() const {
     if (this->_bit_width==32) { // fl
-      return this->_n.f==-3.4028235E38;
+      return this->_n.f==-3.4028235E38f;
     } else {  // do
       return this->_n.d==-1.7976931348623157E308;
     }
@@ -314,7 +314,7 @@ public:
   /// \brief Return true if this is the maximum machine integer
   bool is_max() const {
     if (this->_bit_width==32) { // fl
-      return this->_n.f==3.4028235E38;
+      return this->_n.f==3.4028235E38f;
     } else {  // do
       return this->_n.d==1.7976931348623157E308;
     }
@@ -338,7 +338,7 @@ public:
   /// \brief Return a string representation of the floating point number in the
   /// given base
   /// \todo(Not sure if this function is still needed, I'll keep it for now.)
-  std::string str(int base = 10) const {
+  std::string str() const {
     if (this->is_fl()) {
       return std::to_string(this->_n.f);
     } else {

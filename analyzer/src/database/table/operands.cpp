@@ -966,7 +966,7 @@ struct OperandReprVisitor {
     return c->value().str();
   }
 
-  std::string operator()(ar::FloatConstant* c) const { return c->value(); }
+  std::string operator()(ar::FloatConstant* c) const { return c->value().str(); }
 
   std::string operator()(ar::NullConstant*) const { return "NULL"; }
 
