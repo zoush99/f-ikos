@@ -47,6 +47,7 @@
 #include <ikos/core/domain/numeric/operator.hpp> // By zoush99
 #include <ikos/core/domain/pointer/operator.hpp>
 #include <ikos/core/linear_expression.hpp>
+#include <ikos/core/number/f_number.hpp>  // By zoush99
 #include <ikos/core/number/machine_int.hpp>
 #include <ikos/core/semantic/machine_int/variable.hpp>
 #include <ikos/core/semantic/memory_location.hpp>
@@ -104,7 +105,6 @@ public:
   using FnuIntervalCongruence = numeric::IntervalCongruence< FNumber >;
 
 public:
-  /// \brief Expanding the threshold can be a floating-point number.
   /// \brief Perform the widening of two abstract values with a threshold
   virtual void widen_threshold_with(const Derived& other,
                                     const MachineInt& threshold) = 0;
@@ -117,7 +117,6 @@ public:
     return tmp;
   }
 
-  /// \brief Narrowing the threshold can be a floating-point number.
   /// \brief Perform the narrowing of two abstract values with a threshold
   virtual void narrow_threshold_with(const Derived& other,
                                      const MachineInt& threshold) = 0;

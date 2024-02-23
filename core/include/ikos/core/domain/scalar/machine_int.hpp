@@ -1645,7 +1645,7 @@ public:
 
     this->_uninitialized.assign_initialized(x);
     /// \todo bugs here!!! By zoush99
-    this->_integer.assign(x, n);
+    this->_fnumber.assign(x, n);
   }
 
   void dynamic_write_nondet_float(VariableRef x) override {
@@ -1656,7 +1656,7 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    this->_integer.forget(x);
+    this->_fnumber.forget(x);
   }
 
   /// \brief By zoush99
@@ -1670,7 +1670,7 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
+    this->_fnumber.assign(x, y);
   }
 
   void dynamic_write_null(VariableRef x) override {
@@ -1809,6 +1809,7 @@ public:
     }
   }
 
+  /// \todo(floating point)
   void scalar_float_to_int(VariableRef f, VariableRef x) override {
     ikos_assert(ScalarVariableTrait::is_int(x));
     ikos_assert(ScalarVariableTrait::is_float(f));
@@ -1822,6 +1823,7 @@ public:
     this->_integer.forget(x);
   }
 
+  /// \todo(floating point)
   void scalar_int_to_float(VariableRef x, VariableRef f) override {
     ikos_assert(ScalarVariableTrait::is_float(f));
     ikos_assert(ScalarVariableTrait::is_int(x));

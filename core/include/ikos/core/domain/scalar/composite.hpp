@@ -151,6 +151,7 @@ private:
   /// \brief Underlying machine integer abstract domains
   MachineIntDomain _integer;
 
+  /// By zoush99
   /// \brief Underlying floating point abstract domains
   FNumberDomain _fnumber;
 

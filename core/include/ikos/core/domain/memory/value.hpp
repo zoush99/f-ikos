@@ -62,6 +62,7 @@
 #include <ikos/core/semantic/memory/value/cell_factory.hpp>
 #include <ikos/core/semantic/memory/value/cell_variable.hpp>
 #include <ikos/core/support/cast.hpp>
+#include <ikos/core/semantic/scalar/variable.hpp> // By zoush99
 
 namespace ikos {
 namespace core {
@@ -406,7 +407,6 @@ public:
     }
   }
 
-  /// \todo Expanding the threshold can be a floating-point number.
   void widen_threshold_with(const ValueDomain& other,
                             const MachineInt& threshold) override {
     this->normalize();
@@ -450,7 +450,6 @@ public:
     }
   }
 
-  /// \todo Narrowing the threshold can be a floating-point number.
   void narrow_threshold_with(const ValueDomain& other,
                              const MachineInt& threshold) override {
     this->normalize();
@@ -522,7 +521,6 @@ public:
     }
   }
 
-  /// \todo
   ValueDomain widening_threshold(const ValueDomain& other,
                                  const MachineInt& threshold) const override {
     if (this->is_bottom()) {
@@ -567,7 +565,6 @@ public:
     }
   }
 
-  /// \todo
   ValueDomain narrowing_threshold(const ValueDomain& other,
                                   const MachineInt& threshold) const override {
     if (this->is_bottom()) {
@@ -936,7 +933,6 @@ public:
     this->_scalar.pointer_assign(p, q, o);
   }
 
-  /// \todo
   void pointer_assign(VariableRef p,
                       VariableRef q,
                       const MachineInt& o) override {
@@ -1103,11 +1099,13 @@ public:
   /// \brief By zoush99
   void scalar_float_to_int(VariableRef f, VariableRef x) override{
 //    this->_scalar.scalar_float_to_int(f, x);
+    return;
   }
 
   /// \brief By zoush99
   void scalar_int_to_float(VariableRef x, VariableRef f) override{
 //    this->_scalar.scalar_int_to_float(x, f);
+    return;
   }
 
   void scalar_pointer_to_int(VariableRef x,

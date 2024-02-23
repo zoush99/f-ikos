@@ -2398,12 +2398,15 @@ public:
     this->_ptr->scalar_assign_nondet(x);
   }
 
+  /// \todo(floating point)
   void scalar_float_to_int(VariableRef f, VariableRef x) override{
-    this->_ptr->scalar_float_to_int(f, x);
+//    this->_ptr->scalar_float_to_int(f, x);
+    return;
   }
 
   void scalar_int_to_float(VariableRef x, VariableRef f) override{
-    this->_ptr->scalar_int_to_float(x, f);
+//    this->_ptr->scalar_int_to_float(x, f);
+    return;
   }
 
   void scalar_pointer_to_int(VariableRef x,
