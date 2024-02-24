@@ -6,7 +6,6 @@
 
 #include <ikos/core/number/compatibility.hpp>
 #include <ikos/core/number/signedness.hpp>
-#include <ikos/core/number/supported_integral.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
 #include <ikos/core/number/z_number.hpp>
 #include <ikos/core/support/compiler.hpp>
@@ -18,7 +17,7 @@ namespace core {
 class FNumber {
 private:
   /// If bit-width = 32, store as the float,
-  /// Otherwise bit-width = 64,use double type.
+  /// Otherwise bit-width = 64, use double type.
   union {
     float f;  /// bit-width = 32
     double d; /// bit-width = 64
@@ -138,7 +137,7 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
     if(bit_width==32){  // fl
-      return FNumber(-3.4028235E38,32,sign);
+      return FNumber(-3.4028235E38f,32,sign);
     }else{  // do
       return FNumber(-1.7976931348623157E308,64,sign);
     }
@@ -149,7 +148,7 @@ public:
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
     if(bit_width==32){  // fl
-      return FNumber(3.4028235E38,32,sign,NormalizedTag{});
+      return FNumber(3.4028235E38f,32,sign,NormalizedTag{});
     }else{  // do
       return FNumber(1.7976931348623157E308,64,sign,NormalizedTag{});
     }
@@ -337,7 +336,6 @@ public:
 
   /// \brief Return a string representation of the floating point number in the
   /// given base
-  /// \todo(Not sure if this function is still needed, I'll keep it for now.)
   std::string str() const {
     if (this->is_fl()) {
       return std::to_string(this->_n.f);

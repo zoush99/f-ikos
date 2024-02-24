@@ -36,9 +36,9 @@ BOOST_AUTO_TEST_CASE(test_assign_operation_signed) {
   BOOST_CHECK((FNumber(2,32,Signed)*=FNumber(12,32,Signed))==FNumber(24,32,Signed));
   BOOST_CHECK((FNumber(2,32,Signed)*=FNumber(0,32,Signed))==FNumber(0,32,Signed));
   BOOST_CHECK((FNumber(12,32,Signed)/=FNumber(2,32,Signed))==FNumber(6,32,Signed));
-  BOOST_CHECK((FNumber(3,32,Signed)/=FNumber(12,32,Signed))==FNumber(0.25,32,Signed));
-  BOOST_CHECK((FNumber(1.5,32,Signed)+=FNumber(2.5,32,Signed))==FNumber(4,32,Signed));
-  BOOST_CHECK((FNumber(1.5,32,Signed)-=FNumber(2.5,32,Signed))==FNumber(-1,32,Signed));
+  BOOST_CHECK((FNumber(3,32,Signed)/=FNumber(12,32,Signed))==FNumber(0.25f,32,Signed));
+  BOOST_CHECK((FNumber(2.5f,32,Signed)+=FNumber(2.5f,32,Signed))==FNumber(5,32,Signed));
+  BOOST_CHECK((FNumber(1.5f,32,Signed)-=FNumber(2.5f,32,Signed))==FNumber(-1,32,Signed));
   BOOST_CHECK((FNumber(1.5,32,Signed)*=FNumber(1.5,32,Signed))==FNumber(2.25,32,Signed));
   BOOST_CHECK((FNumber(4.5f,32,Signed)/=FNumber(1.5f,32,Signed))==FNumber(3,32,Signed));
 }
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE(test_minus_signed) {
   BOOST_CHECK((-FNumber(1.2,64,Signed))==FNumber(-1.2,64,Signed));
 }
 
-/*BOOST_AUTO_TEST_CASE(test_trunc_signed) {
+BOOST_AUTO_TEST_CASE(test_trunc_signed) {
   BOOST_CHECK(FNumber(12,32,Signed).trunc(32)==FNumber(12,32,Signed));
   BOOST_CHECK(FNumber(1.2f,32,Signed).trunc(32)==FNumber(1.2f,32,Signed));
   BOOST_CHECK(FNumber(1.2,64,Signed).trunc(32)==FNumber(1.2f,32,Signed));
@@ -91,25 +91,25 @@ BOOST_AUTO_TEST_CASE(test_ext_signed){
   BOOST_CHECK(FNumber(12,32,Signed).ext(32)==FNumber(12,32,Signed));
   BOOST_CHECK(FNumber(12,32,Signed).ext(64)==FNumber(12,64,Signed));
   BOOST_CHECK(FNumber(12,64,Signed).ext(64)==FNumber(12,64,Signed));
-}*/
+}
 
 BOOST_AUTO_TEST_CASE(test_operation_signed){
   BOOST_CHECK(add(FNumber(1,32,Signed),FNumber(2,32,Signed))==FNumber(3,32,Signed));
   BOOST_CHECK(add(FNumber(1.5f,32,Signed),FNumber(2,32,Signed))==FNumber(3.5f,32,Signed));
   BOOST_CHECK(add(FNumber(1.5f,32,Signed),FNumber(2.5f,32,Signed))==FNumber(4,32,Signed));
-  BOOST_CHECK(add(FNumber(1.5,64,Signed),FNumber(2.5,64,Signed))==FNumber(4,64,Signed));
+  BOOST_CHECK(add(FNumber(1.5,64,Signed),FNumber(2.5,64,Signed))==FNumber(4.0,64,Signed));
   BOOST_CHECK(sub(FNumber(1,32,Signed),FNumber(2,32,Signed))==FNumber(-1,32,Signed));
   BOOST_CHECK(sub(FNumber(1.5f,32,Signed),FNumber(2,32,Signed))==FNumber(-0.5f,32,Signed));
   BOOST_CHECK(sub(FNumber(1.5f,32,Signed),FNumber(2.5f,32,Signed))==FNumber(-1,32,Signed));
-  BOOST_CHECK(sub(FNumber(1.5,64,Signed),FNumber(2.5,64,Signed))==FNumber(-1,64,Signed));
+  BOOST_CHECK(sub(FNumber(1.5,64,Signed),FNumber(2.5,64,Signed))==FNumber(-1.0,64,Signed));
   BOOST_CHECK(mul(FNumber(1,32,Signed),FNumber(2,32,Signed))==FNumber(2,32,Signed));
   BOOST_CHECK(mul(FNumber(1.5f,32,Signed),FNumber(2,32,Signed))==FNumber(3,32,Signed));
   BOOST_CHECK(mul(FNumber(1.5f,32,Signed),FNumber(2.5f,32,Signed))==FNumber(3.75f,32,Signed));
   BOOST_CHECK(mul(FNumber(1.5,64,Signed),FNumber(2.5,64,Signed))==FNumber(3.75,64,Signed));
-  BOOST_CHECK(div(FNumber(1,32,Signed),FNumber(2,32,Signed))==FNumber(0.5,32,Signed));
+  BOOST_CHECK(div(FNumber(1,32,Signed),FNumber(2,32,Signed))==FNumber(0.5f,32,Signed));
   BOOST_CHECK(div(FNumber(1.5f,32,Signed),FNumber(2,32,Signed))==FNumber(0.75f,32,Signed));
   BOOST_CHECK(div(FNumber(1.5f,32,Signed),FNumber(3,32,Signed))==FNumber(0.5f,32,Signed));
-  BOOST_CHECK(div(FNumber(1.5,64,Signed),FNumber(3,64,Signed))==FNumber(0.5,64,Signed));
+  BOOST_CHECK(div(FNumber(1.5,64,Signed),FNumber(3.0,64,Signed))==FNumber(0.5,64,Signed));
 }
 
 BOOST_AUTO_TEST_CASE(test_comparision_signed){
