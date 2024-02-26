@@ -169,12 +169,22 @@ public:
     this->_uninitialized.normalize();
     if (this->_uninitialized.is_bottom()) {
       this->_integer.set_to_bottom();
+      this->_fnumber.set_to_bottom();
       return;
     }
 
     this->_integer.normalize();
     if (this->_integer.is_bottom()) {
       this->_uninitialized.set_to_bottom();
+      this->_fnumber.set_to_bottom();
+      return;
+    }
+
+    /// By zoush99
+    this->_fnumber.normalize();
+    if (this->_fnumber.is_bottom()) {
+      this->_uninitialized.set_to_bottom();
+      this->_integer.set_to_bottom();
       return;
     }
   }
@@ -894,8 +904,6 @@ public:
         return;
       }
       this->_uninitialized.assign_initialized(x);
-      /// \todo bugs here!!!
-      /// \details: In template: no matching member function for call to 'assign'
       this->_fnumber.assign(x, n);
     }
 
@@ -1517,7 +1525,6 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    /// \todo bugs here!!! By zoush99
     this->_fnumber.assign(x, n);
   }
 
@@ -1611,7 +1618,7 @@ public:
     }
 
     this->_uninitialized.assign(x, y);
-    this->_integer.assign(x, y);
+    this->_fnumber.assign(x, y);
   }
 
   void dynamic_read_pointer(VariableRef x, VariableRef y) override {

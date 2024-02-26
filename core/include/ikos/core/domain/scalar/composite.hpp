@@ -1047,7 +1047,6 @@ public:
     }
 
     this->_uninitialized.assign_initialized(x);
-    /// \todo bugs here!!!
     this->_fnumber.assign(x, n);
   }
 
