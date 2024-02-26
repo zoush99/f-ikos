@@ -647,6 +647,7 @@ public:
 
   void dynamic_write_int(VariableRef, VariableRef) override {}
 
+  /// \brief By zoush99
   void dynamic_write_float(VariableRef, const FNumber&) override {}
 
   void dynamic_write_nondet_float(VariableRef) override {}
@@ -681,9 +682,9 @@ public:
 
   void scalar_assign_nondet(VariableRef) override {}
 
-  void scalar_float_to_int(VariableRef x, VariableRef f) override {}
+  void scalar_float_to_int(VariableRef f, VariableRef x) override {}
 
-  void scalar_int_to_float(VariableRef f, VariableRef x) override {}
+  void scalar_int_to_float(VariableRef x, VariableRef f) override {}
 
   void scalar_pointer_to_int(VariableRef,
                              VariableRef,

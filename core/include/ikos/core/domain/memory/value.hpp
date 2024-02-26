@@ -61,8 +61,8 @@
 #include <ikos/core/semantic/machine_int/variable.hpp>
 #include <ikos/core/semantic/memory/value/cell_factory.hpp>
 #include <ikos/core/semantic/memory/value/cell_variable.hpp>
-#include <ikos/core/support/cast.hpp>
 #include <ikos/core/semantic/scalar/variable.hpp> // By zoush99
+#include <ikos/core/support/cast.hpp>
 
 namespace ikos {
 namespace core {

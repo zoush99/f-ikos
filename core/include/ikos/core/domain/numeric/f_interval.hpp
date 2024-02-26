@@ -5,7 +5,7 @@
 /*******************************************************************************
  *
  * \file
- * \brief Standard domain of intervals
+ * \brief Standard domain of f-intervals
  *
  * Author: Arnaud J. Venet
  *
@@ -304,7 +304,7 @@ public:
     }
   }
 
-  /// \todo(Further modifications are needed here, as this was copied without
+  /// (Further modifications are needed here, as this was copied without
   /// changes from machine integer types. Some of the involved functions do not
   /// exist, and correctness has not been considered.) By zoush99
   /// \brief Add the constraint `x pred y`

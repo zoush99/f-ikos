@@ -600,10 +600,10 @@ public:
 
   /// \brief By zoush99
   /// \brief Assign 'x = fl-to-int f'
-  virtual void scalar_float_to_int(VariableRef x, VariableRef f) = 0;
+  virtual void scalar_float_to_int(VariableRef f, VariableRef x) = 0;
 
   /// \brief Assign 'f = x-to-fl x'
-  virtual void scalar_int_to_float(VariableRef f, VariableRef x) = 0;
+  virtual void scalar_int_to_float(VariableRef x, VariableRef f) = 0;
 
   /// \brief Assign `x = ptr-to-int p`
   virtual void scalar_pointer_to_int(VariableRef x,

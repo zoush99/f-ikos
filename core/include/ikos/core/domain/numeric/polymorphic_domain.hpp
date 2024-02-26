@@ -7,7 +7,7 @@
  * \file
  * \brief Polymorphic floating point abstract domain
  *
- * The PolymorphicDomain is a machine integer abstract domain whose behavior
+ * The PolymorphicDomain is a floating point abstract domain whose behavior
  * depends on the abstract domain it is constructed with. It allows the use of
  * different abstract domains at runtime.
  *
@@ -307,7 +307,7 @@ private:
     virtual IntervalCongruence< Number > to_interval_congruence(
         const LinearExpressionT& e) const = 0;
 
-    /// \todo(annotate)
+    /// \todo annotate
     virtual LinearConstraintSystemT to_linear_constraint_system() const =0;
 
     /// @}

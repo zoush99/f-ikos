@@ -166,7 +166,7 @@ private:
     /// \brief Perform the widening of two abstract values
     virtual void widen_with(const PolymorphicBase& other) = 0;
 
-    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// (Putting it on hold for now; if needed later, functions with
     /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual void widen_threshold_with(const PolymorphicBase& other,
@@ -178,7 +178,7 @@ private:
     /// \brief Perform the narrowing of two abstract values
     virtual void narrow_with(const PolymorphicBase& other) = 0;
 
-    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// (Putting it on hold for now; if needed later, functions with
     /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the narrowing of two abstract values with a threshold
     virtual void narrow_threshold_with(const PolymorphicBase& other,
@@ -201,7 +201,7 @@ private:
     virtual std::unique_ptr< PolymorphicBase > widening(
         const PolymorphicBase& other) const = 0;
 
-    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// (Putting it on hold for now; if needed later, functions with
     /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the widening of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > widening_threshold(
@@ -215,7 +215,7 @@ private:
     virtual std::unique_ptr< PolymorphicBase > narrowing(
         const PolymorphicBase& other) const = 0;
 
-    /// \todo(Putting it on hold for now; if needed later, functions with
+    /// (Putting it on hold for now; if needed later, functions with
     /// floating-point parameters can be added. By zoush99)
     /// \brief Perform the narrowing of two abstract values with a threshold
     virtual std::unique_ptr< PolymorphicBase > narrowing_threshold(
@@ -408,8 +408,6 @@ private:
     virtual void float_forget(VariableRef x) = 0;
 */
 
-
-    /// \details(floating point)
     /// \brief Assign `x = n`
     virtual void float_assign(VariableRef x, const FNumber& n) = 0;
 
@@ -715,10 +713,10 @@ private:
     virtual void scalar_assign_nondet(VariableRef x) = 0;
 
     /// \brief Assign 'x = fl-to-int f'
-    virtual void scalar_float_to_int(VariableRef x, VariableRef f) = 0;
+    virtual void scalar_float_to_int(VariableRef f, VariableRef x) = 0;
 
     /// \brief Assign 'f = x-to-fl x'
-    virtual void scalar_int_to_float(VariableRef f, VariableRef x) = 0;
+    virtual void scalar_int_to_float(VariableRef x, VariableRef f) = 0;
 
     /// \brief Assign `x = ptr-to-int p`
     virtual void scalar_pointer_to_int(VariableRef x,
@@ -1272,7 +1270,6 @@ private:
 */
 
     void float_assign(VariableRef x, const FNumber& n) override {
-      /// \todo bugs here!!!
       this->_inv.float_assign(x, n);
     }
 
