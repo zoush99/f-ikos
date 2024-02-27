@@ -218,7 +218,7 @@ IntegerConstant* ContextImpl::integer_cst(IntegerType* type,
 }
 */
 
-// By zoush99
+/// By zoush99
 FloatConstant* ContextImpl::float_cst(FloatType* type,
                                       const FNumber& value) {
   auto it = this->_float_constants.find(std::make_tuple(type, value));

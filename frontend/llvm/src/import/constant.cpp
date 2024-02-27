@@ -224,7 +224,6 @@ ar::IntegerConstant* ConstantImporter::translate_constant_int(
   return ar::IntegerConstant::get(this->_context, type, n);
 }
 
-/// \todo(floating point)
 /// \brief Convert the 'llvm::APFloat' type to a string type and pass it to AR
 /*
    ar::FloatConstant* ConstantImporter::translate_constant_fp(
@@ -236,6 +235,7 @@ ar::IntegerConstant* ConstantImporter::translate_constant_int(
  }
  */
 
+/// \brief Convert the 'llvm::APFloat' type to a FNumber type and pass it to AR
 ar::FloatConstant* ConstantImporter::translate_constant_fp(
     llvm::ConstantFP* cst, ar::FloatType* type) {
   ar::FNumber n= to_floating_point(cst->getValueAPF());

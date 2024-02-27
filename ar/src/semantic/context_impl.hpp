@@ -235,7 +235,6 @@ public:
   /// \brief Get or create an integer type
   IntegerType* integer_type(uint64_t bit_width, Signedness sign);
 
-  /// \todo(floating point)
   /// \brief Get or create an floating point type
   FloatType* float_type(uint64_t bit_width,FloatSemantic float_sem);
 
@@ -271,7 +270,6 @@ public:
   FloatConstant* float_cst(FloatType* type, const std::string& value);
 */
 
-  /// \todo
   /// \brief Get or create a float constant
   FloatConstant* float_cst(FloatType* type, const FNumber& value);
 

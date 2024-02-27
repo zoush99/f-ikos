@@ -107,7 +107,7 @@ void IntegerConstant::dump(std::ostream& o) const {
 }
 
 // FloatConstant
-/// \todo(Here, floating-point types are treated as string representations;
+/// (Here, floating-point types are treated as string representations;
 /// later on, I will represent floating-point types as FNumber types.)
 /*
 FloatConstant::FloatConstant(FloatType* type, std::string value)
