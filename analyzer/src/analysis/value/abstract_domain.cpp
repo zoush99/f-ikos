@@ -49,7 +49,7 @@
 #include <ikos/core/domain/uninitialized/separate_domain.hpp>
 
 #include <ikos/analyzer/analysis/value/abstract_domain.hpp>
-/// \brief (This place should also consider the numerical abstraction domain.)
+/// (This place should also consider the numerical abstraction domain.)
 #include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
 #include <ikos/analyzer/analysis/value/numeric_domain.hpp>  // By zoush99
 
@@ -72,10 +72,7 @@ using ScalarAbstractDomain =
                                    MemoryLocation*,
                                    UninitializedAbstractDomain,
                                    MachineIntAbstractDomain,
-                                   // using MachineIntAbstractDomain =
-                                   // core::machine_int::PolymorphicDomain<
-                                   // Variable* >;
-                                   NumericAbstractDomain,
+                                   NumericAbstractDomain, // By zoush99
                                    NullityAbstractDomain >;
 
 /// \brief Lifetime abstract domain
@@ -111,7 +108,7 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
     return MemoryAbstractDomain(inv);
   }*/
   /// \brief Division is not currently supported. It will be addressed in a future update.
-  return MemoryAbstractDomain(inv); /// By zoush99
+  return MemoryAbstractDomain(inv); // By zoush99
 }
 
 /// \brief Create the top memory abstract value
@@ -132,7 +129,7 @@ MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
     return MemoryAbstractDomain(inv);
   }*/
   /// \brief Division is not currently supported. It will be addressed in a future update.
-  return MemoryAbstractDomain(inv); /// By zoush99
+  return MemoryAbstractDomain(inv); // By zoush99
 }
 
 } // end anonymous namespace

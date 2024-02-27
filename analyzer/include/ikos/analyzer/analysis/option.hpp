@@ -140,24 +140,6 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
   }
 }
 
-/*
-/// \brief Numeric abstract domain
-enum class NumericDomainOption {
-  FInterval, // floating point interval, by zoush99
-};
-
-/// \brief Return a string representing a NumericDomainOption
-inline const char* numeric_domain_option_str(NumericDomainOption d) {
-  switch (d) {
-    case NumericDomainOption::FInterval: // By zoush99
-      return "finterval";
-    default: {
-      ikos_unreachable("unreachable");
-    }
-  }
-}
-*/
-
 /// \brief Either Interprocedural or Intraprocedural
 enum class Procedural {
   /// \brief Analyzes function by taking into account other functions
