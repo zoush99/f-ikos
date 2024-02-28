@@ -47,8 +47,8 @@
 #include <ikos/core/domain/exception/exception.hpp>
 #include <ikos/core/domain/machine_int/interval.hpp>
 #include <ikos/core/domain/memory/dummy.hpp>
-#include <ikos/core/domain/numeric/f_interval.hpp>  // By zoush99
-#include <ikos/core/domain/scalar/machine_int.hpp>  // Bugs here!!!
+#include <ikos/core/domain/numeric/f_interval.hpp> // By zoush99
+#include <ikos/core/domain/scalar/machine_int.hpp> // Bugs here!!!
 #include <ikos/core/domain/uninitialized/separate_domain.hpp>
 #include <ikos/core/fixpoint/fwd_fixpoint_iterator.hpp>
 
@@ -79,7 +79,6 @@ namespace {
 
 /// \brief Numerical abstract domain for the intra-procedural pointer analysis
 using MachineIntAbstractDomain = core::machine_int::IntervalDomain< Variable* >;
-//using NumericAbstractDomain = core::numeric::IntervalDomain< Variable* >;
 
 /// \brief Uninitialized abstract domain for the intra-procedural pointer
 /// analysis
@@ -88,16 +87,16 @@ using UninitializedAbstractDomain =
 
 /// By zoush99
 using NumericAbstractDomain =
-    core::numeric::FIntervalDomain<FNumber,Variable*>;
-//using FNumberAbstractDomain=core::numeric::FIntervalDomain<FNumber,Variable*,10>; // By zoush99
+    core::numeric::FIntervalDomain< FNumber, Variable*,10 >;
 
+/// By zoush99
 /// \brief Scalar abstract domain for the intra-procedural pointer analysis
 using ScalarAbstractDomain =
     core::scalar::MachineIntDomain< Variable*,
                                     MemoryLocation*,
                                     UninitializedAbstractDomain,
                                     MachineIntAbstractDomain,
-                                    NumericAbstractDomain>;
+                                    NumericAbstractDomain >;
 
 /// \brief Memory abstract domain for the intra-procedural pointer analysis
 using MemoryAbstractDomain = core::memory::
@@ -122,7 +121,7 @@ AbstractDomain make_initial_abstract_value() {
   auto top = MemoryAbstractDomain(
       ScalarAbstractDomain(UninitializedAbstractDomain::top(),
                            MachineIntAbstractDomain::top(),
-                           NumericAbstractDomain::bottom()));
+                           NumericAbstractDomain::top()));
   auto bottom = MemoryAbstractDomain(
       ScalarAbstractDomain(UninitializedAbstractDomain::bottom(),
                            MachineIntAbstractDomain::bottom(),

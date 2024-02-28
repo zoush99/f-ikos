@@ -68,7 +68,7 @@ using PointsToSet = core::PointsToSet< MemoryLocation* >;
 using MachineIntInterval = core::machine_int::Interval;
 
 /// \brief floating point interval
-using NumericInterval = core::numeric::Interval<FNumber>; // By zoush99
+using NumericInterval = core::numeric::Interval< FNumber >; // By zoush99
 
 /// \brief Pointer abstraction using a points-to set and an interval
 using PointerAbsValue = core::PointerAbsValue< MemoryLocation* >;
