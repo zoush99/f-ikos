@@ -497,8 +497,8 @@ public:
     FOLT,
     FOLE,
     FONE,
-    FORD,
-    FUNO,
+    FORD, // Not NaN
+    FUNO, // Exist NaN
     FUEQ,
     FUGT,
     FUGE,

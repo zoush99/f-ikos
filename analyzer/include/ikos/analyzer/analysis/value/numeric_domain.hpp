@@ -47,7 +47,7 @@
 
 #pragma once
 
-#include <ikos/core/domain/numeric/polymorphic_domain.hpp>
+#include <ikos/core/domain/numeric/polymorphic_domain.hpp>  // Warnings
 
 #include <ikos/analyzer/analysis/option.hpp>
 #include <ikos/analyzer/analysis/variable.hpp>

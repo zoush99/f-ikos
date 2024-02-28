@@ -202,7 +202,7 @@ public:
   }
 
   bool is_top() const override {
-    return this->_uninitialized.is_top() && this->_integer.is_top() ||
+    return this->_uninitialized.is_top() && this->_integer.is_top() &&
            this->_fnumber.is_top();
   }
 

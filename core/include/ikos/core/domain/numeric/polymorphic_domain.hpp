@@ -657,7 +657,7 @@ private:
     }
 
     /// \todo(annotate)
-    LinearConstraintSystemT to_linear_constraint_system() const {
+    LinearConstraintSystemT to_linear_constraint_system() const override {
       return this->_inv.to_linear_constraint_system();
     }
 
@@ -952,7 +952,7 @@ public:
   }
 
   /// \brief How to construct a polymorphic abstract domain? By zoush99
-  LinearConstraintSystemT to_linear_constraint_system() const {
+  LinearConstraintSystemT to_linear_constraint_system() const override {
     return this->_ptr->to_linear_constraint_system();
   }
 

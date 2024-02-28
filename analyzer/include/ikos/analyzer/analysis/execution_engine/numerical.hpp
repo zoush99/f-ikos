@@ -91,7 +91,6 @@ public:
                 "memory::AbstractDomain");
 
 private:
-  /// \todo(numeric)
   using IntInterval = core::machine_int::Interval;
   using IntIntervalCongruence = core::machine_int::IntervalCongruence;
   using IntVariable = core::VariableExpression< MachineInt, Variable* >;
@@ -634,9 +633,6 @@ private:
     void machine_int_var(Variable*) { ikos_unreachable("unreachable"); }
 
     void floating_point_var(Variable* rhs) {
-      auto rhs_type = ar::cast< ar::FloatType >(rhs->type());
-//      ikos_assert(this->_type->bit_width() == rhs_type->bit_width());
-
       this->_inv.normal().uninit_assert_initialized(rhs);
       this->_inv.normal().float_assign(this->_lhs, rhs);
     }
@@ -1521,7 +1517,7 @@ public:
       case ar::Comparison::FULE:
         /// \todo(floating point unordered or not equal)
       case ar::Comparison::FUNE: {
-        /// \todo(dump)
+        /// \todo(dummy operation)
         this->exec_float_comparison(FnuPredicate::EQ,left, right);
       } break;
       case ar::Comparison::PEQ: {
@@ -1576,7 +1572,6 @@ private:
     }
   }
 
-  /// \todo(floating point)
   /// \brief Execute a floating point comparison
   void exec_float_comparison(FnuPredicate pred,
                              const ScalarLit& left,
