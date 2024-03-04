@@ -40,10 +40,10 @@ public:
   /// @{
 
   /// \brief Default constructor
-  FNumber(){
-    _n.f=1;
-    _bit_width=32;
-    _sign=Signedness::Signed;
+  FNumber() {
+    this->_n.f = 1;
+    this->_bit_width = 32;
+    this->_sign = Signedness::Signed;
   }
 
   /// \brief Create a floating point number from a type
@@ -54,9 +54,10 @@ public:
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
 
-    if (std::is_same< T, float >::value || std::is_same< T, int >::value) {  // fl or int
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl or int
       this->_n.f = static_cast< float >(n);
-    } else {  // do
+    } else { // do
       this->_n.d = static_cast< double >(n);
     }
   }
@@ -69,9 +70,10 @@ public:
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
 
-    if (std::is_same< T, float >::value || std::is_same< T, int >::value) {  // fl or int
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl or int
       this->_n.f = static_cast< float >(n);
-    } else {  // do
+    } else { // do
       this->_n.d = static_cast< double >(n);
     }
   }
@@ -80,9 +82,9 @@ public:
   FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    if (bit_width == 32) {  // fl
+    if (bit_width == 32) { // fl
       this->_n.f = n.to< int >();
-    } else {  // do
+    } else { // do
       this->_n.d = n.to< int >();
     }
   }
@@ -91,9 +93,9 @@ public:
   FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign, NormalizedTag)
       : _bit_width(bit_width), _sign(sign) {
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    if (bit_width == 32) {  // fl
+    if (bit_width == 32) { // fl
       this->_n.f = n.to< int >();
-    } else {  // do
+    } else { // do
       this->_n.d = n.to< int >();
     }
   }
@@ -102,12 +104,13 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FNumber(T n): _sign(Signed){
-    if (std::is_same< T, float >::value || std::is_same< T, int >::value) {  // fl
-      _bit_width=32;
+  FNumber(T n) : _sign(Signed) {
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
+      _bit_width = 32;
       this->_n.f = static_cast< float >(n);
-    } else {  // do
-      _bit_width=64;
+    } else { // do
+      _bit_width = 64;
       this->_n.d = static_cast< double >(n);
     }
   }
@@ -131,15 +134,17 @@ public:
   /// \brief Destructor
   ~FNumber() = default;
 
-  /// \brief It is aimed at normalized numbers and does not consider denormalized numbers.
-  /// \brief Create the minimum machine integer for the given bit width and sign
+  /// \brief It is aimed at normalized numbers and does not consider
+  /// denormalized numbers.
+  /// \brief Create the minimum machine integer for the
+  /// given bit width and sign
   static FNumber min(uint64_t bit_width, Signedness sign) {
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
-    if(bit_width==32){  // fl
-      return FNumber(-3.4028235E38f,32,sign);
-    }else{  // do
-      return FNumber(-1.7976931348623157E308,64,sign);
+    if (bit_width == 32) { // fl
+      return FNumber(-3.4028235E38f, 32, sign);
+    } else { // do
+      return FNumber(-1.7976931348623157E308, 64, sign);
     }
   }
 
@@ -147,13 +152,12 @@ public:
   static FNumber max(uint64_t bit_width, Signedness sign) {
     ikos_assert_msg(bit_width > 0, "invalid bit width");
     // By default, all are signed.
-    if(bit_width==32){  // fl
-      return FNumber(3.4028235E38f,32,sign,NormalizedTag{});
-    }else{  // do
-      return FNumber(1.7976931348623157E308,64,sign,NormalizedTag{});
+    if (bit_width == 32) { // fl
+      return FNumber(3.4028235E38f, 32, sign, NormalizedTag{});
+    } else { // do
+      return FNumber(1.7976931348623157E308, 64, sign, NormalizedTag{});
     }
   }
-
 
   /// \brief Create the null floating point number for the given bit width and
   /// sign
@@ -274,10 +278,10 @@ public:
   /// \brief Division assignment
   FNumber& operator/=(const FNumber& x) {
     ikos_assert_msg(!x.is_zero(), "division by zero");
-    if (this->is_fl()) {  // fl / fl
-      this->_n.f=this->_n.f / x._n.f;
-    } else {  // do / do
-      this->_n.d=this->_n.d / x._n.d;
+    if (this->is_fl()) { // fl / fl
+      this->_n.f = this->_n.f / x._n.f;
+    } else { // do / do
+      this->_n.d = this->_n.d / x._n.d;
     }
     return *this;
   }
@@ -300,22 +304,23 @@ public:
   /// \name Value tests
   /// @{
 
-  /// \brief It is aimed at normalized numbers and does not consider denormalized numbers.
-  /// \brief Return true if this is the minimum machine integer
+  /// \brief It is aimed at normalized numbers and does not consider
+  /// denormalized numbers. \brief Return true if this is the minimum machine
+  /// integer
   bool is_min() const {
-    if (this->_bit_width==32) { // fl
-      return this->_n.f==-3.4028235E38f;
-    } else {  // do
-      return this->_n.d==-1.7976931348623157E308;
+    if (this->_bit_width == 32) { // fl
+      return this->_n.f == -3.4028235E38f;
+    } else { // do
+      return this->_n.d == -1.7976931348623157E308;
     }
   }
 
   /// \brief Return true if this is the maximum machine integer
   bool is_max() const {
-    if (this->_bit_width==32) { // fl
-      return this->_n.f==3.4028235E38f;
-    } else {  // do
-      return this->_n.d==1.7976931348623157E308;
+    if (this->_bit_width == 32) { // fl
+      return this->_n.f == 3.4028235E38f;
+    } else { // do
+      return this->_n.d == 1.7976931348623157E308;
     }
   }
 
@@ -374,8 +379,7 @@ public:
       if (bit_width == 32) { // 32 -> 32
         return FNumber(*this);
       }
-    }
-    else {
+    } else {
       if (bit_width == 32) { // 64 -> 32
         return FNumber(static_cast< float >(this->_n.d),
                        bit_width,
@@ -847,7 +851,6 @@ inline std::size_t hash_value(const FNumber& n) {
 
 } // end namespace core
 } // end namespace ikos
-
 
 namespace std {
 

@@ -620,7 +620,6 @@ private:
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
     void floating_point(const FNumber& rhs) {
-//      ikos_assert(this->_type->bit_width() == rhs.bit_width());
       this->_inv.normal().float_assign(this->_lhs, rhs);
     }
 

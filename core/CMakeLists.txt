@@ -99,8 +99,8 @@ if (APRON_FOUND)
   include_directories(SYSTEM ${APRON_INCLUDE_DIRS})
 endif()
 
-find_package(LLVM REQUIRED) # By zoush99
-include_directories(SYSTEM ${LLVM_INCLUDE_DIR}) # By zoush99
+#find_package(LLVM REQUIRED) # By zoush99
+#include_directories(SYSTEM ${LLVM_INCLUDE_DIR}) # By zoush99
 
 #
 # Compiler flags
