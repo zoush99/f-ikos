@@ -20,8 +20,8 @@ private:
   Signedness _sign;
 
 private:
-  struct TopTag{};
-  struct BottomTag{};
+  struct TopTag {};
+  struct BottomTag {};
 
   /// \brief Create the top floating point interval number [-oo, +oo]
   explicit FINumber(TopTag)
@@ -47,14 +47,14 @@ public:
   /// \name Constructors
   /// @{
 
-  /// \brief Default
+  /// \brief Default constructor
   FINumber() : _lb(1), _ub(1), _bit_width(32), _sign(Signed) {}
 
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v,uint64_t bit_width, Signedness sign)
+  FINumber(T v, uint64_t bit_width, Signedness sign)
       : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating point interval number from a type
@@ -103,12 +103,12 @@ public:
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating pointer interval number from Fbounds
-  FINumber(FBound lb, FBound ub)
-      : _lb(lb), _ub(ub), _sign(Signed) {
-    if(lb.number().is_initialized() && ub.number().is_initialized()){ // lb and ub are not empty
-      this->_bit_width=lb.number()->bit_width();
-    }else{  // none
-      this->_bit_width=0;
+  FINumber(FBound lb, FBound ub) : _lb(lb), _ub(ub), _sign(Signed) {
+    if (lb.number().is_initialized() &&
+        ub.number().is_initialized()) { // lb and ub are not empty
+      this->_bit_width = lb.number()->bit_width();
+    } else { // none
+      this->_bit_width = 0;
     }
   }
 
@@ -166,7 +166,6 @@ public:
 
     this->_lb = o._lb;
     this->_ub = o._ub;
-    this->_sign = o._sign;
     return *this;
   }
 
@@ -179,7 +178,6 @@ public:
     this->_lb = o._lb;
     this->_ub = o._ub;
     this->_bit_width = o._bit_width;
-    this->_sign = o._sign;
     o._bit_width = 0; // do not delete o._lb,o._ub
     return *this;
   }
@@ -191,12 +189,12 @@ public:
   FINumber& operator=(T n) {
     this->_lb = n;
     this->_ub = n;
-    if (this->is_fl()) {
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
-    } else {
+    } else { // do
       this->_bit_width = 64;
     }
-    this->_sign = Signed;
     return *this;
   }
 
@@ -221,6 +219,7 @@ public:
     return *this;
   }
 
+  /// \todo
   /// \brief Division assignment
   FINumber& operator/=(const FINumber& x) {
     this->_lb /= x._lb;
@@ -275,7 +274,7 @@ public:
     if (this->is_bottom()) {
       return bottom();
     } else {
-      return FINumber(-this->_ub, -this->_lb);
+      return FINumber(-this->_ub,-this->_lb);
     }
   }
 
@@ -310,21 +309,21 @@ public:
 public:
   // friends
 
-  friend FINumber add(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber add(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber operator+(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber operator+(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber sub(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber sub(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber operator-(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber operator-(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber mul(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber mul(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber operator*(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber operator*(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber div(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber div(const FINumber& lhs, const FINumber& rhs);
 
-  friend FINumber operator/(const FINumber& lhs,const FINumber& rhs);
+  friend FINumber operator/(const FINumber& lhs, const FINumber& rhs);
 
   friend bool operator==(const FINumber& lhs, const FINumber& rhs);
 
@@ -338,12 +337,11 @@ public:
 
   friend bool operator>=(const FINumber& lhs, const FINumber& rhs);
 
-  friend std::ostream& operator<<(std::ostream& o,const FINumber& n);
+  friend std::ostream& operator<<(std::ostream& o, const FINumber& n);
 
   friend std::size_t hash_value(const FINumber&);
 };
 // end class FINumber
-
 
 /// \name Binary Operators
 /// @{
@@ -351,35 +349,35 @@ public:
 /// \brief Addition
 ///
 /// Returns the sum of the operands
-inline FINumber add(const FINumber& lhs,const FINumber& rhs){
-  return FINumber(lhs._lb+rhs._lb,lhs._ub+rhs._ub);
+inline FINumber add(const FINumber& lhs, const FINumber& rhs) {
+  return FINumber(lhs._lb + rhs._lb, lhs._ub + rhs._ub);
 }
 
 /// \brief Addition
 ///
 /// Returns the sum of the operands
-inline FINumber operator+(const FINumber& lhs,const FINumber& rhs){
-  return add(lhs,rhs);
+inline FINumber operator+(const FINumber& lhs, const FINumber& rhs) {
+  return add(lhs, rhs);
 }
 
 /// \brief Subtraction
 ///
 /// Returns the difference of the operands
-inline FINumber sub(const FINumber& lhs,const FINumber& rhs){
-  return FINumber(lhs._lb-rhs._lb,lhs._ub-rhs._ub);
+inline FINumber sub(const FINumber& lhs, const FINumber& rhs) {
+  return FINumber(lhs._lb - rhs._lb, lhs._ub - rhs._ub);
 }
 
 /// \brief Subtraction
 ///
 /// Returns the sum of the operands
-inline FINumber operator-(const FINumber& lhs,const FINumber& rhs){
-  return sub(lhs,rhs);
+inline FINumber operator-(const FINumber& lhs, const FINumber& rhs) {
+  return sub(lhs, rhs);
 }
 
 /// \brief Multiplication
 ///
 /// Returns the product of the operands
-inline FINumber mul(const FINumber& lhs,const FINumber& rhs){
+inline FINumber mul(const FINumber& lhs, const FINumber& rhs) {
   if (lhs.is_bottom() || rhs.is_bottom()) {
     return FINumber::bottom();
   } else {
@@ -394,8 +392,8 @@ inline FINumber mul(const FINumber& lhs,const FINumber& rhs){
 /// \brief Multiplication
 ///
 /// Returns the product of the operands
-inline FINumber operator*(const FINumber& lhs,const FINumber& rhs){
-  return mul(lhs,rhs);
+inline FINumber operator*(const FINumber& lhs, const FINumber& rhs) {
+  return mul(lhs, rhs);
 }
 
 /*/// \brief Division
@@ -470,14 +468,13 @@ inline bool operator>=(const FINumber& lhs, const FINumber& rhs) {
   return (lhs._lb <= rhs._lb && lhs._ub >= rhs._ub);
 }
 
-
 /// @}
 /// \name Input / Output
 /// @{
 
 /// \brief Write a floating point number on a stream
 inline std::ostream& operator<<(std::ostream& o, const FINumber& n) {
-  o<<"["<<n._lb<<","<<n._ub<<"]";
+  o << "[" << n._lb << "," << n._ub << "]";
   return o;
 }
 
