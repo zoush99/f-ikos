@@ -57,6 +57,26 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FINumber(T v,uint64_t bit_width, Signedness sign)
+      : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
+
+  /// \brief Create a floating point interval number from a type
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FINumber(T v) : _lb(v), _ub(v), _sign(Signed) {
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
+      this->_bit_width = 32;
+    } else { // do
+      this->_bit_width = 64;
+    }
+  }
+
+  /// \brief Create a floating point interval number from a type
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FINumber(T lb, T ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
 
@@ -262,6 +282,34 @@ public:
     }
   }
 
+  /// \brief If the interval is a singleton [n, n], return n, otherwise return
+  /// boost::none
+  boost::optional< FBound > singleton() const {
+    if (this->_lb.is_finite() && this->_lb == this->_ub) {
+      return this->_lb;
+    } else {
+      return boost::none;
+    }
+  }
+
+  /// \brief Return true if the interval contains n
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  bool contains(T n) const {
+    return this->contains(FNumber(n));
+  }
+
+  /// \brief Return true if the interval contains n
+  bool contains(FNumber n) const {
+    if (this->is_bottom()) {
+      return false;
+    } else {
+      FBound b(std::move(n));
+      return this->_lb <= b && b <= this->_ub;
+    }
+  }
+
 public:
   // friends
 
@@ -299,9 +347,165 @@ public:
 };
 // end class FINumber
 
+
+/// \name Binary Operators
+/// @{
+
+/// \brief Addition
+///
+/// Returns the sum of the operands
+inline FINumber add(const FINumber& lhs,const FINumber& rhs){
+  return FINumber(lhs._lb+rhs._lb,lhs._ub+rhs._ub);
+}
+
+/// \brief Addition
+///
+/// Returns the sum of the operands
+inline FINumber operator+(const FINumber& lhs,const FINumber& rhs){
+  return add(lhs,rhs);
+}
+
+/// \brief Subtraction
+///
+/// Returns the difference of the operands
+inline FINumber sub(const FINumber& lhs,const FINumber& rhs){
+  return FINumber(lhs._lb-rhs._lb,lhs._ub-rhs._ub);
+}
+
+/// \brief Subtraction
+///
+/// Returns the sum of the operands
+inline FINumber operator-(const FINumber& lhs,const FINumber& rhs){
+  return sub(lhs,rhs);
+}
+
+/// \brief Multiplication
+///
+/// Returns the product of the operands
+inline FINumber mul(const FINumber& lhs,const FINumber& rhs){
+  if (lhs.is_bottom() || rhs.is_bottom()) {
+    return FINumber::bottom();
+  } else {
+    FBound ll = lhs.lb() * rhs.lb();
+    FBound lu = lhs.lb() * rhs.ub();
+    FBound ul = lhs.ub() * rhs.lb();
+    FBound uu = lhs.ub() * rhs.ub();
+    return FINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
+  }
+}
+
+/// \brief Multiplication
+///
+/// Returns the product of the operands
+inline FINumber operator*(const FINumber& lhs,const FINumber& rhs){
+  return mul(lhs,rhs);
+}
+
+/*/// \brief Division
+///
+/// Returns the quotient of the operands
+/// \todo bugs here!!!
+inline FINumber div(const FINumber& lhs,const FINumber& rhs){
+  if (lhs.is_bottom() || rhs.is_bottom()) {
+    return FINumber::bottom();
+  } else {
+    boost::optional< FBound> d = rhs.singleton();
+    if (d && *d == 0) {
+      // [_, _] / 0 = ⊥
+      return FINumber::bottom();
+    } else if (rhs.contains(0)) {
+      boost::optional< FBound > n = lhs.singleton();
+      if (n && *n == 0) {
+        // 0 / [_, _] = 0
+        return FINumber(0);
+      } else {
+        // ([_,_]) / ([_,0] join [0,_]) = top
+        return FINumber::top();
+      }
+    } else {
+      FBound ll = lhs.lb() / rhs.lb();
+      FBound lu = lhs.lb() / rhs.ub();
+      FBound ul = lhs.ub() / rhs.lb();
+      FBound uu = lhs.ub() / rhs.ub();
+      return FINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
+    }
+  }
+}
+
+/// \brief Division
+///
+/// Returns the quotient of the operands
+inline FINumber operator/(const FINumber& lhs,const FINumber& rhs){
+  return div(lhs,rhs);
+}*/
+
+/// @}
+/// \name Comparison Operators
+/// @{
+
 /// \brief Equality operator
 inline bool operator==(const FINumber& lhs, const FINumber& rhs) {
   return (lhs._lb == rhs._lb && lhs._ub == rhs._ub);
 }
+
+/// \brief Equality operator
+inline bool operator!=(const FINumber& lhs, const FINumber& rhs) {
+  return (lhs._lb != rhs._lb || lhs._ub != rhs._ub);
+}
+
+/// \brief Less than comparison with floating point number types
+inline bool operator<(const FINumber& lhs, const FINumber& rhs) {
+  return (lhs._lb > rhs._lb && lhs._ub < rhs._ub);
+}
+
+/// \brief Less or equal than comparison with floating point number types
+inline bool operator<=(const FINumber& lhs, const FINumber& rhs) {
+  return (lhs._lb >= rhs._lb && lhs._ub <= rhs._ub);
+}
+
+/// \brief Greater than comparison with floating point number types
+inline bool operator>(const FINumber& lhs, const FINumber& rhs) {
+  return (lhs._lb < rhs._lb && lhs._ub > rhs._ub);
+}
+
+/// \brief Greater or equal than comparison with floating point number types
+inline bool operator>=(const FINumber& lhs, const FINumber& rhs) {
+  return (lhs._lb <= rhs._lb && lhs._ub >= rhs._ub);
+}
+
+
+/// @}
+/// \name Input / Output
+/// @{
+
+/// \brief Write a floating point number on a stream
+inline std::ostream& operator<<(std::ostream& o, const FINumber& n) {
+  o<<"["<<n._lb<<","<<n._ub<<"]";
+  return o;
+}
+
+/// @}
+
+/// \todo
+/// \brief Return the hash of a FNumber
+inline std::size_t hash_value(const FINumber& n) {
+  std::size_t hash = 0;
+  boost::hash_combine(hash, n);
+  boost::hash_combine(hash, n._bit_width);
+  boost::hash_combine(hash, n._sign);
+  return hash;
+}
 } // end namespace core
 } // end namespace ikos
+
+namespace std {
+
+/// \brief Hash for FINumber
+template <>
+struct hash< ikos::core::FINumber > {
+  std::size_t operator()(const ikos::core::FINumber& n) const {
+    return ikos::core::hash_value(n);
+  }
+};
+
+} // end namespace std

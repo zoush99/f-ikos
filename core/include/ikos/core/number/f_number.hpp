@@ -474,7 +474,7 @@ public:
 
 /// \brief Addition
 ///
-/// Returns the sum of the operands, with wrapping.
+/// Returns the sum of the operands
 inline FNumber add(const FNumber& lhs, const FNumber& rhs) {
   if (lhs.is_fl()) {
     if (rhs.is_fl()) { // fl + fl
@@ -497,14 +497,14 @@ inline FNumber add(const FNumber& lhs, const FNumber& rhs) {
 
 /// \brief Addition
 ///
-/// Returns the sum of the operands, with wrapping.
+/// Returns the sum of the operands
 inline FNumber operator+(const FNumber& lhs, const FNumber& rhs) {
   return add(lhs, rhs);
 }
 
-// \brief Subtraction
+/// \brief Subtraction
 ///
-/// Returns the difference of the operands, with wrapping.
+/// Returns the difference of the operands
 inline FNumber sub(const FNumber& lhs, const FNumber& rhs) {
   if (lhs.is_fl()) {
     if (rhs.is_fl()) { // fl - fl
@@ -527,14 +527,14 @@ inline FNumber sub(const FNumber& lhs, const FNumber& rhs) {
 
 /// \brief Subtraction
 ///
-/// Returns the difference of the operands, with wrapping.
+/// Returns the difference of the operands
 inline FNumber operator-(const FNumber& lhs, const FNumber& rhs) {
   return sub(lhs, rhs);
 }
 
 /// \brief Multiplication
 ///
-/// Returns the product of the operands, with wrapping.
+/// Returns the product of the operands
 inline FNumber mul(const FNumber& lhs, const FNumber& rhs) {
   if (lhs.is_fl()) {
     if (rhs.is_fl()) { // fl * fl
@@ -557,14 +557,14 @@ inline FNumber mul(const FNumber& lhs, const FNumber& rhs) {
 
 /// \brief Multiplication
 ///
-/// Returns the product of the operands, with wrapping.
+/// Returns the product of the operands
 inline FNumber operator*(const FNumber& lhs, const FNumber& rhs) {
   return mul(lhs, rhs);
 }
 
 /// \brief Division
 ///
-/// Returns the quotient of the operands, with wrapping.
+/// Returns the quotient of the operands
 inline FNumber div(const FNumber& lhs, const FNumber& rhs) {
   ikos_assert_msg(!rhs.is_zero(), "division by zero");
   if (lhs.is_fl()) {
@@ -588,7 +588,7 @@ inline FNumber div(const FNumber& lhs, const FNumber& rhs) {
 
 /// \brief Division
 ///
-/// Returns the quotient of the operands, with wrapping.
+/// Returns the quotient of the operands
 inline FNumber operator/(const FNumber& lhs, const FNumber& rhs) {
   return div(lhs, rhs);
 }
@@ -848,7 +848,7 @@ inline std::ostream& operator<<(std::ostream& o, const FNumber& n) {
 
 /// @}
 
-/// \brief Return the hash of a MachineInt
+/// \brief Return the hash of a FNumber
 inline std::size_t hash_value(const FNumber& n) {
   std::size_t hash = 0;
   if (n.is_fl()) {
@@ -866,7 +866,7 @@ inline std::size_t hash_value(const FNumber& n) {
 
 namespace std {
 
-/// \brief Hash for MachineInt
+/// \brief Hash for FNumber
 template <>
 struct hash< ikos::core::FNumber > {
   std::size_t operator()(const ikos::core::FNumber& n) const {
