@@ -23,6 +23,17 @@ private:
   Signedness _sign;
 
 private:
+  struct TopTag{};
+  struct BottomTag{};
+
+  /// \brief Create the top floating point interval number [-oo, +oo]
+  explicit FINumber(TopTag)
+      : _lb(FBound ::minus_infinity()), _ub(FBound ::plus_infinity()) {}
+
+  /// \brief Create the bottom floating point interval number
+  explicit FINumber(BottomTag) : _lb(1), _ub(0) {}
+
+private:
   /// \brief Return true if bit-width = 32
   bool is_fl() const { return ikos_likely(this->_bit_width == 32); }
 
@@ -30,6 +41,12 @@ private:
   bool is_do() const { return ikos_likely(this->_bit_width == 64); }
 
 public:
+  /// \brief Create the floating point interval number [-oo, +oo]
+  static FINumber top() { return FINumber(TopTag{}); }
+
+  /// \brief Create the bottom floating point interval number
+  static FINumber bottom() { return FINumber(BottomTag{}); }
+
   /// \name Constructors
   /// @{
 
@@ -71,7 +88,11 @@ public:
   /// \brief Create a floating pointer interval number from Fbounds
   FINumber(FBound lb, FBound ub)
       : _lb(lb), _ub(ub), _sign(Signed) {
-    if(lb.number())
+    if(lb.number().is_initialized() && ub.number().is_initialized()){ // lb and ub are not empty
+      this->_bit_width=lb.number()->bit_width();
+    }else{  // none
+      this->_bit_width=0;
+    }
   }
 
 public:
@@ -235,7 +256,7 @@ public:
   /// \brief Unary minus
   const FINumber operator-() const {
     if (this->is_bottom()) {
-      return
+      return bottom();
     } else {
       return FINumber(-this->_ub, -this->_lb);
     }
@@ -244,7 +265,37 @@ public:
 public:
   // friends
 
+  friend FINumber add(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber operator+(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber sub(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber operator-(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber mul(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber operator*(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber div(const FINumber& lhs,const FINumber& rhs);
+
+  friend FINumber operator/(const FINumber& lhs,const FINumber& rhs);
+
   friend bool operator==(const FINumber& lhs, const FINumber& rhs);
+
+  friend bool operator!=(const FINumber& lhs, const FINumber& rhs);
+
+  friend bool operator<(const FINumber& lhs, const FINumber& rhs);
+
+  friend bool operator<=(const FINumber& lhs, const FINumber& rhs);
+
+  friend bool operator>(const FINumber& lhs, const FINumber& rhs);
+
+  friend bool operator>=(const FINumber& lhs, const FINumber& rhs);
+
+  friend std::ostream& operator<<(std::ostream& o,const FINumber& n);
+
+  friend std::size_t hash_value(const FINumber&);
 };
 // end class FINumber
 
