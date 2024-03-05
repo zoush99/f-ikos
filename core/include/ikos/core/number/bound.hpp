@@ -52,7 +52,7 @@
 #include <boost/optional.hpp>
 
 #include <ikos/core/exception.hpp>
-#include <ikos/core/number/f_number.hpp>  // By zoush99
+#include <ikos/core/number/f_number.hpp> // By zoush99
 #include <ikos/core/number/q_number.hpp>
 #include <ikos/core/number/z_number.hpp>
 #include <ikos/core/support/assert.hpp>
@@ -211,6 +211,21 @@ public:
       this->_n *= other._n;
       this->_is_infinite = (this->_is_infinite || other._is_infinite);
       this->normalize();
+    }
+  }
+
+  /// By zoush99
+  /// \brief Divide by a bound
+  void operator/=(const Bound& other) {
+    if (other.is_zero()) { // x / 0
+      this->_is_infinite = true;
+      this->normalize();
+    } else if (this->is_zero()) { // 0 / x
+      return;
+    } else if (this->is_finite() && other.is_finite()) { // x / y
+      this->_n /= other._n;
+    } else { // oo / oo
+      ikos_unreachable("undefined operation +oo - +oo");
     }
   }
 

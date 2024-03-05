@@ -57,8 +57,10 @@ public:
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl or int
       this->_n.f = static_cast< float >(n);
+      this->_bit_width = 32;
     } else { // do
       this->_n.d = static_cast< double >(n);
+      this->_bit_width = 64;
     }
   }
 
@@ -73,8 +75,10 @@ public:
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl or int
       this->_n.f = static_cast< float >(n);
+      this->_bit_width = 32;
     } else { // do
       this->_n.d = static_cast< double >(n);
+      this->_bit_width = 64;
     }
   }
 
@@ -84,8 +88,10 @@ public:
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
     if (bit_width == 32) { // fl
       this->_n.f = n.to< int >();
+      this->_bit_width = 32;
     } else { // do
       this->_n.d = n.to< int >();
+      this->_bit_width = 64;
     }
   }
 
@@ -95,8 +101,10 @@ public:
     ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
     if (bit_width == 32) { // fl
       this->_n.f = n.to< int >();
+      this->_bit_width = 32;
     } else { // do
       this->_n.d = n.to< int >();
+      this->_bit_width = 64;
     }
   }
 
@@ -107,10 +115,10 @@ public:
   FNumber(T n) : _sign(Signed) {
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
-      _bit_width = 32;
+      this->_bit_width = 32;
       this->_n.f = static_cast< float >(n);
     } else { // do
-      _bit_width = 64;
+      this->_bit_width = 64;
       this->_n.d = static_cast< double >(n);
     }
   }
@@ -120,15 +128,17 @@ public:
   FNumber(const FNumber& o) : _bit_width(o._bit_width), _sign(o._sign) {
     if (o.is_fl()) {
       this->_n.f = o._n.f;
+      this->_bit_width = o._bit_width;
     } else {
       this->_n.d = o._n.d;
+      this->_bit_width = o._bit_width;
     }
   }
 
   /// \brief Move constructor
   FNumber(FNumber&& o) noexcept
       : _n(o._n), _bit_width(o._bit_width), _sign(o._sign) {
-    o._bit_width = 0; // do not delete o._n.p
+    o._bit_width = 0; // do not delete o._n
   }
 
   /// \brief Destructor
@@ -190,7 +200,6 @@ public:
       }
     }
 
-    this->_bit_width = o._bit_width;
     this->_sign = o._sign;
     return *this;
   }
@@ -204,7 +213,7 @@ public:
     this->_n = o._n;
     this->_bit_width = o._bit_width;
     this->_sign = o._sign;
-    o._bit_width = 0; // do not delete o._n.p
+    o._bit_width = 0; // do not delete o._n
     return *this;
   }
 
@@ -215,9 +224,12 @@ public:
   FNumber& operator=(T n) {
     if (this->is_fl()) {
       this->_n.f = static_cast< float >(n);
+      this->_bit_width = 32;
     } else {
       this->_n.d = static_cast< double >(n);
+      this->_bit_width = 64;
     }
+    this->_sign = Signed;
     return *this;
   }
 

@@ -17,7 +17,6 @@ namespace core {
 /// \brief Class for floating point interval numbers
 class FINumber {
 private:
-  ///
   FBound _lb; /// [_lb,_ub]: [FNumber,FNumber]
   FBound _ub;
   uint64_t _bit_width;
@@ -61,6 +60,109 @@ public:
 
   /// \brief Destructor
   ~FINumber() = default;
+
+  /// \brief Create the null floating point interval number for the given bit
+  /// width
+  static FINumber zero(uint64_t bit_width, Signedness sign) {
+    ikos_assert_msg(bit_width > 0, "invalid bit width");
+
+    return FINumber(0, 0, bit_width, sign);
+  }
+
+  /// @}
+  /// \name Assignment Operators
+  /// @{
+
+  /// \brief Copy assignment
+  FINumber& operator=(const FINumber& o) {
+    if (this == &o) {
+      return *this;
+    }
+
+    this->_lb = o._lb;
+    this->_ub = o._ub;
+    this->_sign = o._sign;
+    return *this;
+  }
+
+  /// \brief Move assignment
+  FINumber& operator=(FINumber&& o) noexcept {
+    if (this == &o) {
+      return *this;
+    }
+
+    this->_lb = o._lb;
+    this->_ub = o._ub;
+    this->_bit_width = o._bit_width;
+    this->_sign = o._sign;
+    o._bit_width = 0; // do not delete o._lb,o._ub
+    return *this;
+  }
+
+  /// \brief Assignment for integral/float types
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FINumber& operator=(T n) {
+    this->_lb = n;
+    this->_ub = n;
+    if (this->is_fl()) {
+      this->_bit_width = 32;
+    } else {
+      this->_bit_width = 64;
+    }
+    this->_sign = Signed;
+    return *this;
+  }
+
+  /// \brief Addition assignment
+  FINumber& operator+=(const FINumber& x) {
+    this->_lb += x._lb;
+    this->_ub += x._ub;
+    return *this;
+  }
+
+  /// \brief Subtraction assignment
+  FINumber& operator-=(const FINumber& x){
+    this->_lb -= x._lb;
+    this->_ub -= x._ub;
+    return *this;
+  }
+
+  /// \brief Multiplication assignment
+  FINumber& operator*=(const FINumber& x){
+    this->_lb *= x._lb;
+    this->_ub *= x._ub;
+    return *this;
+  }
+
+  /// \brief Division assignment
+  FINumber& operator/=(const FINumber& x){
+    this->_lb /= x._lb;
+    this->_ub /= x._ub;
+    return *this;
+  }
+
+
+  /// @}
+  /// \name Value Characterization Functions
+  /// @{
+
+  /// \brief Return the bit width of the floating point number
+  uint64_t bit_width() const { return this->_bit_width; }
+
+  /// \brief Return the signedness (Signed or Unsigned) of the floating point
+  /// number Each one is a signed floating point number
+  Signedness sign() const { return this->_sign; }
+
+  bool is_signed() const { return this->_sign == Signed; }
+  bool is_unsigned() const { return this->_sign == Unsigned; }
+
+  /// @}
+  /// \name Value tests
+  /// @{
+
+  /// \brief Return true if the float point interval number is [0,0]
 
 public:
   // friends
