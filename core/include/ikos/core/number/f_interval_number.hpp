@@ -22,6 +22,7 @@ private:
 private:
   struct TopTag {};
   struct BottomTag {};
+  struct AbstractTag{};
 
   /// \brief Create the top floating point interval number [-oo, +oo]
   explicit FINumber(TopTag)
@@ -55,6 +56,14 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FINumber(T v, uint64_t bit_width, Signedness sign)
+      : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
+
+  /// \todo
+  /// \brief Create a floating point interval number from a type
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FINumber(T v, uint64_t bit_width, Signedness sign,AbstractTag)
       : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating point interval number from a type
