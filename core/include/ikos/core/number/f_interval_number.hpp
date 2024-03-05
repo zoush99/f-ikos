@@ -5,11 +5,8 @@
 #pragma once
 
 #include <ikos/core/number/bound.hpp> // By zoush99
-#include <ikos/core/number/compatibility.hpp>
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
-#include <ikos/core/support/compiler.hpp>
-// #include <ikos/core/value/numeric/interval.hpp> // By zoush99
 
 namespace ikos {
 namespace core {
