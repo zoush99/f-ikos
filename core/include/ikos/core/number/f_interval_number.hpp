@@ -43,9 +43,36 @@ public:
   FINumber(T lb, T ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
 
+  /// \brief Create a floating point interval number from a type
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FINumber(T lb, T ub) : _lb(lb), _ub(ub), _sign(Signed) {
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
+      this->_bit_width = 32;
+    } else { // do
+      this->_bit_width = 64;
+    }
+  }
+
   /// \brief Create a floating pointer interval number from FNumbers
   FINumber(FNumber lb, FNumber ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
+
+  /// \brief Create a floating pointer interval number from FNumbers
+  FINumber(FNumber lb, FNumber ub)
+      : _lb(lb), _ub(ub), _bit_width(lb.bit_width()), _sign(Signed) {}
+
+  /// \brief Create a floating pointer interval number from FBounds
+  FINumber(FBound lb, FBound ub, uint64_t bit_width, Signedness sign)
+      : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
+
+  /// \brief Create a floating pointer interval number from Fbounds
+  FINumber(FBound lb, FBound ub)
+      : _lb(lb), _ub(ub), _sign(Signed) {
+    if(lb.number())
+  }
 
 public:
   /// \brief Copy constructor
@@ -60,6 +87,26 @@ public:
 
   /// \brief Destructor
   ~FINumber() = default;
+
+  /// \brief Return the lower bound
+  const FBound& lb() const {
+    ikos_assert(!this->is_bottom());
+    return this->_lb;
+  }
+
+  /// \brief Return the upper bound
+  const FBound& ub() const {
+    ikos_assert(!this->is_bottom());
+    return this->_ub;
+  }
+
+  /// \brief Return whether it is bottom
+  bool is_bottom() const { return this->_lb > this->_ub; }
+
+  /// \brief Return whether it is top
+  bool is_top() const {
+    return this->_lb.is_infinite() && this->_ub.is_infinite();
+  }
 
   /// \brief Create the null floating point interval number for the given bit
   /// width
@@ -123,26 +170,25 @@ public:
   }
 
   /// \brief Subtraction assignment
-  FINumber& operator-=(const FINumber& x){
+  FINumber& operator-=(const FINumber& x) {
     this->_lb -= x._lb;
     this->_ub -= x._ub;
     return *this;
   }
 
   /// \brief Multiplication assignment
-  FINumber& operator*=(const FINumber& x){
+  FINumber& operator*=(const FINumber& x) {
     this->_lb *= x._lb;
     this->_ub *= x._ub;
     return *this;
   }
 
   /// \brief Division assignment
-  FINumber& operator/=(const FINumber& x){
+  FINumber& operator/=(const FINumber& x) {
     this->_lb /= x._lb;
     this->_ub /= x._ub;
     return *this;
   }
-
 
   /// @}
   /// \name Value Characterization Functions
@@ -163,6 +209,37 @@ public:
   /// @{
 
   /// \brief Return true if the float point interval number is [0,0]
+  bool is_zero() const { return (this->_lb.is_zero() && this->_ub.is_zero()); }
+
+  /// @}
+  /// \name Conversion Functions
+  /// @{
+
+  /// \todo
+  /// \brief Return a string representation of the floating point number in the
+  /// given base
+  /*  std::string str() const{
+      return std::to_string(this->_lb.number());
+    }*/
+
+  /// @}
+  /// \name Unary Operators
+  /// @{
+
+  /// \brief Set the floating point interval number to [0,0]
+  void set_zero() {
+    this->_lb = 0;
+    this->_ub = 0;
+  }
+
+  /// \brief Unary minus
+  const FINumber operator-() const {
+    if (this->is_bottom()) {
+      return
+    } else {
+      return FINumber(-this->_ub, -this->_lb);
+    }
+  }
 
 public:
   // friends
