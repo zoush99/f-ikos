@@ -4,71 +4,84 @@
 
 #pragma once
 
+#include <bitset>                     // By zoush99
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
 #include <iostream> // By zoush99
-#include <bitset> // By zoush99
 
 namespace ikos {
 namespace core {
 
-namespace detail{
-// 函数用于解析浮点数的符号、指数和尾数
-void decompose_float(float float_value, int& sign_bit, int& exponent, int& mantissa) {
-  // 将浮点数转换为32位二进制表示
-  int float_bits = *reinterpret_cast<int*>(&float_value);
+/// \todo
+namespace detail {
 
-  // 提取符号位、指数位和尾数位
-  sign_bit = float_bits >> 31 & 1;
-  exponent = float_bits >> 23 & 0xFF;
-  mantissa = float_bits & 0x7FFFFF;
+/// \brief Covert floating point numbers to binary representation
+template <typename T>
+void decompose_float(T float_value,
+                     int& sign_bit,
+                     int& exponent,
+                     long long& mantissa) {
+
+  if(std::is_same<T,float>::value){ // fl
+    int float_bits = *reinterpret_cast< int* >(&float_value);
+
+    sign_bit = float_bits >> 31 & 1;
+    exponent = float_bits >> 23 & 0xFF;
+    mantissa = float_bits & 0x7FFFFF;
+  }else{  // do
+    long long double_bits = *reinterpret_cast<long long*>(&float_value);
+
+    sign_bit = double_bits >> 63 & 1;
+    exponent = double_bits >> 52 & 0x7FF;
+    mantissa = double_bits & 0xFFFFFFFFFFFFFLL;
+  }
 }
 
-// 函数用于将符号、指数和尾数重新组合成浮点数
-float compose_float(int sign_bit, int exponent, int mantissa) {
-  // 将符号、指数和尾数合并为32位表示
-  int float_bits = (sign_bit << 31) | (exponent << 23) | mantissa;
+/// \brief Convert binary representations to floating point numbers
+template < typename T>
+T compose_float(int sign_bit, int exponent, long long mantissa) {
+  if(std::is_same<T,float>::value){ // fl
+    int float_bits = (sign_bit << 31) | (exponent << 23) | mantissa;
 
-  // 将32位二进制表示转换为浮点数
-  float result = *reinterpret_cast<float*>(&float_bits);
-  return result;
+    T result = *reinterpret_cast< float* >(&float_bits);
+    return result;
+  }else{  // do
+    long long double_bits = (static_cast<long long>(sign_bit) << 63) |
+                            (static_cast<long long>(exponent) << 52) | mantissa;
+
+    T result = *reinterpret_cast<double*>(&double_bits);
+    return result;
+  }
 }
 
-// 函数用于查找给定浮点数的最近两个浮点数
-void find_nearest_floats(float float_value) {
-  // 解析给定浮点数的符号、指数和尾数
-  int sign_bit, exponent, mantissa;
-  decompose_float(float_value, sign_bit, exponent, mantissa);
+/// \brief Find the nearest floating point number that is less than the nearest neighbor
+template < typename T>
+T find_next_value_down(T float_value) {
+    int sign_bit, exponent;
+    long long mantissa;
+    decompose_float<T>(float_value, sign_bit, exponent, mantissa);
+    T value = compose_float<T>(sign_bit, exponent, mantissa);
+    T next_float_value_down =
+        compose_float<T>(sign_bit, exponent, mantissa - 1);
 
-  // 打印解析结果
-  std::cout << "Sign bit: " << sign_bit << std::endl;
-  std::cout << "Exponent: " << exponent << std::endl;
-  std::cout << "Mantissa: " << mantissa << std::endl;
-
-  // 计算给定浮点数的值
-  float value = compose_float(sign_bit, exponent, mantissa);
-  std::cout << "Value: " << value << std::endl;
-
-  // 找到稍大一点的浮点数
-  float next_float_value_up = compose_float(sign_bit, exponent, mantissa + 1);
-
-  // 找到稍小一点的浮点数
-  float next_float_value_down = compose_float(sign_bit, exponent, mantissa - 1);
-
-  // 计算稍大一点的浮点数的值
-  float next_value_up = next_float_value_up;
-
-  // 计算稍小一点的浮点数的值
-  float next_value_down = next_float_value_down;
-
-  // 打印结果
-  std::cout.precision(10);
-  std::cout << "Next float up: " << next_float_value_up << ", Value: " << next_value_up << std::endl;
-  std::cout << "Next float down: " << next_float_value_down << ", Value: " << next_value_down << std::endl;
-
+    return next_float_value_down;
 }
+
+/// \brief Find the nearest floating point number that is greater than the nearest neighbor
+template < typename T>
+T find_next_value_up(T float_value) {
+  int sign_bit, exponent;
+  long long mantissa;
+  decompose_float<T>(float_value, sign_bit, exponent, mantissa);
+  T value = compose_float<T>(sign_bit, exponent, mantissa);
+  T next_float_value_up = compose_float<T>(sign_bit, exponent, mantissa + 1);
+
+  return next_float_value_up;
 }
+
+} // namespace detail
+
 /// \brief Class for floating point interval numbers
 class FINumber {
 private:
@@ -80,7 +93,7 @@ private:
 private:
   struct TopTag {};
   struct BottomTag {};
-  struct AbstractTag{};
+  struct AbstractTag {};
 
   /// \brief Create the top floating point interval number [-oo, +oo]
   explicit FINumber(TopTag)
@@ -121,7 +134,7 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v, uint64_t bit_width, Signedness sign,AbstractTag)
+  FINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag)
       : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating point interval number from a type
@@ -281,20 +294,41 @@ public:
 
   /// \brief Multiplication assignment
   FINumber& operator*=(const FINumber& x) {
-      FBound ll = this->lb() * x.lb();
-      FBound lu = this->lb() * x.ub();
-      FBound ul = this->ub() * x.lb();
-      FBound uu = this->ub() * x.ub();
-      this->_lb=min(ll, lu, ul, uu);
-      this->_ub=max(ll, lu, ul, uu);
+    FBound ll = this->lb() * x.lb();
+    FBound lu = this->lb() * x.ub();
+    FBound ul = this->ub() * x.lb();
+    FBound uu = this->ub() * x.ub();
+    this->_lb = min(ll, lu, ul, uu);
+    this->_ub = max(ll, lu, ul, uu);
     return *this;
   }
 
-  /// \todo
   /// \brief Division assignment
   FINumber& operator/=(const FINumber& x) {
-    this->_lb /= x._lb;
-    this->_ub /= x._ub;
+    boost::optional< FBound > d = x.singleton(); // FBound
+    if (d && (*d).is_zero()) {
+      // [_, _] / 0 = ⊥
+      this->_lb = 1;
+      this->_ub = 0;
+    } else if (x.contains(0)) {
+      boost::optional< FBound > n = this->singleton();
+      if (n && (*n).is_zero()) {
+        // 0 / [_, _] = 0
+        this->_lb = 0;
+        this->_ub = 0;
+      } else {
+        // ([_,_]) / ([_,0] join [0,_]) = top
+        this->_lb = FBound::minus_infinity();
+        this->_ub = FBound::plus_infinity();
+      }
+    } else {
+      FBound ll = this->lb() / x.lb();
+      FBound lu = this->lb() / x.ub();
+      FBound ul = this->ub() / x.lb();
+      FBound uu = this->ub() / x.ub();
+      this->_lb = min(ll, lu, ul, uu);
+      this->_ub = max(ll, lu, ul, uu);
+    }
     return *this;
   }
 
@@ -323,12 +357,15 @@ public:
   /// \name Conversion Functions
   /// @{
 
-  /// \todo
   /// \brief Return a string representation of the floating point number in the
   /// given base
-  /*  std::string str() const{
-      return std::to_string(this->_lb.number());
-    }*/
+    std::string str() const{
+      if(this->_lb.number().is_initialized() && this->_ub.number().is_initialized()){
+        return ("["+this->_lb.number()->str()+","+this->_ub.number()->str()+"]");
+      }else{
+        return "none";
+      }
+    }
 
   /// @}
   /// \name Unary Operators
@@ -346,7 +383,7 @@ public:
     if (this->is_bottom()) {
       return bottom();
     } else {
-      return FINumber(-this->_ub,-this->_lb);
+      return FINumber(-this->_ub, -this->_lb);
     }
   }
 
@@ -468,43 +505,38 @@ inline FINumber operator*(const FINumber& lhs, const FINumber& rhs) {
   return mul(lhs, rhs);
 }
 
-/*/// \brief Division
+/// \brief Division
 ///
 /// Returns the quotient of the operands
-/// \todo bugs here!!!
-inline FINumber div(const FINumber& lhs,const FINumber& rhs){
-  if (lhs.is_bottom() || rhs.is_bottom()) {
+inline FINumber div(const FINumber& lhs, const FINumber& rhs) {
+  boost::optional< FBound > d = rhs.singleton(); // FBound
+  if (d && (*d).is_zero()) {
+    // [_, _] / 0 = ⊥
     return FINumber::bottom();
-  } else {
-    boost::optional< FBound> d = rhs.singleton();
-    if (d && *d == 0) {
-      // [_, _] / 0 = ⊥
-      return FINumber::bottom();
-    } else if (rhs.contains(0)) {
-      boost::optional< FBound > n = lhs.singleton();
-      if (n && *n == 0) {
-        // 0 / [_, _] = 0
-        return FINumber(0);
-      } else {
-        // ([_,_]) / ([_,0] join [0,_]) = top
-        return FINumber::top();
-      }
+  } else if (rhs.contains(0)) {
+    boost::optional< FBound > n = lhs.singleton();
+    if (n && (*n).is_zero()) {
+      // 0 / [_, _] = 0
+      return FINumber(0);
     } else {
-      FBound ll = lhs.lb() / rhs.lb();
-      FBound lu = lhs.lb() / rhs.ub();
-      FBound ul = lhs.ub() / rhs.lb();
-      FBound uu = lhs.ub() / rhs.ub();
-      return FINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
+      // ([_,_]) / ([_,0] join [0,_]) = top
+      return FINumber::top();
     }
+  } else {
+    FBound ll = lhs.lb() / rhs.lb();
+    FBound lu = lhs.lb() / rhs.ub();
+    FBound ul = lhs.ub() / rhs.lb();
+    FBound uu = lhs.ub() / rhs.ub();
+    return FINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
   }
 }
 
 /// \brief Division
 ///
 /// Returns the quotient of the operands
-inline FINumber operator/(const FINumber& lhs,const FINumber& rhs){
-  return div(lhs,rhs);
-}*/
+inline FINumber operator/(const FINumber& lhs, const FINumber& rhs) {
+  return div(lhs, rhs);
+}
 
 /// @}
 /// \name Comparison Operators
@@ -552,7 +584,6 @@ inline std::ostream& operator<<(std::ostream& o, const FINumber& n) {
 
 /// @}
 
-/// \todo
 /// \brief Return the hash of a FNumber
 inline std::size_t hash_value(const FINumber& n) {
   std::size_t hash = 0;
