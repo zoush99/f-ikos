@@ -13,9 +13,7 @@
 namespace ikos {
 namespace core {
 
-/// \todo
 namespace detail {
-
 /// \brief Covert floating point numbers to binary representation
 template <typename T>
 void decompose_float(T float_value,
@@ -93,7 +91,6 @@ private:
 private:
   struct TopTag {};
   struct BottomTag {};
-  struct AbstractTag {};
 
   /// \brief Create the top floating point interval number [-oo, +oo]
   explicit FINumber(TopTag)
@@ -101,6 +98,9 @@ private:
 
   /// \brief Create the bottom floating point interval number
   explicit FINumber(BottomTag) : _lb(1), _ub(0) {}
+
+public:
+  struct AbstractTag {};
 
 private:
   /// \brief Return true if bit-width = 32
@@ -129,13 +129,14 @@ public:
   FINumber(T v, uint64_t bit_width, Signedness sign)
       : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
 
-  /// \todo
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag)
-      : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
+  FINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag):_bit_width(bit_width), _sign(sign) {
+    this->_lb=detail::find_next_value_down(v);
+    this->_ub=detail::find_next_value_up(v);
+  }
 
   /// \brief Create a floating point interval number from a type
   template <
