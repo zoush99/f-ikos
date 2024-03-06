@@ -1,6 +1,7 @@
 //
 // Created by zou on 3/4/24.
 //
+#include <boost/test/tools/old/interface.hpp>
 #define BOOST_TEST_MODULE test_f_interval_number
 #define BOOST_TEST_DYN_LINK
 #include <boost/mpl/list.hpp>
@@ -103,4 +104,8 @@ BOOST_AUTO_TEST_CASE(test_comparasion){
   BOOST_CHECK(FINumber(1.2,2.4)<=FINumber(1.,2.5));
   BOOST_CHECK(FINumber(1.2,2.4)<=FINumber(1.2,2.4));
   BOOST_CHECK(FINumber(1.2,2.4)<=FINumber(1.2,2.5));
+}
+
+BOOST_AUTO_TEST_CASE(test_float){
+  ikos::core::detail::find_nearest_floats(10.0f);
 }

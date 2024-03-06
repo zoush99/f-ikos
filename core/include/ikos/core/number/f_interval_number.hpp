@@ -7,10 +7,68 @@
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
+#include <iostream> // By zoush99
+#include <bitset> // By zoush99
 
 namespace ikos {
 namespace core {
 
+namespace detail{
+// 函数用于解析浮点数的符号、指数和尾数
+void decompose_float(float float_value, int& sign_bit, int& exponent, int& mantissa) {
+  // 将浮点数转换为32位二进制表示
+  int float_bits = *reinterpret_cast<int*>(&float_value);
+
+  // 提取符号位、指数位和尾数位
+  sign_bit = float_bits >> 31 & 1;
+  exponent = float_bits >> 23 & 0xFF;
+  mantissa = float_bits & 0x7FFFFF;
+}
+
+// 函数用于将符号、指数和尾数重新组合成浮点数
+float compose_float(int sign_bit, int exponent, int mantissa) {
+  // 将符号、指数和尾数合并为32位表示
+  int float_bits = (sign_bit << 31) | (exponent << 23) | mantissa;
+
+  // 将32位二进制表示转换为浮点数
+  float result = *reinterpret_cast<float*>(&float_bits);
+  return result;
+}
+
+// 函数用于查找给定浮点数的最近两个浮点数
+void find_nearest_floats(float float_value) {
+  // 解析给定浮点数的符号、指数和尾数
+  int sign_bit, exponent, mantissa;
+  decompose_float(float_value, sign_bit, exponent, mantissa);
+
+  // 打印解析结果
+  std::cout << "Sign bit: " << sign_bit << std::endl;
+  std::cout << "Exponent: " << exponent << std::endl;
+  std::cout << "Mantissa: " << mantissa << std::endl;
+
+  // 计算给定浮点数的值
+  float value = compose_float(sign_bit, exponent, mantissa);
+  std::cout << "Value: " << value << std::endl;
+
+  // 找到稍大一点的浮点数
+  float next_float_value_up = compose_float(sign_bit, exponent, mantissa + 1);
+
+  // 找到稍小一点的浮点数
+  float next_float_value_down = compose_float(sign_bit, exponent, mantissa - 1);
+
+  // 计算稍大一点的浮点数的值
+  float next_value_up = next_float_value_up;
+
+  // 计算稍小一点的浮点数的值
+  float next_value_down = next_float_value_down;
+
+  // 打印结果
+  std::cout.precision(10);
+  std::cout << "Next float up: " << next_float_value_up << ", Value: " << next_value_up << std::endl;
+  std::cout << "Next float down: " << next_float_value_down << ", Value: " << next_value_down << std::endl;
+
+}
+}
 /// \brief Class for floating point interval numbers
 class FINumber {
 private:
