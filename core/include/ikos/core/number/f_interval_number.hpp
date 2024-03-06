@@ -216,15 +216,19 @@ public:
 
   /// \brief Subtraction assignment
   FINumber& operator-=(const FINumber& x) {
-    this->_lb -= x._lb;
-    this->_ub -= x._ub;
+    this->_lb -= x._ub;
+    this->_ub -= x._lb;
     return *this;
   }
 
   /// \brief Multiplication assignment
   FINumber& operator*=(const FINumber& x) {
-    this->_lb *= x._lb;
-    this->_ub *= x._ub;
+      FBound ll = this->lb() * x.lb();
+      FBound lu = this->lb() * x.ub();
+      FBound ul = this->ub() * x.lb();
+      FBound uu = this->ub() * x.ub();
+      this->_lb=min(ll, lu, ul, uu);
+      this->_ub=max(ll, lu, ul, uu);
     return *this;
   }
 
@@ -273,9 +277,10 @@ public:
   /// @{
 
   /// \brief Set the floating point interval number to [0,0]
-  void set_zero() {
+  FINumber& set_zero() {
     this->_lb = 0;
     this->_ub = 0;
+    return *this;
   }
 
   /// \brief Unary minus
@@ -373,7 +378,7 @@ inline FINumber operator+(const FINumber& lhs, const FINumber& rhs) {
 ///
 /// Returns the difference of the operands
 inline FINumber sub(const FINumber& lhs, const FINumber& rhs) {
-  return FINumber(lhs._lb - rhs._lb, lhs._ub - rhs._ub);
+  return FINumber(lhs._lb - rhs._ub, lhs._ub - rhs._lb);
 }
 
 /// \brief Subtraction

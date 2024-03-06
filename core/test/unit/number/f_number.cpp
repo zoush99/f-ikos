@@ -46,7 +46,7 @@ BOOST_AUTO_TEST_CASE(test_assign_operation_signed) {
 BOOST_AUTO_TEST_CASE(test_bit_width) {
   BOOST_CHECK(FNumber(0,32,Signed).bit_width()==32);
   BOOST_CHECK(FNumber(1.2f,32,Signed).bit_width()==32);
-  BOOST_CHECK(FNumber(1.2,32,Signed).bit_width()==32);
+  BOOST_CHECK(FNumber(1.2,64,Signed).bit_width()==64);
 }
 
 BOOST_AUTO_TEST_CASE(test_sign) {
