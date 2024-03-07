@@ -4,17 +4,16 @@
 
 #pragma once
 
-//#include <bitset>                     // By zoush99
+// #include <bitset>                     // By zoush99
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
-//#include <iostream> // By zoush99
+// #include <iostream> // By zoush99
 
 namespace ikos {
 namespace core {
 
 namespace detail {
-/// \todo Normalization, need to solve the non-normalized number
 /// \brief Covert floating point numbers to binary representation
 template < typename T >
 void decompose_float(T float_value,
@@ -61,11 +60,23 @@ T find_next_value_down(T float_value) {
   int sign_bit, exponent;
   long long mantissa;
   decompose_float< T >(float_value, sign_bit, exponent, mantissa);
-  T value = compose_float< T >(sign_bit, exponent, mantissa);
-  T next_float_value_down =
-      compose_float< T >(sign_bit, exponent, mantissa - 1);
 
-  return next_float_value_down;
+  if (exponent == 0 && mantissa == 0) { // Non-normalized number
+    mantissa -= 1;
+  } else {
+    if (mantissa == 0) { // Sub-normal number
+      if (std::is_same< T, float >::value) { // fl
+        mantissa = (1LL << 23) - 1;
+      } else { // do
+        mantissa = (1LL << 52) - 1;
+      }
+      exponent -= 1;
+    } else { // Normalized number
+      mantissa -= 1;
+    }
+  }
+
+  return compose_float< T >(sign_bit, exponent, mantissa);
 }
 
 /// \brief Find the nearest floating point number that is greater than the
@@ -75,10 +86,23 @@ T find_next_value_up(T float_value) {
   int sign_bit, exponent;
   long long mantissa;
   decompose_float< T >(float_value, sign_bit, exponent, mantissa);
-  T value = compose_float< T >(sign_bit, exponent, mantissa);
-  T next_float_value_up = compose_float< T >(sign_bit, exponent, mantissa + 1);
 
-  return next_float_value_up;
+  if (exponent == 0 && mantissa == 0) { // Non-normalized number
+    mantissa += 1;
+  } else {
+    if (std::is_same< T, float >::value && mantissa == (1LL << 23) - 1) { // fl // Sub-normal number
+      mantissa = 0;
+      exponent += 1;
+    } else if (std::is_same< T, double >::value &&
+               mantissa == (1LL << 52) - 1) { // do // Sub-normal number
+      mantissa = 0;
+      exponent += 1;
+    } else { // Normalized number
+      mantissa += 1;
+    }
+  }
+
+  return compose_float< T >(sign_bit, exponent, mantissa);
 }
 
 } // namespace detail
@@ -213,7 +237,7 @@ public:
     if (bit_width == 32) { // fl
       this->_lb = detail::find_next_value_down(v.value< float >());
       this->_ub = detail::find_next_value_up(v.value< float >());
-    } else { // do
+    } else if(bit_width==64) { // do
       this->_lb = detail::find_next_value_down(v.value< double >());
       this->_ub = detail::find_next_value_up(v.value< double >());
     }
@@ -244,13 +268,13 @@ public:
 
   /// \brief Label that require abstraction
   /// \brief Create a floating pointer interval number from a Fbound
-  FINumber(FBound v, uint64_t bit_width, Signedness sign,AbstractTag)
+  FINumber(FBound v, uint64_t bit_width, Signedness sign, AbstractTag)
       : _bit_width(bit_width), _sign(sign) {
     if (v.number().is_initialized() &&
         bit_width == 32) { // x is not empty and fl
       this->_lb = detail::find_next_value_down(v.number()->value< float >());
       this->_ub = detail::find_next_value_up(v.number()->value< float >());
-    } else if (v.number().is_initialized() && bit_width == 64) { // do
+    } else if (v.number().is_initialized() && bit_width == 64) { // x is not empty and do
       this->_lb = detail::find_next_value_down(v.number()->value< double >());
       this->_ub = detail::find_next_value_up(v.number()->value< double >());
     } else { // none
@@ -653,6 +677,7 @@ inline bool operator>=(const FINumber& lhs, const FINumber& rhs) {
 
 /// \brief Write a floating point number on a stream
 inline std::ostream& operator<<(std::ostream& o, const FINumber& n) {
+  std::cout.precision(30);
   o << "[" << n._lb << "," << n._ub << "]";
   return o;
 }

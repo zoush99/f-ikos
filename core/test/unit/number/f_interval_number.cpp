@@ -38,6 +38,43 @@ BOOST_AUTO_TEST_CASE(test_constructor) {
   BOOST_CHECK(FINumber(std::move(fi1)) == FINumber(1.2, 2.4, 64, Signed));
 }
 
+BOOST_AUTO_TEST_CASE(test_f_abstract_constructor) {
+  float x = 1.2f;
+  double y = 1.2;
+  FINumber fi1(x, FINumber::AbstractTag{});
+  FINumber fi2(y, FINumber::AbstractTag{});
+  FNumber f1(x);
+  FNumber f2(y);
+  FINumber fi3(f1, 32, Signed, FINumber::AbstractTag{});
+  FINumber fi4(f2, 64, Signed, FINumber::AbstractTag{});
+  FBound fb1(x);
+  FBound fb2(y);
+  FINumber fi5(fb1, 32, Signed, FINumber::AbstractTag{});
+  FINumber fi6(fb2, 64, Signed, FINumber::AbstractTag{});
+  BOOST_CHECK(FINumber(1.2f, FINumber::AbstractTag{}) ==
+              FINumber(1.2f, FINumber::AbstractTag{}));
+  //  BOOST_CHECK(FINumber(FNumber(1.0),64,Signed,FINumber::AbstractTag{}) ==
+  //  FINumber(1.0,FINumber::AbstractTag{}));
+  //  BOOST_CHECK(FINumber(FBound(1.0),64,Signed,FINumber::AbstractTag{}) ==
+  //  FINumber(1.0,FINumber::AbstractTag{}));
+
+  std::cout.precision(30);
+  std::cout<<x<<std::endl;
+  std::cout<<y<<std::endl;
+  std::cout << std::endl;
+
+  std::cout << fi1 << std::endl;
+  std::cout << fi2 << std::endl;
+  std::cout << std::endl;
+  //  BOOST_CHECK(fi1!=fi2);
+  std::cout << fi3 << std::endl;
+  std::cout << fi4 << std::endl;
+  std::cout << std::endl;
+
+  std::cout << fi5 << std::endl;
+  std::cout << fi6 << std::endl;
+}
+
 BOOST_AUTO_TEST_CASE(test_top_bottom) {
   BOOST_CHECK(FINumber(1, -1).is_bottom() == true);
   BOOST_CHECK(
@@ -114,9 +151,16 @@ BOOST_AUTO_TEST_CASE(test_comparasion) {
 BOOST_AUTO_TEST_CASE(test_float_abstract) {
   float x = 0.5f;
   double y = 0.5;
-  FINumber fi3(5.0, 32, Signed,FINumber::AbstractTag{});
-  std::cout.precision(20);
-  std::cout<<fi3.lb()<<std::endl;
-  std::cout<<fi3.ub()<<std::endl;
-//  std::cout << fi3 << std::endl;
+  FINumber fi1(0.4999999701976776123046875f,
+               32,
+               Signed,
+               FINumber::AbstractTag{});
+  //  FINumber fi2(1.0f, 32, Signed);
+  std::cout.precision(50);
+  std::cout << fi1.lb() << std::endl;
+  std::cout << fi1.ub() << std::endl;
+
+  //  std::cout<<fi2.lb()<<std::endl;
+  //  std::cout<<fi2.ub()<<std::endl;
+  //  std::cout << fi3 << std::endl;
 }

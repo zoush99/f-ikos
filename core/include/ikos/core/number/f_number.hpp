@@ -366,9 +366,9 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   T value() const {
-    if (this->is_fl()) {
+    if (this->is_fl()) {  // fl
       return this->_n.f;
-    } else {
+    } else  {  // do
       return this->_n.d;
     }
   }
