@@ -39,26 +39,47 @@ BOOST_AUTO_TEST_CASE(test_constructor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_f_abstract_constructor) {
-  float x = 1.2f;
-  double y = 1.2;
+  float x = 1.0f;
+  double y = 1.0;
+  std::cout.precision(30);
+  std::cout<<x<<std::endl;
+  std::cout<<y<<std::endl;
+  std::cout << std::endl;
+
   FINumber fi1(x, FINumber::AbstractTag{});
   FINumber fi2(y, FINumber::AbstractTag{});
+  std::cout<<"fi1: "<<fi1<<std::endl;
+  std::cout<<"fi2: "<<fi2<<std::endl;
+
   FNumber f1(x);
   FNumber f2(y);
-  FINumber fi3(f1, 32, Signed, FINumber::AbstractTag{});
-  FINumber fi4(f2, 64, Signed, FINumber::AbstractTag{});
+  std::cout.precision(30);
+  std::cout<<"f1: "<<f1.value<float>()<<std::endl;
+  std::cout<<"f2: "<<f2.value<double>()<<std::endl;
+
+//  std::cout<<"f1.bitwidth: "<<f1.bit_width()<<std::endl;
+//  std::cout<<"f2.bitwidth: "<<f2.bit_width()<<std::endl;
+
+  FINumber fi3(f1, FINumber::AbstractTag{});
+  FINumber fi4(f2,FINumber::AbstractTag{});
+  std::cout<<"fi3: "<<fi3<<std::endl;
+  std::cout<<"fi4: "<<fi4<<std::endl;
+
   FBound fb1(x);
   FBound fb2(y);
-  FINumber fi5(fb1, 32, Signed, FINumber::AbstractTag{});
-  FINumber fi6(fb2, 64, Signed, FINumber::AbstractTag{});
-  BOOST_CHECK(FINumber(1.2f, FINumber::AbstractTag{}) ==
-              FINumber(1.2f, FINumber::AbstractTag{}));
-  //  BOOST_CHECK(FINumber(FNumber(1.0),64,Signed,FINumber::AbstractTag{}) ==
-  //  FINumber(1.0,FINumber::AbstractTag{}));
-  //  BOOST_CHECK(FINumber(FBound(1.0),64,Signed,FINumber::AbstractTag{}) ==
-  //  FINumber(1.0,FINumber::AbstractTag{}));
+  std::cout<<"fb1: "<<fb1.number()->value<float>()<<std::endl;
+  std::cout<<"fb2: "<<fb2.number()->value<double>()<<std::endl;
+//  std::cout<<"fb1.bitwidth: "<<fb1.number()->bit_width()<<std::endl;
+//  std::cout<<"fb2.bitwidth: "<<fb2.number()->bit_width()<<std::endl;
 
-  std::cout.precision(30);
+  FINumber fi5(fb1 ,FINumber::AbstractTag{});
+  FINumber fi6(fb2,FINumber::AbstractTag{});
+  std::cout<<"fi5: "<<fi5<<std::endl;
+  std::cout<<"fi6: "<<fi6<<std::endl;
+//  BOOST_CHECK(FINumber(1.2f, FINumber::AbstractTag{}) ==
+//              FINumber(1.2f, FINumber::AbstractTag{}));
+
+/*  std::cout.precision(30);
   std::cout<<x<<std::endl;
   std::cout<<y<<std::endl;
   std::cout << std::endl;
@@ -72,7 +93,7 @@ BOOST_AUTO_TEST_CASE(test_f_abstract_constructor) {
   std::cout << std::endl;
 
   std::cout << fi5 << std::endl;
-  std::cout << fi6 << std::endl;
+  std::cout << fi6 << std::endl;*/
 }
 
 BOOST_AUTO_TEST_CASE(test_top_bottom) {

@@ -8,6 +8,7 @@
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
+#include <iostream>
 // #include <iostream> // By zoush99
 
 namespace ikos {
@@ -64,7 +65,7 @@ T find_next_value_down(T float_value) {
   if (exponent == 0 && mantissa == 0) { // Non-normalized number
     mantissa -= 1;
   } else {
-    if (mantissa == 0) { // Sub-normal number
+    if (mantissa == 0) {                     // Sub-normal number
       if (std::is_same< T, float >::value) { // fl
         mantissa = (1LL << 23) - 1;
       } else { // do
@@ -90,7 +91,8 @@ T find_next_value_up(T float_value) {
   if (exponent == 0 && mantissa == 0) { // Non-normalized number
     mantissa += 1;
   } else {
-    if (std::is_same< T, float >::value && mantissa == (1LL << 23) - 1) { // fl // Sub-normal number
+    if (std::is_same< T, float >::value &&
+        mantissa == (1LL << 23) - 1) { // fl // Sub-normal number
       mantissa = 0;
       exponent += 1;
     } else if (std::is_same< T, double >::value &&
@@ -219,28 +221,44 @@ public:
   }
 
   /// \brief Create a floating pointer interval number from a FNumber
-  FINumber(FNumber v, uint64_t bit_width, Signedness sign)
-      : _bit_width(bit_width), _sign(sign) {
-    if (bit_width == 32) { // fl
+  FINumber(FNumber v) {
+    if (v.bit_width() == 32) { // fl
       this->_lb = v.value< float >();
       this->_ub = v.value< float >();
-    } else { // do
+    } else if (v.bit_width() == 64) { // do
       this->_lb = v.value< double >();
       this->_ub = v.value< double >();
+    } else {
+      this->_lb = this->_ub = 1;
     }
   }
 
   /// \brief Label that require abstraction
   /// \brief Create a floating pointer interval number from a FNumber
-  FINumber(FNumber v, uint64_t bit_width, Signedness sign, AbstractTag)
-      : _bit_width(bit_width), _sign(sign) {
-    if (bit_width == 32) { // fl
-      this->_lb = detail::find_next_value_down(v.value< float >());
-      this->_ub = detail::find_next_value_up(v.value< float >());
-    } else if(bit_width==64) { // do
-      this->_lb = detail::find_next_value_down(v.value< double >());
-      this->_ub = detail::find_next_value_up(v.value< double >());
+  /*  FINumber(FNumber v, AbstractTag) {
+      if (v.bit_width() == 32) { // fl
+        this->_lb = detail::find_next_value_down(v.value< float >());
+        this->_ub = detail::find_next_value_up(v.value< float >());
+      } else if (v.bit_width() == 64) { // do
+        this->_lb = detail::find_next_value_down(v.value< double >());
+        this->_ub = detail::find_next_value_up(v.value< double >());
+      } else {
+        this->_lb = this->_ub = 1;
+      }
+      this->_bit_width=v.bit_width();
+    }*/
+
+  FINumber(FNumber v, AbstractTag) {
+    if (v.bit_width() == 32) { // fl
+      this->_lb = std::move(FBound(detail::find_next_value_down(v.value< float >())));
+      this->_ub = std::move(FBound(detail::find_next_value_up(v.value< float >())));
+    } else if (v.bit_width() == 64) { // do
+      this->_lb = std::move(FBound(detail::find_next_value_down(v.value< double >())));
+      this->_ub = std::move(FBound(detail::find_next_value_up(v.value< double >())));
+    } else {
+      this->_lb = this->_ub = 1;
     }
+    this->_bit_width = v.bit_width();
   }
 
   /// \brief Create a floating pointer interval number from FNumbers
@@ -252,35 +270,41 @@ public:
       : _lb(lb), _ub(ub), _bit_width(lb.bit_width()), _sign(Signed) {}
 
   /// \brief Create a floating pointer interval number from a Fbound
-  FINumber(FBound v, uint64_t bit_width, Signedness sign)
-      : _bit_width(bit_width), _sign(sign) {
+  FINumber(FBound v) {
     if (v.number().is_initialized() &&
-        bit_width == 32) { // x is not empty and fl
+        v.number()->bit_width() == 32) { // x is not empty and fl
       this->_lb = v.number()->value< float >();
       this->_ub = v.number()->value< float >();
-    } else if (v.number().is_initialized() && bit_width == 64) { // do
+    } else if (v.number().is_initialized() &&
+               v.number()->bit_width() == 64) { // do
       this->_lb = v.number()->value< double >();
       this->_ub = v.number()->value< double >();
     } else { // none
       this->_lb = this->_ub = 1;
     }
+    this->_bit_width = v.number()->bit_width();
   }
 
   /// \brief Label that require abstraction
   /// \brief Create a floating pointer interval number from a Fbound
-  FINumber(FBound v, uint64_t bit_width, Signedness sign, AbstractTag)
-      : _bit_width(bit_width), _sign(sign) {
+  FINumber(FBound v, AbstractTag) {
     if (v.number().is_initialized() &&
-        bit_width == 32) { // x is not empty and fl
-      this->_lb = detail::find_next_value_down(v.number()->value< float >());
-      this->_ub = detail::find_next_value_up(v.number()->value< float >());
-    } else if (v.number().is_initialized() && bit_width == 64) { // x is not empty and do
-      this->_lb = detail::find_next_value_down(v.number()->value< double >());
-      this->_ub = detail::find_next_value_up(v.number()->value< double >());
+        v.number()->bit_width() == 32) { // x is not empty and fl
+      this->_lb =
+          std::move(FBound(detail::find_next_value_down(v.number()->value< float >())));
+      this->_ub =
+          std::move(FBound(detail::find_next_value_up(v.number()->value< float >())));
+    } else if (v.number().is_initialized() &&
+               v.number()->bit_width() == 64) { // x is not empty and do
+      this->_lb =
+          std::move(FBound(detail::find_next_value_down(v.number()->value< double >())));
+      this->_ub =
+          std::move(FBound(detail::find_next_value_up(v.number()->value< double >())));
     } else { // none
       this->_lb = this->_ub = 1;
     }
   }
+
   /// \brief Create a floating pointer interval number from FBounds
   FINumber(FBound lb, FBound ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
