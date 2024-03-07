@@ -14,6 +14,7 @@ namespace ikos {
 namespace core {
 
 namespace detail {
+/// \todo Normalization, need to solve the non-normalized number
 /// \brief Covert floating point numbers to binary representation
 template < typename T >
 void decompose_float(T float_value,
