@@ -15,7 +15,7 @@ using ikos::core::Signed;
 using ikos::core::Unsigned;
 using FINumber = ikos::core::FINumber;
 
-BOOST_AUTO_TEST_CASE(test_constructor_signed) {
+BOOST_AUTO_TEST_CASE(test_constructor) {
   FNumber f1(1.2);
   FNumber f2(2.4);
   FBound fb1(f1);
@@ -36,8 +36,6 @@ BOOST_AUTO_TEST_CASE(test_constructor_signed) {
   BOOST_CHECK(FINumber(FINumber(1.2, 1.3)) == FINumber(1.2, 1.3, 64, Signed));
   BOOST_CHECK(FINumber(FINumber(1.3, 1.2)) == FINumber(1.3, 1.2, 64, Signed));
   BOOST_CHECK(FINumber(std::move(fi1)) == FINumber(1.2, 2.4, 64, Signed));
-  FINumber fi3(1.2, 64, Signed);
-  std::cout << fi3 << std::endl;
 }
 
 BOOST_AUTO_TEST_CASE(test_top_bottom) {
@@ -113,10 +111,12 @@ BOOST_AUTO_TEST_CASE(test_comparasion) {
   BOOST_CHECK(FINumber(1.2, 2.4) <= FINumber(1.2, 2.5));
 }
 
-BOOST_AUTO_TEST_CASE(test_float) {
-  float x = 1.2;
-  double y = 1.2;
-  //  ikos::core::detail::find_nearest_floats(x);
-  ikos::core::detail::find_next_value_down(y);
-  ikos::core::detail::find_next_value_up(y);
+BOOST_AUTO_TEST_CASE(test_float_abstract) {
+  float x = 0.5f;
+  double y = 0.5;
+  FINumber fi3(5.0, 32, Signed,FINumber::AbstractTag{});
+  std::cout.precision(20);
+  std::cout<<fi3.lb()<<std::endl;
+  std::cout<<fi3.ub()<<std::endl;
+//  std::cout << fi3 << std::endl;
 }

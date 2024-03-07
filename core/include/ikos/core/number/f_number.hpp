@@ -361,6 +361,18 @@ public:
     }
   }
 
+  /// \brief Return a floating point data type of a FNumber
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  T value() const {
+    if (this->is_fl()) {
+      return this->_n.f;
+    } else {
+      return this->_n.d;
+    }
+  }
+
   /// @}
   /// \name Unary Operators
   /// @{

@@ -4,31 +4,30 @@
 
 #pragma once
 
-#include <bitset>                     // By zoush99
+//#include <bitset>                     // By zoush99
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
-#include <iostream> // By zoush99
+//#include <iostream> // By zoush99
 
 namespace ikos {
 namespace core {
 
 namespace detail {
 /// \brief Covert floating point numbers to binary representation
-template <typename T>
+template < typename T >
 void decompose_float(T float_value,
                      int& sign_bit,
                      int& exponent,
                      long long& mantissa) {
-
-  if(std::is_same<T,float>::value){ // fl
+  if (std::is_same< T, float >::value) { // fl
     int float_bits = *reinterpret_cast< int* >(&float_value);
 
     sign_bit = float_bits >> 31 & 1;
     exponent = float_bits >> 23 & 0xFF;
     mantissa = float_bits & 0x7FFFFF;
-  }else{  // do
-    long long double_bits = *reinterpret_cast<long long*>(&float_value);
+  } else { // do
+    long long double_bits = *reinterpret_cast< long long* >(&float_value);
 
     sign_bit = double_bits >> 63 & 1;
     exponent = double_bits >> 52 & 0x7FF;
@@ -37,43 +36,46 @@ void decompose_float(T float_value,
 }
 
 /// \brief Convert binary representations to floating point numbers
-template < typename T>
+template < typename T >
 T compose_float(int sign_bit, int exponent, long long mantissa) {
-  if(std::is_same<T,float>::value){ // fl
+  if (std::is_same< T, float >::value) { // fl
     int float_bits = (sign_bit << 31) | (exponent << 23) | mantissa;
 
     T result = *reinterpret_cast< float* >(&float_bits);
     return result;
-  }else{  // do
-    long long double_bits = (static_cast<long long>(sign_bit) << 63) |
-                            (static_cast<long long>(exponent) << 52) | mantissa;
+  } else { // do
+    long long double_bits = (static_cast< long long >(sign_bit) << 63) |
+                            (static_cast< long long >(exponent) << 52) |
+                            mantissa;
 
-    T result = *reinterpret_cast<double*>(&double_bits);
+    T result = *reinterpret_cast< double* >(&double_bits);
     return result;
   }
 }
 
-/// \brief Find the nearest floating point number that is less than the nearest neighbor
-template < typename T>
+/// \brief Find the nearest floating point number that is less than the nearest
+/// neighbor
+template < typename T >
 T find_next_value_down(T float_value) {
-    int sign_bit, exponent;
-    long long mantissa;
-    decompose_float<T>(float_value, sign_bit, exponent, mantissa);
-    T value = compose_float<T>(sign_bit, exponent, mantissa);
-    T next_float_value_down =
-        compose_float<T>(sign_bit, exponent, mantissa - 1);
+  int sign_bit, exponent;
+  long long mantissa;
+  decompose_float< T >(float_value, sign_bit, exponent, mantissa);
+  T value = compose_float< T >(sign_bit, exponent, mantissa);
+  T next_float_value_down =
+      compose_float< T >(sign_bit, exponent, mantissa - 1);
 
-    return next_float_value_down;
+  return next_float_value_down;
 }
 
-/// \brief Find the nearest floating point number that is greater than the nearest neighbor
-template < typename T>
+/// \brief Find the nearest floating point number that is greater than the
+/// nearest neighbor
+template < typename T >
 T find_next_value_up(T float_value) {
   int sign_bit, exponent;
   long long mantissa;
-  decompose_float<T>(float_value, sign_bit, exponent, mantissa);
-  T value = compose_float<T>(sign_bit, exponent, mantissa);
-  T next_float_value_up = compose_float<T>(sign_bit, exponent, mantissa + 1);
+  decompose_float< T >(float_value, sign_bit, exponent, mantissa);
+  T value = compose_float< T >(sign_bit, exponent, mantissa);
+  T next_float_value_up = compose_float< T >(sign_bit, exponent, mantissa + 1);
 
   return next_float_value_up;
 }
@@ -100,6 +102,7 @@ private:
   explicit FINumber(BottomTag) : _lb(1), _ub(0) {}
 
 public:
+  /// \brief Label that require abstraction
   struct AbstractTag {};
 
 private:
@@ -129,20 +132,39 @@ public:
   FINumber(T v, uint64_t bit_width, Signedness sign)
       : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
 
+  /// \brief Label that require abstraction
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag):_bit_width(bit_width), _sign(sign) {
-    this->_lb=detail::find_next_value_down(v);
-    this->_ub=detail::find_next_value_up(v);
-  }
+  FINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag)
+      : _lb(detail::find_next_value_down(v)),
+        _ub(detail::find_next_value_up(v)),
+        _bit_width(bit_width),
+        _sign(sign) {}
 
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FINumber(T v) : _lb(v), _ub(v), _sign(Signed) {
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
+      this->_bit_width = 32;
+    } else { // do
+      this->_bit_width = 64;
+    }
+  }
+
+  /// \brief Label that require abstraction
+  /// \brief Create a floating point interval number from a type
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
+  FINumber(T v, AbstractTag)
+      : _lb(detail::find_next_value_down(v)),
+        _ub(detail::find_next_value_up(v)),
+        _sign(Signed) {
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
@@ -171,6 +193,31 @@ public:
     }
   }
 
+  /// \brief Create a floating pointer interval number from a FNumber
+  FINumber(FNumber v, uint64_t bit_width, Signedness sign)
+      : _bit_width(bit_width), _sign(sign) {
+    if (bit_width == 32) { // fl
+      this->_lb = v.value< float >();
+      this->_ub = v.value< float >();
+    } else { // do
+      this->_lb = v.value< double >();
+      this->_ub = v.value< double >();
+    }
+  }
+
+  /// \brief Label that require abstraction
+  /// \brief Create a floating pointer interval number from a FNumber
+  FINumber(FNumber v, uint64_t bit_width, Signedness sign, AbstractTag)
+      : _bit_width(bit_width), _sign(sign) {
+    if (bit_width == 32) { // fl
+      this->_lb = detail::find_next_value_down(v.value< float >());
+      this->_ub = detail::find_next_value_up(v.value< float >());
+    } else { // do
+      this->_lb = detail::find_next_value_down(v.value< double >());
+      this->_ub = detail::find_next_value_up(v.value< double >());
+    }
+  }
+
   /// \brief Create a floating pointer interval number from FNumbers
   FINumber(FNumber lb, FNumber ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
@@ -179,6 +226,36 @@ public:
   FINumber(FNumber lb, FNumber ub)
       : _lb(lb), _ub(ub), _bit_width(lb.bit_width()), _sign(Signed) {}
 
+  /// \brief Create a floating pointer interval number from a Fbound
+  FINumber(FBound v, uint64_t bit_width, Signedness sign)
+      : _bit_width(bit_width), _sign(sign) {
+    if (v.number().is_initialized() &&
+        bit_width == 32) { // x is not empty and fl
+      this->_lb = v.number()->value< float >();
+      this->_ub = v.number()->value< float >();
+    } else if (v.number().is_initialized() && bit_width == 64) { // do
+      this->_lb = v.number()->value< double >();
+      this->_ub = v.number()->value< double >();
+    } else { // none
+      this->_lb = this->_ub = 1;
+    }
+  }
+
+  /// \brief Label that require abstraction
+  /// \brief Create a floating pointer interval number from a Fbound
+  FINumber(FBound v, uint64_t bit_width, Signedness sign,AbstractTag)
+      : _bit_width(bit_width), _sign(sign) {
+    if (v.number().is_initialized() &&
+        bit_width == 32) { // x is not empty and fl
+      this->_lb = detail::find_next_value_down(v.number()->value< float >());
+      this->_ub = detail::find_next_value_up(v.number()->value< float >());
+    } else if (v.number().is_initialized() && bit_width == 64) { // do
+      this->_lb = detail::find_next_value_down(v.number()->value< double >());
+      this->_ub = detail::find_next_value_up(v.number()->value< double >());
+    } else { // none
+      this->_lb = this->_ub = 1;
+    }
+  }
   /// \brief Create a floating pointer interval number from FBounds
   FINumber(FBound lb, FBound ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
@@ -208,16 +285,10 @@ public:
   ~FINumber() = default;
 
   /// \brief Return the lower bound
-  const FBound& lb() const {
-    ikos_assert(!this->is_bottom());
-    return this->_lb;
-  }
+  const FBound& lb() const { return this->_lb; }
 
   /// \brief Return the upper bound
-  const FBound& ub() const {
-    ikos_assert(!this->is_bottom());
-    return this->_ub;
-  }
+  const FBound& ub() const { return this->_ub; }
 
   /// \brief Return whether it is bottom
   bool is_bottom() const { return this->_lb > this->_ub; }
@@ -360,13 +431,15 @@ public:
 
   /// \brief Return a string representation of the floating point number in the
   /// given base
-    std::string str() const{
-      if(this->_lb.number().is_initialized() && this->_ub.number().is_initialized()){
-        return ("["+this->_lb.number()->str()+","+this->_ub.number()->str()+"]");
-      }else{
-        return "none";
-      }
+  std::string str() const {
+    if (this->_lb.number().is_initialized() &&
+        this->_ub.number().is_initialized()) {
+      return ("[" + this->_lb.number()->str() + "," +
+              this->_ub.number()->str() + "]");
+    } else {
+      return "none";
     }
+  }
 
   /// @}
   /// \name Unary Operators

@@ -94,8 +94,9 @@ private:
   }
 
 public:
+  /// Modified by zoush99, make it default
   /// \brief No default constructor
-  Bound() = delete;
+  Bound() = default;
 
   /// \brief Create a bound
   template <
