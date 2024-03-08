@@ -7,25 +7,25 @@
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
-//#include <iostream>
+// #include <iostream>
 #include <cmath>
 namespace ikos {
 namespace core {
 
 /// \brief Relative error
-struct relativeError{
-  float floatlRE = 1- pow(2,-23);
-  float floatrRE = 1+pow(2,-23);
-  double doublelRE = 1-pow(2,-52);
-  double doublerRE = 1+pow(2,-52);
+struct relativeError {
+  float floatlRE = 1 - pow(2, -23);
+  float floatrRE = 1 + pow(2, -23);
+  double doublelRE = 1 - pow(2, -52);
+  double doublerRE = 1 + pow(2, -52);
 } RelativeError;
 
 /// \brief Absolute error
-struct absoluteError{
-  float floatlAE = -pow(2,-149);
-  float floatrAE = pow(2,-149);
-  double doublelAE = -pow(2,-1074);
-  double doublerAE = pow(2,-1074);
+struct absoluteError {
+  float floatlAE = -pow(2, -149);
+  float floatrAE = pow(2, -149);
+  double doublelAE = -pow(2, -1074);
+  double doublerAE = pow(2, -1074);
 } AbsoluteError;
 
 /// \brief Class for floating point interval numbers
@@ -88,7 +88,7 @@ public:
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_lb = std::move(
-          FBound(v*RelativeError.floatlRE  + AbsoluteError.floatlAE));
+          FBound(v * RelativeError.floatlRE + AbsoluteError.floatlAE));
       this->_ub = std::move(
           FBound(v * RelativeError.floatrRE + AbsoluteError.floatrAE));
     } else { // do
@@ -121,15 +121,15 @@ public:
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
-      this->_lb =std::move(
+      this->_lb = std::move(
           FBound(v * RelativeError.floatlRE + AbsoluteError.floatlAE));
-      this->_ub =std::move(
+      this->_ub = std::move(
           FBound(v * RelativeError.floatrRE + AbsoluteError.floatrAE));
     } else { // do
       this->_bit_width = 64;
-      this->_lb =std::move(
+      this->_lb = std::move(
           FBound(v * RelativeError.doublelRE + AbsoluteError.doublelAE));
-      this->_ub =std::move(
+      this->_ub = std::move(
           FBound(v * RelativeError.doublerRE + AbsoluteError.doublerAE));
     }
   }
@@ -171,12 +171,10 @@ public:
   /// \brief Create a floating pointer interval number from a FNumber
   FRINumber(FNumber v, AbstractTag) {
     if (v.bit_width() == 32) { // fl
-      this->_lb =
-          std::move(FBound(v.value< float >() * RelativeError.floatlRE +
-                           AbsoluteError.floatlAE));
-      this->_ub =
-          std::move(FBound(v.value< float >() * RelativeError.floatrRE +
-                           AbsoluteError.floatrAE));
+      this->_lb = std::move(FBound(v.value< float >() * RelativeError.floatlRE +
+                                   AbsoluteError.floatlAE));
+      this->_ub = std::move(FBound(v.value< float >() * RelativeError.floatrRE +
+                                   AbsoluteError.floatrAE));
     } else if (v.bit_width() == 64) { // do
       this->_lb =
           std::move(FBound(v.value< double >() * RelativeError.doublelRE +
@@ -219,16 +217,20 @@ public:
   FRINumber(FBound v, AbstractTag) {
     if (v.number().is_initialized() &&
         v.number()->bit_width() == 32) { // x is not empty and fl
-      this->_lb = std::move(FBound(v.number()->value< float >() * RelativeError.floatlRE +
-AbsoluteError.floatlAE));
-      this->_ub = std::move(FBound(v.number()->value< float >() * RelativeError.floatrRE +
-                                   AbsoluteError.floatrAE));
+      this->_lb = std::move(
+          FBound(v.number()->value< float >() * RelativeError.floatlRE +
+                 AbsoluteError.floatlAE));
+      this->_ub = std::move(
+          FBound(v.number()->value< float >() * RelativeError.floatrRE +
+                 AbsoluteError.floatrAE));
     } else if (v.number().is_initialized() &&
                v.number()->bit_width() == 64) { // x is not empty and do
-      this->_lb = std::move(FBound(v.number()->value< double >() * RelativeError.doublelRE +
-                                  AbsoluteError.doublelAE));
-      this->_ub = std::move(FBound(v.number()->value< double >() * RelativeError.doublerRE +
-                                   AbsoluteError.doublerAE));
+      this->_lb = std::move(
+          FBound(v.number()->value< double >() * RelativeError.doublelRE +
+                 AbsoluteError.doublelAE));
+      this->_ub = std::move(
+          FBound(v.number()->value< double >() * RelativeError.doublerRE +
+                 AbsoluteError.doublerAE));
     } else { // none
       this->_lb = this->_ub = 1;
     }
@@ -317,8 +319,8 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FRINumber& operator=(T n) {
-    this->_lb = n;
-    this->_ub = n;
+    this->_lb = std::move(FBound(n));
+    this->_ub = std::move(FBound(n));
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
@@ -472,17 +474,33 @@ public:
 
   friend FRINumber add(const FRINumber& lhs, const FRINumber& rhs);
 
+  friend FRINumber addFNu(const FNumber& lhs, const FNumber& rhs);
+
+  friend FRINumber addFBo(const FBound & lhs, const FBound & rhs);
+
   friend FRINumber operator+(const FRINumber& lhs, const FRINumber& rhs);
 
   friend FRINumber sub(const FRINumber& lhs, const FRINumber& rhs);
+
+  friend FRINumber subFNu(const FNumber& lhs, const FNumber& rhs);
+
+  friend FRINumber subFBo(const FBound & lhs, const FBound & rhs);
 
   friend FRINumber operator-(const FRINumber& lhs, const FRINumber& rhs);
 
   friend FRINumber mul(const FRINumber& lhs, const FRINumber& rhs);
 
+  friend FRINumber mulFNu(const FNumber& lhs, const FNumber& rhs);
+
+  friend FRINumber mulFBo(const FBound & lhs, const FBound & rhs);
+
   friend FRINumber operator*(const FRINumber& lhs, const FRINumber& rhs);
 
   friend FRINumber div(const FRINumber& lhs, const FRINumber& rhs);
+
+  friend FRINumber divFNu(const FNumber& lhs, const FNumber& rhs);
+
+  friend FRINumber divFBo(const FBound & lhs, const FBound & rhs);
 
   friend FRINumber operator/(const FRINumber& lhs, const FRINumber& rhs);
 
@@ -511,6 +529,13 @@ public:
 /// Returns the sum of the operands
 inline FRINumber add(const FRINumber& lhs, const FRINumber& rhs) {
   return FRINumber(lhs._lb + rhs._lb, lhs._ub + rhs._ub);
+}
+
+inline FRINumber addFNu(const FNumber& lhs, const FNumber& rhs) {
+  FRINumber Flhs(lhs);
+  FRINumber Frhs(rhs);
+  FRINumber Res=Flhs+Frhs;
+  return Res;
 }
 
 /// \brief Addition

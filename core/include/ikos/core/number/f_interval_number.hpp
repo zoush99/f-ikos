@@ -373,8 +373,8 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FINumber& operator=(T n) {
-    this->_lb = n;
-    this->_ub = n;
+    this->_lb = std::move(FBound (n));
+    this->_ub = std::move(FBound (n));
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
