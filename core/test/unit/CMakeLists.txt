@@ -31,6 +31,7 @@ add_unit_test(number q_number)
 add_unit_test(number machine_int)
 add_unit_test(number f_number)  # By zoush99
 add_unit_test(number f_interval_number) # By zoush99
+add_unit_test(number f_relational_interval_number)  # By zoush99
 add_unit_test(number bound)  # By zoush99
 add_unit_test(value numeric constant)
 add_unit_test(value numeric interval)

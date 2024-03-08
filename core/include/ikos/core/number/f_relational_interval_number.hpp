@@ -1,5 +1,5 @@
 //
-// Created by zou on 3/4/24.
+// Created by zou on 3/8/24.
 //
 
 #pragma once
@@ -7,108 +7,29 @@
 #include <ikos/core/number/bound.hpp> // By zoush99
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
-#include <iostream>
-
+//#include <iostream>
+#include <cmath>
 namespace ikos {
 namespace core {
 
-namespace detail {
-/// \brief Covert floating point numbers to binary representation
-template < typename T >
-void decompose_float(T float_value,
-                     int& sign_bit,
-                     int& exponent,
-                     long long& mantissa) {
-  if (std::is_same< T, float >::value) { // fl
-    int float_bits = *reinterpret_cast< int* >(&float_value);
+/// \brief Relative error
+struct relativeError{
+  float floatlRE = 1- pow(2,-23);
+  float floatrRE = 1+pow(2,-23);
+  double doublelRE = 1-pow(2,-52);
+  double doublerRE = 1+pow(2,-52);
+} RelativeError;
 
-    sign_bit = float_bits >> 31 & 1;
-    exponent = float_bits >> 23 & 0xFF;
-    mantissa = float_bits & 0x7FFFFF;
-  } else { // do
-    long long double_bits = *reinterpret_cast< long long* >(&float_value);
-
-    sign_bit = double_bits >> 63 & 1;
-    exponent = double_bits >> 52 & 0x7FF;
-    mantissa = double_bits & 0xFFFFFFFFFFFFFLL;
-  }
-}
-
-/// \brief Convert binary representations to floating point numbers
-template < typename T >
-T compose_float(int sign_bit, int exponent, long long mantissa) {
-  if (std::is_same< T, float >::value) { // fl
-    int float_bits = (sign_bit << 31) | (exponent << 23) | mantissa;
-
-    T result = *reinterpret_cast< float* >(&float_bits);
-    return result;
-  } else { // do
-    long long double_bits = (static_cast< long long >(sign_bit) << 63) |
-                            (static_cast< long long >(exponent) << 52) |
-                            mantissa;
-
-    T result = *reinterpret_cast< double* >(&double_bits);
-    return result;
-  }
-}
-
-/// \brief Find the nearest floating point number that is less than the nearest
-/// neighbor
-template < typename T >
-T find_next_value_down(T float_value) {
-  int sign_bit, exponent;
-  long long mantissa;
-  decompose_float< T >(float_value, sign_bit, exponent, mantissa);
-
-  if (exponent == 0 && mantissa == 0) { // Non-normalized number
-    mantissa -= 1;
-  } else {
-    if (mantissa == 0) {                     // Sub-normal number
-      if (std::is_same< T, float >::value) { // fl
-        mantissa = (1LL << 23) - 1;
-      } else { // do
-        mantissa = (1LL << 52) - 1;
-      }
-      exponent -= 1;
-    } else { // Normalized number
-      mantissa -= 1;
-    }
-  }
-
-  return compose_float< T >(sign_bit, exponent, mantissa);
-}
-
-/// \brief Find the nearest floating point number that is greater than the
-/// nearest neighbor
-template < typename T >
-T find_next_value_up(T float_value) {
-  int sign_bit, exponent;
-  long long mantissa;
-  decompose_float< T >(float_value, sign_bit, exponent, mantissa);
-
-  if (exponent == 0 && mantissa == 0) { // Non-normalized number
-    mantissa += 1;
-  } else {
-    if (std::is_same< T, float >::value &&
-        mantissa == (1LL << 23) - 1) { // fl // Sub-normal number
-      mantissa = 0;
-      exponent += 1;
-    } else if (std::is_same< T, double >::value &&
-               mantissa == (1LL << 52) - 1) { // do // Sub-normal number
-      mantissa = 0;
-      exponent += 1;
-    } else { // Normalized number
-      mantissa += 1;
-    }
-  }
-
-  return compose_float< T >(sign_bit, exponent, mantissa);
-}
-
-} // namespace detail
+/// \brief Absolute error
+struct absoluteError{
+  float floatlAE = -pow(2,-149);
+  float floatrAE = pow(2,-149);
+  double doublelAE = -pow(2,-1074);
+  double doublerAE = pow(2,-1074);
+} AbsoluteError;
 
 /// \brief Class for floating point interval numbers
-class FINumber {
+class FRINumber {
 private:
   FBound _lb; /// [_lb,_ub]: [FNumber,FNumber]
   FBound _ub;
@@ -120,11 +41,11 @@ private:
   struct BottomTag {};
 
   /// \brief Create the top floating point interval number [-oo, +oo]
-  explicit FINumber(TopTag)
+  explicit FRINumber(TopTag)
       : _lb(FBound ::minus_infinity()), _ub(FBound ::plus_infinity()) {}
 
   /// \brief Create the bottom floating point interval number
-  explicit FINumber(BottomTag) : _lb(1), _ub(0) {}
+  explicit FRINumber(BottomTag) : _lb(1), _ub(0) {}
 
 public:
   /// \brief Label that require abstraction
@@ -139,22 +60,22 @@ private:
 
 public:
   /// \brief Create the floating point interval number [-oo, +oo]
-  static FINumber top() { return FINumber(TopTag{}); }
+  static FRINumber top() { return FRINumber(TopTag{}); }
 
   /// \brief Create the bottom floating point interval number
-  static FINumber bottom() { return FINumber(BottomTag{}); }
+  static FRINumber bottom() { return FRINumber(BottomTag{}); }
 
   /// \name Constructors
   /// @{
 
   /// \brief Default constructor
-  FINumber() : _lb(1), _ub(1), _bit_width(32), _sign(Signed) {}
+  FRINumber() : _lb(1), _ub(1), _bit_width(32), _sign(Signed) {}
 
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v, uint64_t bit_width, Signedness sign)
+  FRINumber(T v, uint64_t bit_width, Signedness sign)
       : _lb(v), _ub(v), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Label that require abstraction
@@ -162,17 +83,27 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag)
-      : _lb(detail::find_next_value_down(v)),
-        _ub(detail::find_next_value_up(v)),
-        _bit_width(bit_width),
-        _sign(sign) {}
+  FRINumber(T v, uint64_t bit_width, Signedness sign, AbstractTag)
+      : _bit_width(bit_width), _sign(sign) {
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
+      this->_lb = std::move(
+          FBound(v*RelativeError.floatlRE  + AbsoluteError.floatlAE));
+      this->_ub = std::move(
+          FBound(v * RelativeError.floatrRE + AbsoluteError.floatrAE));
+    } else { // do
+      this->_lb = std::move(
+          FBound(v * RelativeError.doublelRE + AbsoluteError.doublelAE));
+      this->_ub = std::move(
+          FBound(v * RelativeError.doublerRE + AbsoluteError.doublerAE));
+    }
+  }
 
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v) : _lb(v), _ub(v), _sign(Signed) {
+  FRINumber(T v) : _lb(v), _ub(v), _sign(Signed) {
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
@@ -186,15 +117,20 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T v, AbstractTag)
-      : _lb(detail::find_next_value_down(v)),
-        _ub(detail::find_next_value_up(v)),
-        _sign(Signed) {
+  FRINumber(T v, AbstractTag) : _sign(Signed) {
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
+      this->_lb =std::move(
+          FBound(v * RelativeError.floatlRE + AbsoluteError.floatlAE));
+      this->_ub =std::move(
+          FBound(v * RelativeError.floatrRE + AbsoluteError.floatrAE));
     } else { // do
       this->_bit_width = 64;
+      this->_lb =std::move(
+          FBound(v * RelativeError.doublelRE + AbsoluteError.doublelAE));
+      this->_ub =std::move(
+          FBound(v * RelativeError.doublerRE + AbsoluteError.doublerAE));
     }
   }
 
@@ -202,14 +138,14 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T lb, T ub, uint64_t bit_width, Signedness sign)
+  FRINumber(T lb, T ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating point interval number from a type
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber(T lb, T ub) : _lb(lb), _ub(ub), _sign(Signed) {
+  FRINumber(T lb, T ub) : _lb(lb), _ub(ub), _sign(Signed) {
     if (std::is_same< T, float >::value ||
         std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
@@ -219,7 +155,7 @@ public:
   }
 
   /// \brief Create a floating pointer interval number from a FNumber
-  FINumber(FNumber v) {
+  FRINumber(FNumber v) {
     if (v.bit_width() == 32) { // fl
       this->_lb = v.value< float >();
       this->_ub = v.value< float >();
@@ -233,13 +169,21 @@ public:
 
   /// \brief Label that require abstraction
   /// \brief Create a floating pointer interval number from a FNumber
-  FINumber(FNumber v, AbstractTag) {
+  FRINumber(FNumber v, AbstractTag) {
     if (v.bit_width() == 32) { // fl
-      this->_lb = std::move(FBound(detail::find_next_value_down(v.value< float >())));
-      this->_ub = std::move(FBound(detail::find_next_value_up(v.value< float >())));
+      this->_lb =
+          std::move(FBound(v.value< float >() * RelativeError.floatlRE +
+                           AbsoluteError.floatlAE));
+      this->_ub =
+          std::move(FBound(v.value< float >() * RelativeError.floatrRE +
+                           AbsoluteError.floatrAE));
     } else if (v.bit_width() == 64) { // do
-      this->_lb = std::move(FBound(detail::find_next_value_down(v.value< double >())));
-      this->_ub = std::move(FBound(detail::find_next_value_up(v.value< double >())));
+      this->_lb =
+          std::move(FBound(v.value< double >() * RelativeError.doublelRE +
+                           AbsoluteError.doublelAE));
+      this->_ub =
+          std::move(FBound(v.value< double >() * RelativeError.doublerRE +
+                           AbsoluteError.doublerAE));
     } else {
       this->_lb = this->_ub = 1;
     }
@@ -247,15 +191,15 @@ public:
   }
 
   /// \brief Create a floating pointer interval number from FNumbers
-  FINumber(FNumber lb, FNumber ub, uint64_t bit_width, Signedness sign)
+  FRINumber(FNumber lb, FNumber ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating pointer interval number from FNumbers
-  FINumber(FNumber lb, FNumber ub)
+  FRINumber(FNumber lb, FNumber ub)
       : _lb(lb), _ub(ub), _bit_width(lb.bit_width()), _sign(Signed) {}
 
   /// \brief Create a floating pointer interval number from a Fbound
-  FINumber(FBound v) {
+  FRINumber(FBound v) {
     if (v.number().is_initialized() &&
         v.number()->bit_width() == 32) { // x is not empty and fl
       this->_lb = v.number()->value< float >();
@@ -272,30 +216,30 @@ public:
 
   /// \brief Label that require abstraction
   /// \brief Create a floating pointer interval number from a Fbound
-  FINumber(FBound v, AbstractTag) {
+  FRINumber(FBound v, AbstractTag) {
     if (v.number().is_initialized() &&
         v.number()->bit_width() == 32) { // x is not empty and fl
-      this->_lb =
-          std::move(FBound(detail::find_next_value_down(v.number()->value< float >())));
-      this->_ub =
-          std::move(FBound(detail::find_next_value_up(v.number()->value< float >())));
+      this->_lb = std::move(FBound(v.number()->value< float >() * RelativeError.floatlRE +
+AbsoluteError.floatlAE));
+      this->_ub = std::move(FBound(v.number()->value< float >() * RelativeError.floatrRE +
+                                   AbsoluteError.floatrAE));
     } else if (v.number().is_initialized() &&
                v.number()->bit_width() == 64) { // x is not empty and do
-      this->_lb =
-          std::move(FBound(detail::find_next_value_down(v.number()->value< double >())));
-      this->_ub =
-          std::move(FBound(detail::find_next_value_up(v.number()->value< double >())));
+      this->_lb = std::move(FBound(v.number()->value< double >() * RelativeError.doublelRE +
+                                  AbsoluteError.doublelAE));
+      this->_ub = std::move(FBound(v.number()->value< double >() * RelativeError.doublerRE +
+                                   AbsoluteError.doublerAE));
     } else { // none
       this->_lb = this->_ub = 1;
     }
   }
 
   /// \brief Create a floating pointer interval number from FBounds
-  FINumber(FBound lb, FBound ub, uint64_t bit_width, Signedness sign)
+  FRINumber(FBound lb, FBound ub, uint64_t bit_width, Signedness sign)
       : _lb(lb), _ub(ub), _bit_width(bit_width), _sign(sign) {}
 
   /// \brief Create a floating pointer interval number from Fbounds
-  FINumber(FBound lb, FBound ub) : _lb(lb), _ub(ub), _sign(Signed) {
+  FRINumber(FBound lb, FBound ub) : _lb(lb), _ub(ub), _sign(Signed) {
     if (lb.number().is_initialized() &&
         ub.number().is_initialized()) { // lb and ub are not empty
       this->_bit_width = lb.number()->bit_width();
@@ -306,17 +250,17 @@ public:
 
 public:
   /// \brief Copy constructor
-  FINumber(const FINumber& o)
+  FRINumber(const FRINumber& o)
       : _lb(o._lb), _ub(o._ub), _bit_width(o._bit_width), _sign(o._sign) {}
 
   /// \brief Move constructor
-  FINumber(FINumber&& o) noexcept
+  FRINumber(FRINumber&& o) noexcept
       : _lb(o._lb), _ub(o._ub), _bit_width(o._bit_width), _sign(o._sign) {
     o._bit_width = 0; // do not delete o
   }
 
   /// \brief Destructor
-  ~FINumber() = default;
+  ~FRINumber() = default;
 
   /// \brief Return the lower bound
   const FBound& lb() const { return this->_lb; }
@@ -334,10 +278,10 @@ public:
 
   /// \brief Create the null floating point interval number for the given bit
   /// width
-  static FINumber zero(uint64_t bit_width, Signedness sign) {
+  static FRINumber zero(uint64_t bit_width, Signedness sign) {
     ikos_assert_msg(bit_width > 0, "invalid bit width");
 
-    return FINumber(0, 0, bit_width, sign);
+    return FRINumber(0, 0, bit_width, sign);
   }
 
   /// @}
@@ -345,7 +289,7 @@ public:
   /// @{
 
   /// \brief Copy assignment
-  FINumber& operator=(const FINumber& o) {
+  FRINumber& operator=(const FRINumber& o) {
     if (this == &o) {
       return *this;
     }
@@ -356,7 +300,7 @@ public:
   }
 
   /// \brief Move assignment
-  FINumber& operator=(FINumber&& o) noexcept {
+  FRINumber& operator=(FRINumber&& o) noexcept {
     if (this == &o) {
       return *this;
     }
@@ -372,7 +316,7 @@ public:
   template <
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
-  FINumber& operator=(T n) {
+  FRINumber& operator=(T n) {
     this->_lb = n;
     this->_ub = n;
     if (std::is_same< T, float >::value ||
@@ -385,21 +329,21 @@ public:
   }
 
   /// \brief Addition assignment
-  FINumber& operator+=(const FINumber& x) {
+  FRINumber& operator+=(const FRINumber& x) {
     this->_lb += x._lb;
     this->_ub += x._ub;
     return *this;
   }
 
   /// \brief Subtraction assignment
-  FINumber& operator-=(const FINumber& x) {
+  FRINumber& operator-=(const FRINumber& x) {
     this->_lb -= x._ub;
     this->_ub -= x._lb;
     return *this;
   }
 
   /// \brief Multiplication assignment
-  FINumber& operator*=(const FINumber& x) {
+  FRINumber& operator*=(const FRINumber& x) {
     FBound ll = this->lb() * x.lb();
     FBound lu = this->lb() * x.ub();
     FBound ul = this->ub() * x.lb();
@@ -410,7 +354,7 @@ public:
   }
 
   /// \brief Division assignment
-  FINumber& operator/=(const FINumber& x) {
+  FRINumber& operator/=(const FRINumber& x) {
     boost::optional< FBound > d = x.singleton(); // FBound
     if (d && (*d).is_zero()) {
       // [_, _] / 0 = ⊥
@@ -480,18 +424,18 @@ public:
   /// @{
 
   /// \brief Set the floating point interval number to [0,0]
-  FINumber& set_zero() {
+  FRINumber& set_zero() {
     this->_lb = 0;
     this->_ub = 0;
     return *this;
   }
 
   /// \brief Unary minus
-  const FINumber operator-() const {
+  const FRINumber operator-() const {
     if (this->is_bottom()) {
       return bottom();
     } else {
-      return FINumber(-this->_ub, -this->_lb);
+      return FRINumber(-this->_ub, -this->_lb);
     }
   }
 
@@ -526,38 +470,38 @@ public:
 public:
   // friends
 
-  friend FINumber add(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber add(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber operator+(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber operator+(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber sub(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber sub(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber operator-(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber operator-(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber mul(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber mul(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber operator*(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber operator*(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber div(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber div(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend FINumber operator/(const FINumber& lhs, const FINumber& rhs);
+  friend FRINumber operator/(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend bool operator==(const FINumber& lhs, const FINumber& rhs);
+  friend bool operator==(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend bool operator!=(const FINumber& lhs, const FINumber& rhs);
+  friend bool operator!=(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend bool operator<(const FINumber& lhs, const FINumber& rhs);
+  friend bool operator<(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend bool operator<=(const FINumber& lhs, const FINumber& rhs);
+  friend bool operator<=(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend bool operator>(const FINumber& lhs, const FINumber& rhs);
+  friend bool operator>(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend bool operator>=(const FINumber& lhs, const FINumber& rhs);
+  friend bool operator>=(const FRINumber& lhs, const FRINumber& rhs);
 
-  friend std::ostream& operator<<(std::ostream& o, const FINumber& n);
+  friend std::ostream& operator<<(std::ostream& o, const FRINumber& n);
 
-  friend std::size_t hash_value(const FINumber&);
-};    /// end class FINumber
+  friend std::size_t hash_value(const FRINumber&);
+}; /// end class FRINumber
 
 /// \name Binary Operators
 /// @{
@@ -565,83 +509,83 @@ public:
 /// \brief Addition
 ///
 /// Returns the sum of the operands
-inline FINumber add(const FINumber& lhs, const FINumber& rhs) {
-  return FINumber(lhs._lb + rhs._lb, lhs._ub + rhs._ub);
+inline FRINumber add(const FRINumber& lhs, const FRINumber& rhs) {
+  return FRINumber(lhs._lb + rhs._lb, lhs._ub + rhs._ub);
 }
 
 /// \brief Addition
 ///
 /// Returns the sum of the operands
-inline FINumber operator+(const FINumber& lhs, const FINumber& rhs) {
+inline FRINumber operator+(const FRINumber& lhs, const FRINumber& rhs) {
   return add(lhs, rhs);
 }
 
 /// \brief Subtraction
 ///
 /// Returns the difference of the operands
-inline FINumber sub(const FINumber& lhs, const FINumber& rhs) {
-  return FINumber(lhs._lb - rhs._ub, lhs._ub - rhs._lb);
+inline FRINumber sub(const FRINumber& lhs, const FRINumber& rhs) {
+  return FRINumber(lhs._lb - rhs._ub, lhs._ub - rhs._lb);
 }
 
 /// \brief Subtraction
 ///
 /// Returns the sum of the operands
-inline FINumber operator-(const FINumber& lhs, const FINumber& rhs) {
+inline FRINumber operator-(const FRINumber& lhs, const FRINumber& rhs) {
   return sub(lhs, rhs);
 }
 
 /// \brief Multiplication
 ///
 /// Returns the product of the operands
-inline FINumber mul(const FINumber& lhs, const FINumber& rhs) {
+inline FRINumber mul(const FRINumber& lhs, const FRINumber& rhs) {
   if (lhs.is_bottom() || rhs.is_bottom()) {
-    return FINumber::bottom();
+    return FRINumber::bottom();
   } else {
     FBound ll = lhs.lb() * rhs.lb();
     FBound lu = lhs.lb() * rhs.ub();
     FBound ul = lhs.ub() * rhs.lb();
     FBound uu = lhs.ub() * rhs.ub();
-    return FINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
+    return FRINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
   }
 }
 
 /// \brief Multiplication
 ///
 /// Returns the product of the operands
-inline FINumber operator*(const FINumber& lhs, const FINumber& rhs) {
+inline FRINumber operator*(const FRINumber& lhs, const FRINumber& rhs) {
   return mul(lhs, rhs);
 }
 
 /// \brief Division
 ///
 /// Returns the quotient of the operands
-inline FINumber div(const FINumber& lhs, const FINumber& rhs) {
+inline FRINumber div(const FRINumber& lhs, const FRINumber& rhs) {
   boost::optional< FBound > d = rhs.singleton(); // FBound
   if (d && (*d).is_zero()) {
     // [_, _] / 0 = ⊥
-    return FINumber::bottom();
+    return FRINumber::bottom();
   } else if (rhs.contains(0)) {
     boost::optional< FBound > n = lhs.singleton();
     if (n && (*n).is_zero()) {
       // 0 / [_, _] = 0
-      return FINumber(0);
+      return FRINumber(0);
     } else {
       // ([_,_]) / ([_,0] join [0,_]) = top
-      return FINumber::top();
+      return FRINumber::top();
     }
   } else {
     FBound ll = lhs.lb() / rhs.lb();
     FBound lu = lhs.lb() / rhs.ub();
     FBound ul = lhs.ub() / rhs.lb();
     FBound uu = lhs.ub() / rhs.ub();
-    return FINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
+    return FRINumber(min(ll, lu, ul, uu), max(ll, lu, ul, uu));
   }
 }
 
 /// \brief Division
 ///
 /// Returns the quotient of the operands
-inline FINumber operator/(const FINumber& lhs, const FINumber& rhs) {
+inline FRINumber operator/(const FRINumber& lhs, const FRINumber& rhs) {
   return div(lhs, rhs);
 }
 
@@ -650,32 +594,32 @@ inline FINumber operator/(const FINumber& lhs, const FINumber& rhs) {
 /// @{
 
 /// \brief Equality operator
-inline bool operator==(const FINumber& lhs, const FINumber& rhs) {
+inline bool operator==(const FRINumber& lhs, const FRINumber& rhs) {
   return (lhs._lb == rhs._lb && lhs._ub == rhs._ub);
 }
 
 /// \brief Equality operator
-inline bool operator!=(const FINumber& lhs, const FINumber& rhs) {
+inline bool operator!=(const FRINumber& lhs, const FRINumber& rhs) {
   return (lhs._lb != rhs._lb || lhs._ub != rhs._ub);
 }
 
 /// \brief Less than comparison with floating point number types
-inline bool operator<(const FINumber& lhs, const FINumber& rhs) {
+inline bool operator<(const FRINumber& lhs, const FRINumber& rhs) {
   return (lhs._lb > rhs._lb && lhs._ub < rhs._ub);
 }
 
 /// \brief Less or equal than comparison with floating point number types
-inline bool operator<=(const FINumber& lhs, const FINumber& rhs) {
+inline bool operator<=(const FRINumber& lhs, const FRINumber& rhs) {
   return (lhs._lb >= rhs._lb && lhs._ub <= rhs._ub);
 }
 
 /// \brief Greater than comparison with floating point number types
-inline bool operator>(const FINumber& lhs, const FINumber& rhs) {
+inline bool operator>(const FRINumber& lhs, const FRINumber& rhs) {
   return (lhs._lb < rhs._lb && lhs._ub > rhs._ub);
 }
 
 /// \brief Greater or equal than comparison with floating point number types
-inline bool operator>=(const FINumber& lhs, const FINumber& rhs) {
+inline bool operator>=(const FRINumber& lhs, const FRINumber& rhs) {
   return (lhs._lb <= rhs._lb && lhs._ub >= rhs._ub);
 }
 
@@ -684,7 +628,7 @@ inline bool operator>=(const FINumber& lhs, const FINumber& rhs) {
 /// @{
 
 /// \brief Write a floating point number on a stream
-inline std::ostream& operator<<(std::ostream& o, const FINumber& n) {
+inline std::ostream& operator<<(std::ostream& o, const FRINumber& n) {
   std::cout.precision(30);
   o << "[" << n._lb << "," << n._ub << "]";
   return o;
@@ -693,24 +637,14 @@ inline std::ostream& operator<<(std::ostream& o, const FINumber& n) {
 /// @}
 
 /// \brief Return the hash of a FNumber
-inline std::size_t hash_value(const FINumber& n) {
+inline std::size_t hash_value(const FRINumber& n) {
   std::size_t hash = 0;
   boost::hash_combine(hash, n);
   boost::hash_combine(hash, n._bit_width);
   boost::hash_combine(hash, n._sign);
   return hash;
 }
-} // end namespace core
-} // end namespace ikos
 
-namespace std {
+}; // namespace core
 
-/// \brief Hash for FINumber
-template <>
-struct hash< ikos::core::FINumber > {
-  std::size_t operator()(const ikos::core::FINumber& n) const {
-    return ikos::core::hash_value(n);
-  }
-};
-
-} // end namespace std
+}; // namespace ikos
