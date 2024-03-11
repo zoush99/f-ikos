@@ -100,15 +100,6 @@ public:
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, int n) = 0;
 
-/*
-  /// \todo Is it useful?
-  /// \brief Assign `x = n`
-  virtual void assign(VariableRef x, float n) = 0;
-
-  /// \brief Assign `x = n`
-  virtual void assign(VariableRef x, double n) = 0;
-*/
-
   /// \brief Assign `x = n`
   virtual void assign(VariableRef x, const Number& n) = 0;
 

@@ -854,16 +854,6 @@ public:
     this->assign(x, LinearExpressionT(n));
   }
 
-/*
-  void assign(VariableRef x, float n) override {
-    this->assign(x, LinearExpressionT(n));
-  }
-
-  void assign(VariableRef x, double n) override {
-    this->assign(x, LinearExpressionT(n));
-  }
-*/
-
   void assign(VariableRef x, const Number& n) override {
     this->assign(x, LinearExpressionT(n));
   }
@@ -926,7 +916,7 @@ private:
         t = apron::binop_expr< Number >(AP_TEXPR_DIV, left, right);
       } break;
       case BinaryOperator::Rem: {
-        // XXX(marthaud): AP_TEXPR_MOD is actually a signed remainder..
+        // XXX(marthaud): AP_TEXPR_MOD is actually a signed remainder.
         t = apron::binop_expr< Number >(AP_TEXPR_MOD, left, right);
       } break;
       default: {
