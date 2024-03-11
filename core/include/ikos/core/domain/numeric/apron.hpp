@@ -46,6 +46,7 @@
 #include <algorithm>
 #include <memory>
 #include <mutex>
+#include <type_traits>
 #include <vector>
 
 #include <ap_global0.h>
@@ -71,25 +72,21 @@ namespace numeric {
 
 namespace apron {
 
-enum dataty{
-  Znumber,
-  Qnumber,
-  Ffnumber,
-  Fdnumber
-};
+enum dataty { Znumber, Qnumber, Ffnumber, Fdnumber };
 
 /// \brief Create a binary expression
 template < typename Number >
-inline ap_texpr0_t* binop_expr(ap_texpr_op_t, ap_texpr0_t*, ap_texpr0_t*,dataty);
+inline ap_texpr0_t* binop_expr(ap_texpr_op_t,
+                               ap_texpr0_t*,
+                               ap_texpr0_t*,
+                               dataty);
 
 template <>
 inline ap_texpr0_t* binop_expr< ZNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
                                           ap_texpr0_t* r,
                                           dataty d) {
-  if (d==Znumber){  // ZNumber
-    return ap_texpr0_binop(op, l, r, AP_RTYPE_INT, AP_RDIR_ZERO);
-  }
+  return ap_texpr0_binop(op, l, r, AP_RTYPE_INT, AP_RDIR_ZERO);
 }
 
 template <>
@@ -97,9 +94,7 @@ inline ap_texpr0_t* binop_expr< QNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
                                           ap_texpr0_t* r,
                                           dataty d) {
-  if (d==Qnumber) { // QNumber
-    return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
-  }
+  return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
 }
 
 /// By zoush99
@@ -108,14 +103,13 @@ inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
                                           ap_texpr0_t* r,
                                           dataty d) {
-  if (d==Ffnumber){ // fl
+  if (d == Ffnumber) { // fl
     return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_NEAREST);
-  } else if(d==Fdnumber){ // do
+  } else if (d == Fdnumber) { // do
     return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_NEAREST);
-  }else{
+  } else {
     ikos_unreachable("unreachable");
   }
-
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_scalar_t*
@@ -134,15 +128,15 @@ inline ap_scalar_t* to_ap_scalar(const QNumber& n) {
 /// \brief Conversion from ikos::FNumber to ap_scalar_t*
 inline ap_scalar_t* to_ap_scalar(const FNumber& f) {
   mpfr_t _f;
-  if (f.bit_width()==32){ // dl
-    mpfr_init2(_f,32);
-    mpfr_set_flt(_f,f.value<float>(),MPFR_RNDN);
+  if (f.bit_width() == 32) { // dl
+    mpfr_init2(_f, 32);
+    mpfr_set_flt(_f, f.value< float >(), MPFR_RNDN);
     return ap_scalar_alloc_set_mpfr(_f);
-  } else if(f.bit_width()==64){ // do
-    mpfr_init2(_f,64);
-    mpfr_set_d(_f,f.value<double>(),MPFR_RNDN);
+  } else if (f.bit_width() == 64) { // do
+    mpfr_init2(_f, 64);
+    mpfr_set_d(_f, f.value< double >(), MPFR_RNDN);
     return ap_scalar_alloc_set_mpfr(_f);
-  }else{
+  } else {
     ikos_unreachable("unreachable");
   }
 }
@@ -163,15 +157,15 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpfr_t _f;
-  if (f.bit_width()==32){ // fl
-    mpfr_init2(_f,32);
-    mpfr_set_flt(_f,f.value<float>(),MPFR_RNDN);
+  if (f.bit_width() == 32) { // fl
+    mpfr_init2(_f, 32);
+    mpfr_set_flt(_f, f.value< float >(), MPFR_RNDN);
     return ap_texpr0_cst_scalar_mpfr(_f);
-  } else if(f.bit_width()==64){ // do
-    mpfr_init2(_f,64);
-    mpfr_set_d(_f,f.value<double>(),MPFR_RNDN);
+  } else if (f.bit_width() == 64) { // do
+    mpfr_init2(_f, 64);
+    mpfr_set_d(_f, f.value< double >(), MPFR_RNDN);
     return ap_texpr0_cst_scalar_mpfr(_f);
-  }else{
+  } else {
     ikos_unreachable("unreachable");
   }
 }
@@ -203,15 +197,15 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
 
 /// By zoush99
 template <>
-inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/){
+inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   ikos_assert(ap_scalar_infty(scalar) == 0);
   ikos_assert(scalar->discr == AP_SCALAR_MPQ);
 
-  if (scalar->val.mpfr->_mpfr_prec==32){  // fl
+  if (scalar->val.mpfr->_mpfr_prec == 32) { // fl
     return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
-  } else if (scalar->val.mpfr->_mpfr_prec==64){ // do
+  } else if (scalar->val.mpfr->_mpfr_prec == 64) { // do
     return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
-  } else{
+  } else {
     ikos_unreachable("unreachable");
   }
 }
@@ -526,17 +520,23 @@ private:
     return ap_texpr0_dim(this->var_dim_insert(v));
   }
 
-  /// \todo
+  /// By zoush99
   /// \brief Conversion from LinearExpression to ap_texpr0_t*
   ap_texpr0_t* to_ap_expr(const LinearExpressionT& e) {
     ap_texpr0_t* r = apron::to_ap_expr(e.constant());
+    apron::dataty d;
+
+    if (std::is_same< Number, FNumber >::value) { /// \todo
+      d = apron::Ffnumber;
+    }
 
     for (auto it = e.begin(), et = e.end(); it != et; ++it) {
       ap_texpr0_t* term =
           apron::binop_expr< Number >(AP_TEXPR_MUL,
                                       apron::to_ap_expr(it->second),
-                                      this->to_ap_expr(it->first));
-      r = apron::binop_expr< Number >(AP_TEXPR_ADD, r, term);
+                                      this->to_ap_expr(it->first),
+                                      d);
+      r = apron::binop_expr< Number >(AP_TEXPR_ADD, r, term, d);
     }
 
     return r;
@@ -979,23 +979,28 @@ private:
              ap_texpr0_t* left,
              ap_texpr0_t* right) {
     ap_texpr0_t* t;
+    apron::dataty d;
+
+    if (std::is_same< Number, FNumber >::value) { /// \todo
+      d = apron::Ffnumber;
+    }
 
     switch (op) {
       case BinaryOperator::Add: {
-        t = apron::binop_expr< Number >(AP_TEXPR_ADD, left, right);
+        t = apron::binop_expr< Number >(AP_TEXPR_ADD, left, right, d);
       } break;
       case BinaryOperator::Sub: {
-        t = apron::binop_expr< Number >(AP_TEXPR_SUB, left, right);
+        t = apron::binop_expr< Number >(AP_TEXPR_SUB, left, right, d);
       } break;
       case BinaryOperator::Mul: {
-        t = apron::binop_expr< Number >(AP_TEXPR_MUL, left, right);
+        t = apron::binop_expr< Number >(AP_TEXPR_MUL, left, right, d);
       } break;
       case BinaryOperator::Div: {
-        t = apron::binop_expr< Number >(AP_TEXPR_DIV, left, right);
+        t = apron::binop_expr< Number >(AP_TEXPR_DIV, left, right, d);
       } break;
       case BinaryOperator::Rem: {
         // XXX(marthaud): AP_TEXPR_MOD is actually a signed remainder.
-        t = apron::binop_expr< Number >(AP_TEXPR_MOD, left, right);
+        t = apron::binop_expr< Number >(AP_TEXPR_MOD, left, right, d);
       } break;
       default: {
         ikos_unreachable("unsupported operator");
@@ -1385,9 +1390,7 @@ public:
 #endif
   }
 
-  static std::string name() {
-    return apron::domain_name(Domain);
-  }
+  static std::string name() { return apron::domain_name(Domain); }
 
 }; // end class ApronDomain
 
