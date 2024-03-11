@@ -531,6 +531,8 @@ inline FRINumber add(const FRINumber& lhs, const FRINumber& rhs) {
   return FRINumber(lhs._lb + rhs._lb, lhs._ub + rhs._ub);
 }
 
+/// \todo Here I need to modify the binary of two floating point types. By zoush99
+/// Subtraction, multiplication and division are also required
 inline FRINumber addFNu(const FNumber& lhs, const FNumber& rhs) {
   FRINumber Flhs(lhs);
   FRINumber Frhs(rhs);

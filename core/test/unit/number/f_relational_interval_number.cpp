@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE(test_f_abstract_constructor) {
   std::cout.precision(30);
   std::cout<<x<<std::endl;
   std::cout<<y<<std::endl;
-  std::cout <<"这是test-relation-interval-number"<< std::endl;
+  std::cout <<"This is test-relation-interval-number"<< std::endl;
 
   FRINumber fi1(x, FRINumber::AbstractTag{});
   FRINumber fi2(y, FRINumber::AbstractTag{});
