@@ -71,30 +71,51 @@ namespace numeric {
 
 namespace apron {
 
+enum dataty{
+  Znumber,
+  Qnumber,
+  Ffnumber,
+  Fdnumber
+};
+
 /// \brief Create a binary expression
 template < typename Number >
-inline ap_texpr0_t* binop_expr(ap_texpr_op_t, ap_texpr0_t*, ap_texpr0_t*);
+inline ap_texpr0_t* binop_expr(ap_texpr_op_t, ap_texpr0_t*, ap_texpr0_t*,dataty);
 
 template <>
 inline ap_texpr0_t* binop_expr< ZNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
-                                          ap_texpr0_t* r) {
-  return ap_texpr0_binop(op, l, r, AP_RTYPE_INT, AP_RDIR_ZERO);
+                                          ap_texpr0_t* r,
+                                          dataty d) {
+  if (d==Znumber){  // ZNumber
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_INT, AP_RDIR_ZERO);
+  }
 }
 
 template <>
 inline ap_texpr0_t* binop_expr< QNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
-                                          ap_texpr0_t* r) {
-  return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
+                                          ap_texpr0_t* r,
+                                          dataty d) {
+  if (d==Qnumber) { // QNumber
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
+  }
 }
 
-/// \todo
+/// By zoush99
 template <>
 inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
-                                          ap_texpr0_t* r) {
-  return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_NEAREST);
+                                          ap_texpr0_t* r,
+                                          dataty d) {
+  if (d==Ffnumber){ // fl
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_NEAREST);
+  } else if(d==Fdnumber){ // do
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_NEAREST);
+  }else{
+    ikos_unreachable("unreachable");
+  }
+
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_scalar_t*
@@ -109,11 +130,21 @@ inline ap_scalar_t* to_ap_scalar(const QNumber& n) {
   return ap_scalar_alloc_set_mpq(e.get_mpq_t());
 }
 
-/// \todo
+/// By zoush99
 /// \brief Conversion from ikos::FNumber to ap_scalar_t*
-inline ap_scalar_t* to_ap_scalar(const FNumber& n) {
-//  mpq_class e(n.mpz());
-  return ap_scalar_alloc_set_double(n.value<double>());
+inline ap_scalar_t* to_ap_scalar(const FNumber& f) {
+  mpfr_t _f;
+  if (f.bit_width()==32){ // dl
+    mpfr_init2(_f,32);
+    mpfr_set_flt(_f,f.value<float>(),MPFR_RNDN);
+    return ap_scalar_alloc_set_mpfr(_f);
+  } else if(f.bit_width()==64){ // do
+    mpfr_init2(_f,64);
+    mpfr_set_d(_f,f.value<double>(),MPFR_RNDN);
+    return ap_scalar_alloc_set_mpfr(_f);
+  }else{
+    ikos_unreachable("unreachable");
+  }
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_texpr0_t*
@@ -128,11 +159,21 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
 
-/// \todo
+/// zoush99
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
-inline ap_texpr0_t* to_ap_expr(const FNumber& n) {
-//  mpq_class e(n.mpz());
-  return ap_texpr0_cst_scalar_double(n.value<double>());
+inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
+  mpfr_t _f;
+  if (f.bit_width()==32){ // fl
+    mpfr_init2(_f,32);
+    mpfr_set_flt(_f,f.value<float>(),MPFR_RNDN);
+    return ap_texpr0_cst_scalar_mpfr(_f);
+  } else if(f.bit_width()==64){ // do
+    mpfr_init2(_f,64);
+    mpfr_set_d(_f,f.value<double>(),MPFR_RNDN);
+    return ap_texpr0_cst_scalar_mpfr(_f);
+  }else{
+    ikos_unreachable("unreachable");
+  }
 }
 
 /// \brief Conversion from ap_scalar_t* to ikos::ZNumber/QNumber
@@ -160,8 +201,20 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return QNumber(mpq_class(scalar->val.mpq));
 }
 
-/// \todo
+/// By zoush99
+template <>
+inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/){
+  ikos_assert(ap_scalar_infty(scalar) == 0);
+  ikos_assert(scalar->discr == AP_SCALAR_MPQ);
 
+  if (scalar->val.mpfr->_mpfr_prec==32){  // fl
+    return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
+  } else if (scalar->val.mpfr->_mpfr_prec==64){ // do
+    return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
+  } else{
+    ikos_unreachable("unreachable");
+  }
+}
 
 /// \brief Conversion from ap_coeff_t* to ikos::ZNumber/QNumber
 template < typename Number >
@@ -473,6 +526,7 @@ private:
     return ap_texpr0_dim(this->var_dim_insert(v));
   }
 
+  /// \todo
   /// \brief Conversion from LinearExpression to ap_texpr0_t*
   ap_texpr0_t* to_ap_expr(const LinearExpressionT& e) {
     ap_texpr0_t* r = apron::to_ap_expr(e.constant());
@@ -918,6 +972,7 @@ private:
     }
   }
 
+  /// \todo
   /// \brief Apply `x = left op right`
   void apply(BinaryOperator op,
              VariableRef x,
