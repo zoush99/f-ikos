@@ -97,6 +97,7 @@ inline ap_texpr0_t* binop_expr< QNumber >(ap_texpr_op_t op,
   return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
 }
 
+/// \todo
 /// By zoush99
 template <>
 inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
@@ -153,6 +154,8 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
 
+/// \todo
+/// ap_texpr0_cst_interval_mpfr
 /// zoush99
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
@@ -204,7 +207,7 @@ inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   if (scalar->val.mpfr->_mpfr_prec == 32) { // fl
     return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
   } else if (scalar->val.mpfr->_mpfr_prec == 64) { // do
-    return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
+    return FNumber(mpfr_get_d(scalar->val.mpfr, MPFR_RNDN));
   } else {
     ikos_unreachable("unreachable");
   }
@@ -521,6 +524,7 @@ private:
   }
 
   /// By zoush99
+  /// \todo
   /// \brief Conversion from LinearExpression to ap_texpr0_t*
   ap_texpr0_t* to_ap_expr(const LinearExpressionT& e) {
     ap_texpr0_t* r = apron::to_ap_expr(e.constant());
@@ -555,6 +559,7 @@ private:
     }
   }
 
+  /// \todo
   /// \brief Conversion from ap_linexpr0_t* to LinearExpression
   LinearExpressionT to_ikos_linear_expression(ap_linexpr0_t* expr) const {
     ikos_assert(ap_linexpr0_is_linear(expr));
@@ -972,7 +977,6 @@ private:
     }
   }
 
-  /// \todo
   /// \brief Apply `x = left op right`
   void apply(BinaryOperator op,
              VariableRef x,
