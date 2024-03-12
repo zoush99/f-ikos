@@ -158,7 +158,7 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
 /// ap_texpr0_cst_interval_mpfr
 /// zoush99
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
-inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
+/*inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpfr_t _f;
   if (f.bit_width() == 32) { // fl
     mpfr_init2(_f, 32);
@@ -168,6 +168,27 @@ inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
     mpfr_init2(_f, 64);
     mpfr_set_d(_f, f.value< double >(), MPFR_RNDN);
     return ap_texpr0_cst_scalar_mpfr(_f);
+  } else {
+    ikos_unreachable("unreachable");
+  }
+}*/
+
+/// zoush99
+/// \brief Conversion from ikos::FNumber to ap_texpr0_t*
+inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
+  mpfr_t _f1,_f2;
+  if (f.bit_width() == 32) { // fl
+    mpfr_init2(_f1, 32);
+    mpfr_init2(_f2, 32);
+    mpfr_set_flt(_f1, ikos::core::detail::find_next_value_down(f.value< float >()), MPFR_RNDN);
+    mpfr_set_flt(_f2, ikos::core::detail::find_next_value_up(f.value< float >()), MPFR_RNDN);
+    return ap_texpr0_cst_interval_mpfr(_f1,_f2);
+  } else if (f.bit_width() == 64) { // do
+    mpfr_init2(_f1, 64);
+    mpfr_init2(_f2, 64);
+    mpfr_set_flt(_f1, ikos::core::detail::find_next_value_down(f.value< double >()), MPFR_RNDN);
+    mpfr_set_flt(_f2, ikos::core::detail::find_next_value_up(f.value< double >()), MPFR_RNDN);
+    return ap_texpr0_cst_interval_mpfr(_f1,_f2);
   } else {
     ikos_unreachable("unreachable");
   }
@@ -1137,8 +1158,7 @@ public:
     ap_tcons0_array_clear(&ap_csts);
   }
 
-  /// \todo(Rewrote the `add` function to be empty; will proceed with further
-  /// modifications.) By zoush99
+  /// By zoush99
   /// { @
   /// \brief Add the constraint `x pred y`
   void add(Predicate pred, VariableRef x, VariableRef y) override { return; }
