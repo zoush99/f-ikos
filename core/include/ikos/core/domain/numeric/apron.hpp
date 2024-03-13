@@ -959,7 +959,7 @@ public:
   }
 
   void assign(VariableRef x, const Number& n) override {
-    this->assign(x, LinearExpressionT(n));
+      this->assign(x, LinearExpressionT(n));
   }
 
   void assign(VariableRef x, VariableRef y) override {
@@ -973,6 +973,7 @@ public:
       return;
     }
 
+    /// By zoush99, FNumber -> ap_texpr0_t ([a,b] type)
     ap_texpr0_t* t = this->to_ap_expr(e);
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
@@ -1005,7 +1006,7 @@ private:
              ap_texpr0_t* left,
              ap_texpr0_t* right) {
     ap_texpr0_t* t;
-    apron::dataty d;
+    apron::dataty d=apron::Znumber;
 
     if (std::is_same< Number, FNumber >::value) { /// \todo
       d = apron::Ffnumber;
