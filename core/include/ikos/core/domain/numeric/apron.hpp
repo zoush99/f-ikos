@@ -125,11 +125,11 @@ inline ap_scalar_t* to_ap_scalar(const QNumber& n) {
   return ap_scalar_alloc_set_mpq(e.get_mpq_t());
 }
 
-/// By zoush99
+/// By zoush99, FNumber ->mpfr_t -> ap_scalar_t
 /// \brief Conversion from ikos::FNumber to ap_scalar_t*
 inline ap_scalar_t* to_ap_scalar(const FNumber& f) {
   mpfr_t _f;
-  if (f.bit_width() == 32) { // dl
+  if (f.bit_width() == 32) { // fl
     mpfr_init2(_f, 32);
     mpfr_set_flt(_f, f.value< float >(), MPFR_RNDN);
     return ap_scalar_alloc_set_mpfr(_f);
@@ -173,7 +173,7 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   }
 }*/
 
-/// zoush99
+/// zoush99, FNumber -> [mpfr_t,mpfr_t] -> ap_texpr0_t
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpfr_t _f1,_f2;
@@ -219,7 +219,7 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return QNumber(mpq_class(scalar->val.mpq));
 }
 
-/// By zoush99
+/// By zoush99, ap_scalar_t -> FNumber
 template <>
 inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   ikos_assert(ap_scalar_infty(scalar) == 0);
@@ -242,6 +242,7 @@ inline Number to_ikos_number(ap_coeff_t* coeff, bool round_upper) {
   return to_ikos_number< Number >(coeff->val.scalar, round_upper);
 }
 
+/// ap_scalar_t -> Bound< Number >
 /// \brief Conversion from ap_scalar_t* to ikos::bound< Number >
 template < typename Number >
 inline Bound< Number > to_ikos_bound(ap_scalar_t* scalar, bool round_upper) {
@@ -256,6 +257,7 @@ inline Bound< Number > to_ikos_bound(ap_scalar_t* scalar, bool round_upper) {
   }
 }
 
+/// ap_interval_t -> Interval< Number >
 /// \brief Conversion from ap_interval_t* to ikos::interval< Number >
 template < typename Number >
 inline Interval< Number > to_ikos_interval(ap_interval_t* intv) {
@@ -544,8 +546,7 @@ private:
     return ap_texpr0_dim(this->var_dim_insert(v));
   }
 
-  /// By zoush99
-  /// \todo
+  /// By zoush99, LinearExpression -> ap_texpr0_t
   /// \brief Conversion from LinearExpression to ap_texpr0_t*
   ap_texpr0_t* to_ap_expr(const LinearExpressionT& e) {
     ap_texpr0_t* r = apron::to_ap_expr(e.constant());
