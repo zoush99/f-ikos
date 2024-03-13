@@ -55,6 +55,7 @@ add_unit_test(domain numeric var_packing_domain)
 add_unit_test(domain numeric var_packing_dbm)
 add_unit_test(domain numeric var_packing_dbm_congruence)
 if (APRON_FOUND)
+  add_unit_test(domain numeric apron apron_source)  # By zoush99
   add_unit_test(domain numeric apron interval)
   add_unit_test(domain numeric apron polka_polyhedra)
   add_unit_test(domain numeric apron ppl_linear_congruences)

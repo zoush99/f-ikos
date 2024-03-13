@@ -966,6 +966,8 @@ public:
     this->assign(x, LinearExpressionT(y));
   }
 
+  /// By zoush99
+  /// \brief Converting Floating Point Data Types to Interval Representation
   void assign(VariableRef x, const LinearExpressionT& e) override {
     std::lock_guard< std::mutex > lock(this->_mutex);
 
@@ -973,7 +975,7 @@ public:
       return;
     }
 
-    /// By zoush99, FNumber -> ap_texpr0_t ([a,b] type)
+    // FNumber -> ap_texpr0_t ([a,b] type)
     ap_texpr0_t* t = this->to_ap_expr(e);
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
@@ -1116,6 +1118,8 @@ public:
     this->add(LinearConstraintSystemT{cst});
   }
 
+  /// By zoush99
+  /// \brief Add all constraints to apron's constraint system
   void add(const LinearConstraintSystemT& csts) override {
     std::lock_guard< std::mutex > lock(this->_mutex);
 
@@ -1134,6 +1138,11 @@ public:
       ap_csts.p[i++] = this->to_ap_constraint(cst);
     }
 
+    /// \todo Add interval linearization method in this place. By zoush99
+    /// _begin
+    // ap_csts
+
+    /// _end
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
 
     // Improve the precision
@@ -1145,7 +1154,6 @@ public:
       ap_interval_t* ap_intv =
           ap_abstract0_bound_texpr(manager(), this->_inv.get(), cst.texpr0);
       IntervalT intv = apron::to_ikos_interval< Number >(ap_intv);
-
       if (intv.is_bottom() ||
           (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
           (cst.constyp == AP_CONS_SUPEQ && intv.ub() < BoundT(0)) ||
