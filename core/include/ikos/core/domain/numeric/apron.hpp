@@ -1141,7 +1141,15 @@ public:
     /// \todo Add interval linearization method in this place. By zoush99
     /// _begin
     // ap_csts
-
+    i = 0;
+    for (const LinearConstraintT& cst : csts) {
+      ap_csts.p[i++] = this->to_ap_constraint(cst);
+//      ap_csts.p[i++].texpr0->val.cst.val.interval->inf;
+      /*1. 将区间两端类型从mpfr转变成mpq
+       *2. 再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
+       *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
+       * */
+    }
     /// _end
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
 
