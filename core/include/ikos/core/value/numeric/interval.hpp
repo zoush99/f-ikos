@@ -352,13 +352,15 @@ public:
   ///
   /// If mod([a, b], n) is equivalent to [a, b] - x, returns x
   /// Otherwise, returns boost::none.
-  boost::optional< Number > mod_to_sub(const Number& n) {
+  /// Change type from Number to ZNumber. By zoush99
+  boost::optional< ZNumber > mod_to_sub(const ZNumber& n) {
     ikos_assert_msg(n != 0, "division by zero");
 
     if (this->_lb.is_infinite() || this->_ub.is_infinite()) {
       return boost::none;
     }
 
+    /// Change type from ZNumber to Number. By zoush99
     ZNumber lb = *this->_lb.number();
     ZNumber ub = *this->_ub.number();
 

@@ -55,6 +55,8 @@ NumericAbstractDomain make_top_numeric_abstract_value(
   switch (domain) {
     case MachineIntDomainOption::FInterval:
       return make_top_numeric_interval();
+    case MachineIntDomainOption::ApronPplPolyhedra:
+      return make_top_numeric_apron_ppl_polyhedra();
     default: {
       ikos_unreachable("unreachable");
     }
@@ -66,6 +68,8 @@ NumericAbstractDomain make_bottom_numeric_abstract_value(
   switch (domain) {
     case MachineIntDomainOption::FInterval:
       return make_bottom_numeric_interval();
+    case MachineIntDomainOption::ApronPplPolyhedra:
+      return make_bottom_numeric_apron_ppl_polyhedra();
     default: {
       ikos_unreachable("unreachable");
     }

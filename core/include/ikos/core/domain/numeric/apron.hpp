@@ -47,9 +47,9 @@
 #include <memory>
 #include <mutex>
 #include <type_traits>
+#include <unordered_map> // By zoush99
+#include <utility>       // By zoush99
 #include <vector>
-#include <utility> // By zoush99
-#include <unordered_map>  // By zoush99
 
 #include <ap_global0.h>
 #include <ap_pkgrid.h>
@@ -1132,29 +1132,37 @@ public:
       return;
     }
 
-    if (is_supported(op)) {
-      std::lock_guard< std::mutex > lock(this->_mutex);
-      this->apply(op, x, this->to_ap_expr(y), apron::to_ap_expr(z));
-    } else if (op == BinaryOperator::Mod) {
-      // Optimized version, because mod is heavily used on machine integers
-      if (z == 0) {
-        this->set_to_bottom();
-        return;
+      if (is_supported(op)) {
+        std::lock_guard< std::mutex > lock(this->_mutex);
+        this->apply(op, x, this->to_ap_expr(y), apron::to_ap_expr(z));
+        if (std::is_same<Number,FNumber>::value){
+          return;
+        }
       }
+      else if (op == BinaryOperator::Mod) {
+        // Optimized version, because mod is heavily used on machine integers
+        if (z == 0) {
+          this->set_to_bottom();
+          return;
+        }
 
-      IntervalT v_y = this->to_interval(y);
-      boost::optional< Number > n = v_y.mod_to_sub(z);
+        IntervalT v_y = this->to_interval(y);
+        /// \todo bugs here!!!
+        boost::optional< Number > n = v_y.mod_to_sub(z);
 
-      if (n) {
-        // Equivalent to x = y - n
-        this->apply(BinaryOperator::Sub, x, y, *n);
-      } else {
-        this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - 1)));
+        if (n) {
+          // Equivalent to x = y - n
+          this->apply(BinaryOperator::Sub, x, y, *n);
+        } else {
+          this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - 1)));
+        }
       }
-    } else {
-      this->set(x, apply_bin_operator(op, this->to_interval(y), IntervalT(z)));
-    }
+      else {
+        this->set(x,
+                  apply_bin_operator(op, this->to_interval(y), IntervalT(z)));
+      }
   }
+
 
   void apply(BinaryOperator op,
              VariableRef x,
@@ -1198,7 +1206,7 @@ public:
 
     /// \todo Add interval linearization method in this place. By zoush99
     /// _begin
-    if (std::is_same<Number,FNumber>::value) {
+    if (std::is_same< Number, FNumber >::value) {
       std::size_t num = i - 1;
       for (i = 0; i < num; i++) {
         mpq_t _infQ, _supQ, sum, t;
@@ -1215,9 +1223,10 @@ public:
         mpq_div(t, sum, t);
         mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
         /*
-       *1. 将区间两端类型从mpfr转变成mpq
-       *2. 再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
-       *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
+         *1. 将区间两端类型从mpfr转变成mpq
+         *2.
+         *再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
+         *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
          */
       }
     }
@@ -1319,6 +1328,7 @@ public:
     } else {
       std::lock_guard< std::mutex > lock(this->_mutex);
       ap_tcons0_array_t csts = ap_tcons0_array_make(1);
+      /// \todo bugs here!!!
       csts.p[0] =
           ap_tcons0_make(AP_CONS_EQMOD,
                          this->to_ap_expr(VariableExprT(x) - value.residue()),
