@@ -1,11 +1,7 @@
-//
-// Created by zou on 1/13/24.
-//
-
 /*******************************************************************************
  *
  * \file
- * \brief Numeric abstract domain used by the value analysis
+ * \brief Implement make_(top|bottom)_numeric_apron_ppl_polyhedra
  *
  * Author: Maxime Arthaud
  *
@@ -45,42 +41,46 @@
  *
  ******************************************************************************/
 
-#pragma once
+#ifdef HAS_APRON
+#include <ikos/core/domain/machine_int/numeric_domain_adapter.hpp>
+#include <ikos/core/domain/numeric/apron.hpp>
+#endif
 
-#include <ikos/core/domain/numeric/polymorphic_domain.hpp>  // Warnings
-
-#include <ikos/analyzer/analysis/option.hpp>
-#include <ikos/analyzer/analysis/variable.hpp>
+#include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
+#include <ikos/analyzer/exception.hpp>
 
 namespace ikos {
 namespace analyzer {
 namespace value {
 
-/// \brief Floating point abstract domain used for the value analysis
-using NumericAbstractDomain =
-    core::numeric::PolymorphicDomain< FNumber, Variable* >;
+#ifdef HAS_APRON
+namespace {
 
-/// \name Constructors of floating point abstract domains
-/// @{
+using RuntimeNumericDomain = core::numeric::
+    ApronDomain< core::numeric::apron::PplPolyhedra, ZNumber, Variable* >;
+using RuntimeMachineIntDomain =
+    core::machine_int::NumericDomainAdapter< Variable*, RuntimeNumericDomain >;
 
-NumericAbstractDomain make_top_numeric_interval();
-NumericAbstractDomain make_bottom_numeric_interval();
+} // end anonymous namespace
+#endif
 
-NumericAbstractDomain make_top_numeric_apron_polka_polyhedra();
-NumericAbstractDomain make_bottom_numeric_apron_polka_polyhedra();
+NumericAbstractDomain make_top_machine_int_apron_ppl_polyhedra() {
+#ifdef HAS_APRON
+  return MachineIntAbstractDomain(
+      RuntimeMachineIntDomain(RuntimeNumericDomain::top()));
+#else
+  throw LogicError("ikos was compiled without apron support");
+#endif
+}
 
-NumericAbstractDomain make_top_numeric_apron_ppl_polyhedra();
-NumericAbstractDomain make_bottom_numeric_apron_ppl_polyhedra();
-
-/// @}
-
-/// \brief Create the top floating point abstract value of the given choice
-NumericAbstractDomain make_top_numeric_abstract_value(
-    MachineIntDomainOption domain);
-
-/// \brief Create the bottom floating point abstract value of the given choice
-NumericAbstractDomain make_bottom_numeric_abstract_value(
-    MachineIntDomainOption domain);
+MachineIntAbstractDomain make_bottom_machine_int_apron_ppl_polyhedra() {
+#ifdef HAS_APRON
+  return MachineIntAbstractDomain(
+      RuntimeMachineIntDomain(RuntimeNumericDomain::bottom()));
+#else
+  throw LogicError("ikos was compiled without apron support");
+#endif
+}
 
 } // end namespace value
 } // end namespace analyzer

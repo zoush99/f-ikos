@@ -39,8 +39,8 @@ BOOST_AUTO_TEST_CASE(test_constructor) {
 }
 
 BOOST_AUTO_TEST_CASE(test_f_abstract_constructor) {
-  float x = 1.2f;
-  double y = 1.2;
+  float x = 0.1f;
+  double y = 0.1;
   std::cout.precision(30);
   std::cout<<x<<std::endl;
   std::cout<<y<<std::endl;

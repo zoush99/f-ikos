@@ -48,6 +48,8 @@
 #include <mutex>
 #include <type_traits>
 #include <vector>
+#include <utility> // By zoush99
+#include <unordered_map>  // By zoush99
 
 #include <ap_global0.h>
 #include <ap_pkgrid.h>
@@ -69,6 +71,49 @@
 namespace ikos {
 namespace core {
 namespace numeric {
+/*
+
+namespace detail{
+
+// 定义稀疏矩阵
+typedef std::unordered_map<std::pair<int, int>, mpq_class> SparseMatrix;
+
+// 添加非零元素到稀疏矩阵
+void addElement(SparseMatrix& matrix, int row, int col, mpq_class& value) {
+  matrix[std::make_pair(row, col)] = value;
+}
+
+// 获取稀疏矩阵的元素值
+double getElement(const SparseMatrix& matrix, int row, int col) {
+  auto it = matrix.find(std::make_pair(row, col));
+  if (it != matrix.end()) {
+    return it->second;
+  } else {
+    return 0.0; // 如果该位置没有元素，则返回0
+  }
+}
+
+int main() {
+  // 创建稀疏矩阵并添加元素
+  SparseMatrix matrix;
+  addElement(matrix, 0, 0, 3);
+  addElement(matrix, 0, 1, 2);
+  addElement(matrix, 1, 0, 1);
+  addElement(matrix, 1, 1, 2);
+
+  // 打印稀疏矩阵的内容
+  for (int i = 0; i < 2; ++i) {
+    for (int j = 0; j < 2; ++j) {
+      std::cout << getElement(matrix, i, j) << " ";
+    }
+    std::cout << std::endl;
+  }
+
+  return 0;
+}
+
+}
+*/
 
 namespace apron {
 
@@ -176,22 +221,35 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
 /// zoush99, FNumber -> [mpfr_t,mpfr_t] -> ap_texpr0_t
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-  mpfr_t _f1,_f2;
+  mpfr_t _f1, _f2;
+  ap_texpr0_t* result = nullptr;
   if (f.bit_width() == 32) { // fl
     mpfr_init2(_f1, 32);
     mpfr_init2(_f2, 32);
-    mpfr_set_flt(_f1, ikos::core::detail::find_next_value_down(f.value< float >()), MPFR_RNDN);
-    mpfr_set_flt(_f2, ikos::core::detail::find_next_value_up(f.value< float >()), MPFR_RNDN);
-    return ap_texpr0_cst_interval_mpfr(_f1,_f2);
+    mpfr_set_flt(_f1,
+                 ikos::core::detail::find_next_value_down(f.value< float >()),
+                 MPFR_RNDN);
+    mpfr_set_flt(_f2,
+                 ikos::core::detail::find_next_value_up(f.value< float >()),
+                 MPFR_RNDN);
+    result = ap_texpr0_cst_interval_mpfr(_f1, _f2);
   } else if (f.bit_width() == 64) { // do
     mpfr_init2(_f1, 64);
     mpfr_init2(_f2, 64);
-    mpfr_set_flt(_f1, ikos::core::detail::find_next_value_down(f.value< double >()), MPFR_RNDN);
-    mpfr_set_flt(_f2, ikos::core::detail::find_next_value_up(f.value< double >()), MPFR_RNDN);
-    return ap_texpr0_cst_interval_mpfr(_f1,_f2);
+    mpfr_set_d(_f1,
+               ikos::core::detail::find_next_value_down(f.value< double >()),
+               MPFR_RNDN);
+    mpfr_set_d(_f2,
+               ikos::core::detail::find_next_value_up(f.value< double >()),
+               MPFR_RNDN);
+    result = ap_texpr0_cst_interval_mpfr(_f1, _f2);
   } else {
     ikos_unreachable("unreachable");
   }
+  mpfr_clear(_f1);
+  mpfr_clear(_f2);
+
+  return result;
 }
 
 /// \brief Conversion from ap_scalar_t* to ikos::ZNumber/QNumber
@@ -959,7 +1017,7 @@ public:
   }
 
   void assign(VariableRef x, const Number& n) override {
-      this->assign(x, LinearExpressionT(n));
+    this->assign(x, LinearExpressionT(n));
   }
 
   void assign(VariableRef x, VariableRef y) override {
@@ -1008,7 +1066,7 @@ private:
              ap_texpr0_t* left,
              ap_texpr0_t* right) {
     ap_texpr0_t* t;
-    apron::dataty d=apron::Znumber;
+    apron::dataty d = apron::Znumber;
 
     if (std::is_same< Number, FNumber >::value) { /// \todo
       d = apron::Ffnumber;
@@ -1140,16 +1198,30 @@ public:
 
     /// \todo Add interval linearization method in this place. By zoush99
     /// _begin
-    // ap_csts
-    i = 0;
-    for (const LinearConstraintT& cst : csts) {
-      ap_csts.p[i++] = this->to_ap_constraint(cst);
-//      ap_csts.p[i++].texpr0->val.cst.val.interval->inf;
-      /*1. 将区间两端类型从mpfr转变成mpq
+    if (std::is_same<Number,FNumber>::value) {
+      std::size_t num = i - 1;
+      for (i = 0; i < num; i++) {
+        mpq_t _infQ, _supQ, sum, t;
+        mpq_init(_infQ);
+        mpq_init(_supQ);
+        mpq_init(sum);
+        mpq_init(t);
+        mpq_set_d(t, 2);
+        mpfr_get_q(_infQ,
+                   ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpfr);
+        mpfr_get_q(_supQ,
+                   ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpfr);
+        mpq_add(sum, _infQ, _supQ);
+        mpq_div(t, sum, t);
+        mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
+        /*
+       *1. 将区间两端类型从mpfr转变成mpq
        *2. 再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
        *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
-       * */
+         */
+      }
     }
+
     /// _end
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
 

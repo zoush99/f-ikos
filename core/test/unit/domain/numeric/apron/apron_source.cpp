@@ -21,7 +21,15 @@ using IntervalDomain = ikos::core::numeric::IntervalDomain< ZNumber, Variable >;
 using FNumber = ikos::core::FNumber;
 
 BOOST_AUTO_TEST_CASE(is_top_and_bottom) {
-  FNumber _f(0.1f);
-  ap_texpr0_t* _a = ikos::core::numeric::apron::to_ap_expr(_f);
+  float f=0.1f;
+  double g=0.1;
+  FNumber _f(f);
+  FNumber _g(g);
+//  std::cout.precision(30);
+//  std::cout<<g<<std::endl;
+  ap_texpr0_t* _a(ikos::core::numeric::apron::to_ap_expr(_f));
   ap_texpr0_print(_a, nullptr);
+  std::cout<<std::endl;
+  ap_texpr0_t* _b(ikos::core::numeric::apron::to_ap_expr(_g));
+  ap_texpr0_print(_b, nullptr);
 }
