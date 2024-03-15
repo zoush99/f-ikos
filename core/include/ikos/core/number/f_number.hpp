@@ -46,6 +46,7 @@ public:
     this->_sign = Signedness::Signed;
   }
 
+
   /// \brief Create a floating point number from a type
   template <
       typename T,
@@ -446,6 +447,9 @@ private:
 
 public:
   // friends
+  friend class QNumber;
+
+  friend class ZNumber;
 
   friend FNumber add(const FNumber& lhs, const FNumber& rhs);
 

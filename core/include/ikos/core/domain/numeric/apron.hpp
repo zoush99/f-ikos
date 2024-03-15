@@ -174,17 +174,21 @@ inline ap_scalar_t* to_ap_scalar(const QNumber& n) {
 /// \brief Conversion from ikos::FNumber to ap_scalar_t*
 inline ap_scalar_t* to_ap_scalar(const FNumber& f) {
   mpfr_t _f;
+  ap_scalar_t* _r;
   if (f.bit_width() == 32) { // fl
     mpfr_init2(_f, 32);
     mpfr_set_flt(_f, f.value< float >(), MPFR_RNDN);
-    return ap_scalar_alloc_set_mpfr(_f);
+    _r = ap_scalar_alloc_set_mpfr(_f);
   } else if (f.bit_width() == 64) { // do
     mpfr_init2(_f, 64);
     mpfr_set_d(_f, f.value< double >(), MPFR_RNDN);
-    return ap_scalar_alloc_set_mpfr(_f);
+    _r = ap_scalar_alloc_set_mpfr(_f);
   } else {
+    _r = NULL;
     ikos_unreachable("unreachable");
   }
+  mpfr_clear(_f);
+  return _r;
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_texpr0_t*
@@ -198,25 +202,6 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   mpq_class e(q.mpq());
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
-
-/// \todo
-/// ap_texpr0_cst_interval_mpfr
-/// zoush99
-/// \brief Conversion from ikos::FNumber to ap_texpr0_t*
-/*inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-  mpfr_t _f;
-  if (f.bit_width() == 32) { // fl
-    mpfr_init2(_f, 32);
-    mpfr_set_flt(_f, f.value< float >(), MPFR_RNDN);
-    return ap_texpr0_cst_scalar_mpfr(_f);
-  } else if (f.bit_width() == 64) { // do
-    mpfr_init2(_f, 64);
-    mpfr_set_d(_f, f.value< double >(), MPFR_RNDN);
-    return ap_texpr0_cst_scalar_mpfr(_f);
-  } else {
-    ikos_unreachable("unreachable");
-  }
-}*/
 
 /// zoush99, FNumber -> [mpfr_t,mpfr_t] -> ap_texpr0_t
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
@@ -1132,37 +1117,33 @@ public:
       return;
     }
 
-      if (is_supported(op)) {
-        std::lock_guard< std::mutex > lock(this->_mutex);
-        this->apply(op, x, this->to_ap_expr(y), apron::to_ap_expr(z));
-        if (std::is_same<Number,FNumber>::value){
-          return;
-        }
+    if (is_supported(op)) {
+      std::lock_guard< std::mutex > lock(this->_mutex);
+      this->apply(op, x, this->to_ap_expr(y), apron::to_ap_expr(z));
+      if (std::is_same< Number, FNumber >::value) {
+        return;
       }
-      else if (op == BinaryOperator::Mod) {
-        // Optimized version, because mod is heavily used on machine integers
-        if (z == 0) {
-          this->set_to_bottom();
-          return;
-        }
+    } else if (op == BinaryOperator::Mod) {
+      // Optimized version, because mod is heavily used on machine integers
+      if (z == 0) {
+        this->set_to_bottom();
+        return;
+      }
 
-        IntervalT v_y = this->to_interval(y);
-        /// \todo bugs here!!!
-        boost::optional< Number > n = v_y.mod_to_sub(z);
+      IntervalT v_y = this->to_interval(y);
+      /// \todo bugs here!!!
+      boost::optional< Number > n = v_y.mod_to_sub(z);
 
-        if (n) {
-          // Equivalent to x = y - n
-          this->apply(BinaryOperator::Sub, x, y, *n);
-        } else {
-          this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - 1)));
-        }
+      if (n) {
+        // Equivalent to x = y - n
+        this->apply(BinaryOperator::Sub, x, y, *n);
+      } else {
+        this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - 1)));
       }
-      else {
-        this->set(x,
-                  apply_bin_operator(op, this->to_interval(y), IntervalT(z)));
-      }
+    } else {
+      this->set(x, apply_bin_operator(op, this->to_interval(y), IntervalT(z)));
+    }
   }
-
 
   void apply(BinaryOperator op,
              VariableRef x,

@@ -287,6 +287,7 @@ struct MpzTo< long long >
 
 /// \brief Class for unlimited precision integers
 class ZNumber {
+
 private:
   mpz_class _n;
 
@@ -664,6 +665,8 @@ public:
   friend std::istream& operator>>(std::istream& i, ZNumber& n);
 
   friend class QNumber;
+
+  friend class FNumber;
 
   friend ZNumber single_mask(const ZNumber& size);
 
