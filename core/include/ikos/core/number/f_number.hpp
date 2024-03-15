@@ -7,7 +7,7 @@
 #include <ikos/core/number/compatibility.hpp>
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
-#include <ikos/core/number/z_number.hpp>
+//#include <ikos/core/number/z_number.hpp>
 #include <ikos/core/support/compiler.hpp>
 
 namespace ikos {
@@ -82,6 +82,7 @@ public:
       this->_bit_width = 64;
     }
   }
+/*
 
   /// \brief Create a floating point number from a ZNumber
   FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
@@ -108,6 +109,7 @@ public:
       this->_bit_width = 64;
     }
   }
+*/
 
   /// \brief Create a floating point number from a type
   template <

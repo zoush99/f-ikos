@@ -58,6 +58,7 @@
 #include <boost/functional/hash.hpp>
 
 #include <ikos/core/number/exception.hpp>
+#include <ikos/core/number/f_number.hpp> // By zoush99
 #include <ikos/core/number/supported_integral.hpp>
 #include <ikos/core/support/assert.hpp>
 
@@ -287,7 +288,6 @@ struct MpzTo< long long >
 
 /// \brief Class for unlimited precision integers
 class ZNumber {
-
 private:
   mpz_class _n;
 
@@ -341,6 +341,10 @@ public:
   // TODO(marthaud): Add noexcept when mpz_class(mpz_class&&) becomes noexcept
   ZNumber(ZNumber&&) = default;
 
+  /// By zoush99
+  /// \brief Create a ZNumber from a FNumber type
+  ZNumber(const FNumber&) : _n(1) {}
+
   /// \brief Create a ZNumber from a mpz_class
   explicit ZNumber(const mpz_class& n) : _n(n) {}
 
@@ -364,6 +368,13 @@ public:
 
   /// \brief Move assignment
   ZNumber& operator=(ZNumber&&) noexcept = default;
+
+  /// By zoush99
+  /// \brief Copy assignment from a FNumber
+  ZNumber& operator=(const FNumber&) {
+    this->_n = 1;
+    return *this;
+  }
 
   /// \brief Assignment for integral types
   template < typename T,
@@ -645,6 +656,10 @@ public:
     ikos_assert_msg(detail::MpzFits< T >()(this->_n), "does not fit");
     return detail::MpzTo< T >()(this->_n);
   }
+
+  /// By zoush99
+  /// \brief Return the FNumber from the ZNumber
+  FNumber fromZNumber() const { return FNumber(this->to< long long >()); }
 
   /// \brief Return a string representation of the ZNumber in the given base
   ///

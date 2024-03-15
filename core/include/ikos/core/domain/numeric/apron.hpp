@@ -1131,14 +1131,13 @@ public:
       }
 
       IntervalT v_y = this->to_interval(y);
-      /// \todo bugs here!!!
       boost::optional< Number > n = v_y.mod_to_sub(z);
 
       if (n) {
         // Equivalent to x = y - n
         this->apply(BinaryOperator::Sub, x, y, *n);
-      } else {
-        this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - 1)));
+      } else {  /// By zoush99, 1 -> Number(1)
+        this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - Number(1))));
       }
     } else {
       this->set(x, apply_bin_operator(op, this->to_interval(y), IntervalT(z)));

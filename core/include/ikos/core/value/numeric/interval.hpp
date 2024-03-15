@@ -370,7 +370,9 @@ public:
       return boost::none;
     }
 
-    return lb - mod_lb;
+    /// \todo bugs here!!!
+    /// In template: no viable conversion from 'ikos::core::ZNumber' to 'ikos::core::FNumber'
+    return (lb - mod_lb).fromZNumber();
   }
 
   /// \brief If the interval is a singleton [n, n], return n, otherwise return
