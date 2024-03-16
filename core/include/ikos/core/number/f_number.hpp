@@ -7,6 +7,8 @@
 #include <ikos/core/number/compatibility.hpp>
 #include <ikos/core/number/signedness.hpp>
 #include <ikos/core/number/supported_integralorfloat.hpp>
+#include <boost/functional/hash.hpp>
+
 //#include <ikos/core/number/z_number.hpp>
 #include <ikos/core/support/compiler.hpp>
 

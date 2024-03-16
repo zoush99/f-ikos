@@ -662,7 +662,6 @@ inline std::ostream& operator<<(std::ostream& o, const FRINumber& n) {
 }
 
 /// @}
-
 /// \brief Return the hash of a FNumber
 inline std::size_t hash_value(const FRINumber& n) {
   std::size_t hash = 0;
