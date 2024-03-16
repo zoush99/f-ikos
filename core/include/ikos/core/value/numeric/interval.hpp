@@ -370,9 +370,8 @@ public:
       return boost::none;
     }
 
-    /// \todo bugs here!!!
-    /// In template: no viable conversion from 'ikos::core::ZNumber' to 'ikos::core::FNumber'
-    return (lb - mod_lb).fromZNumber();
+    /// \todo
+    return Number((lb - mod_lb).toFNumber());
   }
 
   /// \brief If the interval is a singleton [n, n], return n, otherwise return

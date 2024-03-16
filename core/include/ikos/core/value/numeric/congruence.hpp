@@ -872,6 +872,21 @@ public:
 
   ~Congruence() override = default;
 
+  /// By zoush99
+  /// @{
+  /// \brief Return the modulus
+  const FNumber& modulus() const {
+    ikos_assert(!this->is_bottom());
+    return FNumber(1);
+  }
+
+  /// \brief Return the residue
+  const FNumber& residue() const {
+    ikos_assert(!this->is_bottom());
+    return FNumber(0);
+  }
+  /// }@
+
   void normalize() override { this->_cst.normalize(); }
 
   bool is_bottom() const override { return this->_cst.is_bottom(); }

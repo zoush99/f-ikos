@@ -1309,6 +1309,7 @@ public:
       std::lock_guard< std::mutex > lock(this->_mutex);
       ap_tcons0_array_t csts = ap_tcons0_array_make(1);
       /// \todo bugs here!!!
+      /// In template: no member named 'residue' in 'ikos::core::numeric::Congruence<ikos::core::FNumber>'
       csts.p[0] =
           ap_tcons0_make(AP_CONS_EQMOD,
                          this->to_ap_expr(VariableExprT(x) - value.residue()),

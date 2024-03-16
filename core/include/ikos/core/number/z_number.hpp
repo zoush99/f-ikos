@@ -341,9 +341,9 @@ public:
   // TODO(marthaud): Add noexcept when mpz_class(mpz_class&&) becomes noexcept
   ZNumber(ZNumber&&) = default;
 
-  /// By zoush99
+  /// By zoush99, FNumber -> int -> ZNumber
   /// \brief Create a ZNumber from a FNumber type
-  ZNumber(const FNumber&) : _n(1) {}
+  ZNumber(const FNumber& n) : _n(n.value<int>()) {}
 
   /// \brief Create a ZNumber from a mpz_class
   explicit ZNumber(const mpz_class& n) : _n(n) {}
@@ -369,10 +369,10 @@ public:
   /// \brief Move assignment
   ZNumber& operator=(ZNumber&&) noexcept = default;
 
-  /// By zoush99
+  /// By zoush99, FNumebr -> int -> ZNumber
   /// \brief Copy assignment from a FNumber
-  ZNumber& operator=(const FNumber&) {
-    this->_n = 1;
+  ZNumber& operator=(const FNumber& n) {
+    this->_n = n.value<int >();
     return *this;
   }
 
@@ -642,6 +642,15 @@ public:
   /// \brief Get the internal representation
   const mpz_class& mpz() const { return this->_n; }
 
+/*  /// \todo By zoush99
+  /// \brief Return a floating point data type of a FNumber
+  template <
+      typename T,
+      class = std::enable_if_t< IsSupportedIntegral< T >::value > >
+  T value() const {
+    return this->_n.get_si();
+  }*/
+
   /// \brief Return true if the number fits in the given integer type
   template < typename T,
              class = std::enable_if_t< IsSupportedIntegral< T >::value > >
@@ -657,9 +666,10 @@ public:
     return detail::MpzTo< T >()(this->_n);
   }
 
-  /// By zoush99
+  /// By zoush99, ZNumber -> int -> FNumber
   /// \brief Return the FNumber from the ZNumber
-  FNumber fromZNumber() const { return FNumber(this->to< long long >()); }
+  FNumber toFNumber() const { return FNumber(this->to<int>()); }
+//    FNumber toFNumber() const { return this->to<int>(); }
 
   /// \brief Return a string representation of the ZNumber in the given base
   ///

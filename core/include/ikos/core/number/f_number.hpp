@@ -46,7 +46,6 @@ public:
     this->_sign = Signedness::Signed;
   }
 
-
   /// \brief Create a floating point number from a type
   template <
       typename T,
