@@ -938,7 +938,7 @@ public:
 
   void operator-=(const Congruence& other) { this->_cst -= other._cst; }
 
-  /// \brief By zoush99
+  /// By zoush99
   const FConstant& to_constant() const { return this->_cst; }
 
   boost::optional< FNumber > singleton() const {
