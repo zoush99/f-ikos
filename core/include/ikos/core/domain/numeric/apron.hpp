@@ -47,8 +47,6 @@
 #include <memory>
 #include <mutex>
 #include <type_traits>
-#include <unordered_map> // By zoush99
-#include <utility>       // By zoush99
 #include <vector>
 
 #include <ap_global0.h>
@@ -71,49 +69,6 @@
 namespace ikos {
 namespace core {
 namespace numeric {
-/*
-
-namespace detail{
-
-// 定义稀疏矩阵
-typedef std::unordered_map<std::pair<int, int>, mpq_class> SparseMatrix;
-
-// 添加非零元素到稀疏矩阵
-void addElement(SparseMatrix& matrix, int row, int col, mpq_class& value) {
-  matrix[std::make_pair(row, col)] = value;
-}
-
-// 获取稀疏矩阵的元素值
-double getElement(const SparseMatrix& matrix, int row, int col) {
-  auto it = matrix.find(std::make_pair(row, col));
-  if (it != matrix.end()) {
-    return it->second;
-  } else {
-    return 0.0; // 如果该位置没有元素，则返回0
-  }
-}
-
-int main() {
-  // 创建稀疏矩阵并添加元素
-  SparseMatrix matrix;
-  addElement(matrix, 0, 0, 3);
-  addElement(matrix, 0, 1, 2);
-  addElement(matrix, 1, 0, 1);
-  addElement(matrix, 1, 1, 2);
-
-  // 打印稀疏矩阵的内容
-  for (int i = 0; i < 2; ++i) {
-    for (int j = 0; j < 2; ++j) {
-      std::cout << getElement(matrix, i, j) << " ";
-    }
-    std::cout << std::endl;
-  }
-
-  return 0;
-}
-
-}
-*/
 
 namespace apron {
 
@@ -1183,6 +1138,11 @@ public:
     for (const LinearConstraintT& cst : csts) {
       ap_csts.p[i++] = this->to_ap_constraint(cst);
     }
+    /// \todo Abstract representation of the relationship between variables in
+    /// an expression. By zoush99
+    /// _begin
+
+    /// _end
 
     /// \todo Add interval linearization method in this place. By zoush99
     /// _begin
