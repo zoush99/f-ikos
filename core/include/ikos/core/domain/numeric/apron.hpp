@@ -62,6 +62,7 @@
 #include <ikos/core/linear_constraint.hpp>
 #include <ikos/core/linear_expression.hpp>
 #include <ikos/core/number.hpp>
+#include <ikos/core/number/f_relational_interval_number.hpp> // By zoush99
 #include <ikos/core/support/assert.hpp>
 #include <ikos/core/value/numeric/congruence.hpp>
 #include <ikos/core/value/numeric/interval.hpp>
@@ -328,6 +329,71 @@ inline ap_manager_t* alloc_domain_manager(Domain d) {
   }
 }
 
+/// \brief Get the minimum of two element. By zoush99
+const __mpq_struct* min_mpq(const mpq_t a, const mpq_t b) {
+  if (mpq_cmp(a, b) <= 0) {
+    return a;
+  } else {
+    return b;
+  }
+}
+
+/// \brief Get the maximum of two element. By zoush99
+const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
+  if (mpq_cmp(a, b) >= 0) {
+    return a;
+  } else {
+    return b;
+  }
+}
+
+/// \todo Abstract representation of the relationship between variables in
+/// an expression. By zoush99
+template < typename Number, typename VariableRef >
+void abstractExpr(ap_tcons0_array_t ap_csts[], std::size_t num) {
+  std::size_t i = 0;
+  mpq_t _infQ, _supQ, lhs, rhs, t;
+  for (i = 0; i < num; i++) {
+    mpq_inits(_infQ, _supQ, lhs, rhs, t);
+    mpq_set_d(t, 2);
+    mpq_set_d(lhs, RelativeError.floatlRE); // 1 - pow(2, -23);
+    mpq_set_d(rhs, RelativeError.floatrRE); // 1 + pow(2, -23);
+    mpq_set(_infQ, ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq);
+    mpq_set(_supQ, ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq);
+    mpq_set(ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq,
+            min_mpq(min_mpq(min_mpq(lhs, rhs), _infQ), _supQ)); // min
+    mpq_set(ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq,
+            max_mpq(max_mpq(max_mpq(lhs, rhs), _infQ), _supQ)); // max
+
+    //    mpq_add(sum, _infQ, _supQ);
+    //    mpq_div(t, sum, t);
+    //    mpq_set(ap_csts->p[i].texpr0->val.cst.val.scalar->val.mpq, t);
+  }
+  mpq_clears(_infQ, _supQ, lhs, rhs, t);
+}
+
+/// \todo Add interval linearization method in this place. By zoush99
+template < typename Number, typename VariableRef >
+void intervalLinearization(ap_tcons0_array_t ap_csts[], std::size_t num) {
+  std::size_t i = 0;
+  mpq_t _infQ, _supQ, sum, t;
+  for (i = 0; i < num; i++) {
+    mpq_inits(_infQ,_supQ,sum,t);
+    mpq_set_d(t, 2);
+    mpq_set(_infQ, ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq);
+    mpq_set(_supQ, ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq);
+    mpq_add(sum, _infQ, _supQ);
+    mpq_div(t, sum, t);
+    mpq_set(ap_csts->p[i].texpr0->val.cst.val.scalar->val.mpq, t);
+    /*
+     *1. 将区间两端类型从mpq转变成mpq
+     *2.
+     *再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
+     *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
+     */
+  }
+  mpq_clears(_infQ, _supQ, sum, t);
+}
 } // end namespace apron
 
 /// \brief Wrapper for APRON abstract domains
@@ -1091,7 +1157,7 @@ public:
       if (n) {
         // Equivalent to x = y - n
         this->apply(BinaryOperator::Sub, x, y, *n);
-      } else {  /// By zoush99, 1 -> Number(1)
+      } else { /// By zoush99, 1 -> Number(1)
         this->set(x, IntervalT(BoundT(0), BoundT(abs(z) - Number(1))));
       }
     } else {
@@ -1138,40 +1204,46 @@ public:
     for (const LinearConstraintT& cst : csts) {
       ap_csts.p[i++] = this->to_ap_constraint(cst);
     }
-    /// \todo Abstract representation of the relationship between variables in
-    /// an expression. By zoush99
-    /// _begin
 
-    /// _end
-
-    /// \todo Add interval linearization method in this place. By zoush99
-    /// _begin
+    size_t num = i - 1;
+    /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
-      std::size_t num = i - 1;
-      for (i = 0; i < num; i++) {
-        mpq_t _infQ, _supQ, sum, t;
-        mpq_init(_infQ);
-        mpq_init(_supQ);
-        mpq_init(sum);
-        mpq_init(t);
-        mpq_set_d(t, 2);
-        mpfr_get_q(_infQ,
-                   ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpfr);
-        mpfr_get_q(_supQ,
-                   ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpfr);
-        mpq_add(sum, _infQ, _supQ);
-        mpq_div(t, sum, t);
-        mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
-        /*
+      /// \todo Abstract representation of the relationship between variables in
+      /// an expression. By zoush99
+
+      /// _begin
+
+      /// _end
+
+      /// \todo Add interval linearization method in this place. By zoush99
+      /// _begin
+      apron::intervalLinearization< Number, VariableRef >(ap_csts, num);
+      /*std::size_t num = i - 1;
+           mpq_t _infQ, _supQ, sum, t;
+           for (i = 0; i < num; i++) {
+             mpq_init(_infQ);
+             mpq_init(_supQ);
+             mpq_init(sum);
+             mpq_init(t);
+             mpq_set_d(t, 2);
+             mpfr_get_q(_infQ,
+                        ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpfr);
+             mpfr_get_q(_supQ,
+                        ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpfr);
+             mpq_add(sum, _infQ, _supQ);
+             mpq_div(t, sum, t);
+             mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
+             *//*
          *1. 将区间两端类型从mpfr转变成mpq
          *2.
          *再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
          *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
-         */
+         *//*
       }
-    }
+      mpq_clears(_infQ, _supQ, sum, t);*/
 
-    /// _end
+      /// _end
+    }
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
 
     // Improve the precision
@@ -1269,7 +1341,8 @@ public:
       std::lock_guard< std::mutex > lock(this->_mutex);
       ap_tcons0_array_t csts = ap_tcons0_array_make(1);
       /// \todo bugs here!!!
-      /// In template: no member named 'residue' in 'ikos::core::numeric::Congruence<ikos::core::FNumber>'
+      /// In template: no member named 'residue' in
+      /// 'ikos::core::numeric::Congruence<ikos::core::FNumber>'
       csts.p[0] =
           ap_tcons0_make(AP_CONS_EQMOD,
                          this->to_ap_expr(VariableExprT(x) - value.residue()),

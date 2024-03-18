@@ -18,10 +18,6 @@ namespace {
 
 using RuntimeNumericDomain = core::numeric::
     ApronDomain< core::numeric::apron::PplPolyhedra, FNumber, Variable* >;
-// using RuntimeMachineIntDomain =
-//     core::machine_int::NumericDomainAdapter< Variable*, RuntimeNumericDomain
-//     >;
-
 } // end anonymous namespace
 #endif
 
