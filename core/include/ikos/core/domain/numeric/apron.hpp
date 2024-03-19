@@ -351,7 +351,6 @@ const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
 /// \todo Abstract representation of the relationship between variables in
 /// an expression. By zoush99
 //template < typename Number, typename VariableRef >
-/*
 void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_t _infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr;
   mpq_inits(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
@@ -367,9 +366,9 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
   ap_interval_t* exprB_expr =
       expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
 
-  if (expr->discr == AP_TEXPR_NODE) { // Variable node
+  if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
 
-    if (ap_texpr_is_binop(expr->val.node->op)) { // Binary operators
+    if (expr->val.node->op==AP_TEXPR_MUL) { // MUL: n * x or x * n
 
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
@@ -381,7 +380,9 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
         mpq_set(_infQ, exprB_expr->inf->val.mpq);
         mpq_set(_supQ, exprB_expr->sup->val.mpq);
-      } else {
+      }
+
+      else {
         ikos_unreachable("unreachable");
       }
 
@@ -398,14 +399,15 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
                 max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
       }
 
-      if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+      else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
         mpq_set(exprB_expr->inf->val.mpq,
                 min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
         mpq_set(exprB_expr->sup->val.mpq,
                 max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
+      } else{
+        ikos_unreachable("unreachable");
       }
-
       // Constant term
       mpq_mul(r1, _infQ, lAE);
       mpq_mul(r2, _infQ, rAE);
@@ -426,7 +428,6 @@ if (expr->discr == AP_TEXPR_NODE) {
 }
 
 }
-*/
 
 void abstractExprArr(ap_tcons0_array_t ap_csts[], std::size_t num) {
   std::size_t i = 0;
