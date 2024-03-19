@@ -159,6 +159,7 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
 
+/// \todo bugs here!!!
 /// zoush99, FNumber -> [mpfr_t,mpfr_t] -> ap_texpr0_t
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
@@ -349,9 +350,9 @@ const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
 
 /// \todo Abstract representation of the relationship between variables in
 /// an expression. By zoush99
-template < typename Number, typename VariableRef >
-void abstractExpr(ap_tcons0_array_t ap_csts[], std::size_t num) {
-  std::size_t i = 0;
+//template < typename Number, typename VariableRef >
+/*
+void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_t _infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr;
   mpq_inits(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
   mpq_set_d(lRE, RelativeError.floatlRE); // 1 - pow(2, -23);
@@ -360,73 +361,49 @@ void abstractExpr(ap_tcons0_array_t ap_csts[], std::size_t num) {
   mpq_set_d(rAE, AbsoluteError.floatrAE); //   + pow(2, -149);
   mpq_set_d(_suml, 0);
   mpq_set_d(_sumr, 0);
-  for (i = 0; i < num; i++) {
-    if (ap_csts->p[i].texpr0->discr == AP_TEXPR_NODE) { // Variable node
 
-      if (ap_texpr_is_binop(
-              ap_csts->p[i].texpr0->val.node->op)) { // Binary operators
+  ap_interval_t* exprA_expr =
+      expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
+  ap_interval_t* exprB_expr =
+      expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
 
-        if (ap_csts->p[i].texpr0->val.node->exprA->discr == AP_TEXPR_CST &&
-            ap_csts->p[i].texpr0->val.node->exprB->discr ==
-                AP_TEXPR_DIM) { // n * x
-          mpq_set(_infQ,
-                  ap_csts->p[i]
-                      .texpr0->val.node->exprA->val.cst.val.interval->inf->val
-                      .mpq);
-          mpq_set(_supQ,
-                  ap_csts->p[i]
-                      .texpr0->val.node->exprA->val.cst.val.interval->sup->val
-                      .mpq);
-        }
+  if (expr->discr == AP_TEXPR_NODE) { // Variable node
 
-        else if (ap_csts->p[i].texpr0->val.node->exprA->discr ==
-                       AP_TEXPR_DIM &&
-                   ap_csts->p[i].texpr0->val.node->exprB->discr ==
-                       AP_TEXPR_CST) { // x * n
-          mpq_set(_infQ,
-                  ap_csts->p[i]
-                      .texpr0->val.node->exprB->val.cst.val.interval->inf->val
-                      .mpq);
-          mpq_set(_supQ,
-                  ap_csts->p[i]
-                      .texpr0->val.node->exprB->val.cst.val.interval->sup->val
-                      .mpq);
-        } else {
-          ikos_unreachable("unreachable");
-        }
+    if (ap_texpr_is_binop(expr->val.node->op)) { // Binary operators
 
-        mpq_mul(r1, _infQ, lRE);
-        mpq_mul(r2, _infQ, rRE);
-        mpq_mul(r3, _supQ, rRE);
-        mpq_mul(r4, _supQ, rRE);
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
+        mpq_set(_infQ, exprA_expr->inf->val.mpq);
+        mpq_set(_supQ, exprA_expr->sup->val.mpq);
+      }
 
-        if (ap_csts->p[i].texpr0->val.node->exprA->discr == AP_TEXPR_CST &&
-            ap_csts->p[i].texpr0->val.node->exprB->discr ==
-                AP_TEXPR_DIM) { // n * x
-          mpq_set(ap_csts->p[i]
-                      .texpr0->val.node->exprA->val.cst.val.interval->inf->val
-                      .mpq,
-                  min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
-          mpq_set(ap_csts->p[i]
-                      .texpr0->val.node->exprA->val.cst.val.interval->sup->val
-                      .mpq,
-                  max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
-        }
+      else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
+        mpq_set(_infQ, exprB_expr->inf->val.mpq);
+        mpq_set(_supQ, exprB_expr->sup->val.mpq);
+      } else {
+        ikos_unreachable("unreachable");
+      }
 
-        else if (ap_csts->p[i].texpr0->val.node->exprA->discr == AP_TEXPR_DIM &&
-                 ap_csts->p[i].texpr0->val.node->exprB->discr ==
-                     AP_TEXPR_CST) { // x * n
-          mpq_set(ap_csts->p[i]
-                      .texpr0->val.node->exprB->val.cst.val.interval->inf->val
-                      .mpq,
-                  min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
-          mpq_set(ap_csts->p[i]
-                      .texpr0->val.node->exprB->val.cst.val.interval->sup->val
-                      .mpq,
-                  max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
-        } else{
-          ikos_unreachable("unreachable");
-        }
+      mpq_mul(r1, _infQ, lRE);
+      mpq_mul(r2, _infQ, rRE);
+      mpq_mul(r3, _supQ, rRE);
+      mpq_mul(r4, _supQ, rRE);
+
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
+        mpq_set(exprA_expr->inf->val.mpq,
+                min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
+        mpq_set(exprA_expr->sup->val.mpq,
+                max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
+      }
+
+      if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
+        mpq_set(exprB_expr->inf->val.mpq,
+                min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
+        mpq_set(exprB_expr->sup->val.mpq,
+                max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
       }
 
       // Constant term
@@ -434,17 +411,29 @@ void abstractExpr(ap_tcons0_array_t ap_csts[], std::size_t num) {
       mpq_mul(r2, _infQ, rAE);
       mpq_mul(r3, _supQ, rAE);
       mpq_mul(r4, _supQ, rAE);
-      mpq_add(_suml,_suml,min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
-      mpq_add(_sumr,_suml,max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
+      mpq_add(_suml, _sum->inf->val.mpq, min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
+      mpq_add(_sumr, _sum->sup->val.mpq, max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
+      ap_interval_set_mpq(_sum,_suml,_sumr);
     }
 
-    else if (ap_csts->p[i].texpr0->discr == AP_TEXPR_DIM) { // Constant node
-
-    } else {
-      ikos_unreachable("unreachable");
-    }
   }
-  mpq_clears(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
+
+mpq_clears(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
+
+if (expr->discr == AP_TEXPR_NODE) {
+  abstractExpr(expr->val.node->exprA,_sum);
+  abstractExpr(expr->val.node->exprB,_sum);
+}
+
+}
+*/
+
+void abstractExprArr(ap_tcons0_array_t ap_csts[], std::size_t num) {
+  std::size_t i = 0;
+
+  for (i = 0; i < num; i++) {
+
+  } // end for circulate
 }
 
 /// \todo Add interval linearization method in this place. By zoush99
@@ -685,7 +674,7 @@ private:
     return ap_texpr0_dim(this->var_dim_insert(v));
   }
 
-  /// By zoush99, LinearExpression -> ap_texpr0_t
+  /// By zoush99, LinearExpression -> ap_texpr0_t*
   /// \brief Conversion from LinearExpression to ap_texpr0_t*
   ap_texpr0_t* to_ap_expr(const LinearExpressionT& e) {
     ap_texpr0_t* r = apron::to_ap_expr(e.constant());
@@ -698,8 +687,8 @@ private:
     for (auto it = e.begin(), et = e.end(); it != et; ++it) {
       ap_texpr0_t* term =
           apron::binop_expr< Number >(AP_TEXPR_MUL,
-                                      apron::to_ap_expr(it->second),
-                                      this->to_ap_expr(it->first),
+                                      apron::to_ap_expr(it->second),  // Number -> ap_texpr0_t*
+                                      this->to_ap_expr(it->first),  // VariableRef/LinearExpression -> ap_texpr0_t*
                                       d);
       r = apron::binop_expr< Number >(AP_TEXPR_ADD, r, term, d);
     }
