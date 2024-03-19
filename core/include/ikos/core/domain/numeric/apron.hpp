@@ -352,24 +352,41 @@ const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
 template < typename Number, typename VariableRef >
 void abstractExpr(ap_tcons0_array_t ap_csts[], std::size_t num) {
   std::size_t i = 0;
-  mpq_t _infQ, _supQ, lhs, rhs, t;
+  mpq_t _infQ, _supQ, lRE, rRE,lAE,rAE, r1, r2, r3, r4,_suml,_sumr;
+  mpq_inits(_infQ, _supQ, lRE, rRE,lAE,rAE, r1, r2, r3, r4,_suml,_sumr);
+  mpq_set_d(lRE, RelativeError.floatlRE); // 1 - pow(2, -23);
+  mpq_set_d(rRE, RelativeError.floatrRE); // 1 + pow(2, -23);
+  mpq_set_d(lAE, AbsoluteError.floatlAE); //   - pow(2, -149);
+  mpq_set_d(rAE, AbsoluteError.floatrAE); //   + pow(2, -149);
+  mpq_set_d(_suml,0);
+  mpq_set_d(_sumr,0);
   for (i = 0; i < num; i++) {
-    mpq_inits(_infQ, _supQ, lhs, rhs, t);
-    mpq_set_d(t, 2);
-    mpq_set_d(lhs, RelativeError.floatlRE); // 1 - pow(2, -23);
-    mpq_set_d(rhs, RelativeError.floatrRE); // 1 + pow(2, -23);
-    mpq_set(_infQ, ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq);
-    mpq_set(_supQ, ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq);
-    mpq_set(ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq,
-            min_mpq(min_mpq(min_mpq(lhs, rhs), _infQ), _supQ)); // min
-    mpq_set(ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq,
-            max_mpq(max_mpq(max_mpq(lhs, rhs), _infQ), _supQ)); // max
+    if (ap_csts->p[i].texpr0->discr != AP_TEXPR_CST) { // Not a constant node
+      mpq_set(_infQ, ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq);
+      mpq_set(_supQ, ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq);
+      mpq_mul(r1, _infQ, lRE);
+      mpq_mul(r2, _infQ, rRE);
+      mpq_mul(r3, _supQ, rRE);
+      mpq_mul(r4, _supQ, rRE);
+      mpq_set(ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq,
+              min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
+      mpq_set(ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq,
+              max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
 
-    //    mpq_add(sum, _infQ, _supQ);
-    //    mpq_div(t, sum, t);
-    //    mpq_set(ap_csts->p[i].texpr0->val.cst.val.scalar->val.mpq, t);
+      // Constant term
+      mpq_mul(r1, _infQ, lAE);
+      mpq_mul(r2, _infQ, rAE);
+      mpq_mul(r3, _supQ, rAE);
+      mpq_mul(r4, _supQ, rAE);
+      mpq_add(_suml,_suml,min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
+      mpq_add(_sumr,_suml,max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
+
+      //    mpq_add(sum, _infQ, _supQ);
+      //    mpq_div(t, sum, t);
+      //    mpq_set(ap_csts->p[i].texpr0->val.cst.val.scalar->val.mpq, t);
+    }
   }
-  mpq_clears(_infQ, _supQ, lhs, rhs, t);
+  mpq_clears(_infQ, _supQ, lRE, rRE,lAE,rAE, r1, r2, r3, r4,_suml,_sumr);
 }
 
 /// \todo Add interval linearization method in this place. By zoush99
@@ -378,7 +395,7 @@ void intervalLinearization(ap_tcons0_array_t ap_csts[], std::size_t num) {
   std::size_t i = 0;
   mpq_t _infQ, _supQ, sum, t;
   for (i = 0; i < num; i++) {
-    mpq_inits(_infQ,_supQ,sum,t);
+    mpq_inits(_infQ, _supQ, sum, t);
     mpq_set_d(t, 2);
     mpq_set(_infQ, ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq);
     mpq_set(_supQ, ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq);
