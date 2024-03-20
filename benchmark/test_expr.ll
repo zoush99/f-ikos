@@ -1,4 +1,4 @@
-; ModuleID = '/tmp/ikos-g3hgjo5b/test_expr.pp.bc'
+; ModuleID = '/tmp/ikos-luycv9l0/test_expr.pp.bc'
 source_filename = "test_expr.c"
 target datalayout = "e-m:e-p270:32:32-p271:32:32-p272:64:64-i64:64-f80:128-n8:16:32:64-S128"
 target triple = "x86_64-pc-linux-gnu"
@@ -57,3 +57,25 @@ attributes #1 = { nofree nosync nounwind readnone speculatable willreturn }
 !24 = !DILocalVariable(name: "z", scope: !10, file: !1, line: 4, type: !16)
 !25 = !DILocation(line: 8, column: 13, scope: !10)
 !26 = !DILocation(line: 8, column: 6, scope: !10)
+
+
+AR 
+
+// Bundle
+target-endianness = little-endian
+target-pointer-size = 64 bits
+target-triple = x86_64-pc-linux-gnu
+
+declare double @llvm.fmuladd.f64(double, double, double)
+
+define si32 @main() {
+#1 !entry !exit {
+  double %1 = 0.100001 fmul 0.100001
+  double %2 = 2 fmul 0.100001
+  double %3 = call @llvm.fmuladd.f64(%1, 0.100001, %2)
+  double %4 = %3 fadd 1
+  double %5 = 0.100001 fmul %4
+  si32 %6 = fptosi %5
+  return %6
+}
+}

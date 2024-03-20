@@ -416,6 +416,8 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
       mpq_add(_suml, _sum->inf->val.mpq, min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
       mpq_add(_sumr, _sum->sup->val.mpq, max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
       ap_interval_set_mpq(_sum,_suml,_sumr);
+
+      return;
     } // end expr->val.node->op==AP_TEXPR_MUL
 
     else if (expr->val.node->op==AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
