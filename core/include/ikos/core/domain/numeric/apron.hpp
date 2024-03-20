@@ -462,37 +462,33 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
   }
 
 mpq_clears(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
+
 } // end function abstractExpr
 
-void abstractExprArr(ap_tcons0_array_t ap_csts[], std::size_t num) {
+void abstractExprArr(ap_tcons0_array_t ap_csts, std::size_t num) {
   std::size_t i = 0;
-
   for (i = 0; i < num; i++) {
-
+    ap_interval_t* _sum;
+    ap_interval_set_double(_sum,0,0);
+    abstractExpr(ap_csts.p[i].texpr0,_sum);
   } // end for circulate
 }
 
 /// \todo Add interval linearization method in this place. By zoush99
 template < typename Number, typename VariableRef >
-void intervalLinearization(ap_tcons0_array_t ap_csts[], std::size_t num) {
+void intervalLinearization(ap_tcons0_array_t ap_csts, std::size_t num) {
   std::size_t i = 0;
-  mpq_t _infQ, _supQ, sum, t;
+  mpq_t _infQ, _supQ, _sum, t;
   for (i = 0; i < num; i++) {
-    mpq_inits(_infQ, _supQ, sum, t);
+    mpq_inits(_infQ, _supQ, _sum, t);
     mpq_set_d(t, 2);
-    mpq_set(_infQ, ap_csts->p[i].texpr0->val.cst.val.interval->inf->val.mpq);
-    mpq_set(_supQ, ap_csts->p[i].texpr0->val.cst.val.interval->sup->val.mpq);
-    mpq_add(sum, _infQ, _supQ);
-    mpq_div(t, sum, t);
-    mpq_set(ap_csts->p[i].texpr0->val.cst.val.scalar->val.mpq, t);
-    /*
-     *1. 将区间两端类型从mpq转变成mpq
-     *2.
-     *再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
-     *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
-     */
+    mpq_set(_infQ, ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpq);
+    mpq_set(_supQ, ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpq);
+    mpq_add(_sum, _infQ, _supQ);
+    mpq_div(t, _sum, t);
+    mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
   }
-  mpq_clears(_infQ, _supQ, sum, t);
+  mpq_clears(_infQ, _supQ, _sum, t);
 }
 } // end namespace apron
 
@@ -1312,7 +1308,7 @@ public:
       /// an expression. By zoush99
 
       /// _begin
-
+      apron::abstractExprArr(ap_csts,num);
       /// _end
 
       /// \todo Add interval linearization method in this place. By zoush99
