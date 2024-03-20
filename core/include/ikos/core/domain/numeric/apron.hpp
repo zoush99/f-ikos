@@ -482,6 +482,7 @@ void intervalLinearization(ap_tcons0_array_t ap_csts, std::size_t num) {
   for (i = 0; i < num; i++) {
     mpq_inits(_infQ, _supQ, _sum, t);
     mpq_set_d(t, 2);
+    /// \todo Should iterate through all leaf nodes then interval linearization
     mpq_set(_infQ, ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpq);
     mpq_set(_supQ, ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpq);
     mpq_add(_sum, _infQ, _supQ);
