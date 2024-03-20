@@ -416,18 +416,53 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
       mpq_add(_suml, _sum->inf->val.mpq, min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
       mpq_add(_sumr, _sum->sup->val.mpq, max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
       ap_interval_set_mpq(_sum,_suml,_sumr);
-    }
+    } // end expr->val.node->op==AP_TEXPR_MUL
 
+    else if (expr->val.node->op==AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
+
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_NODE){
+        mpq_set(_infQ, exprA_expr->inf->val.mpq); // Constant
+        mpq_set(_supQ, exprA_expr->sup->val.mpq); // Constant
+        mpq_add(_suml, _sum->inf->val.mpq, _infQ);
+        mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
+        ap_interval_set_mpq(_sum,_suml,_sumr);
+        abstractExpr(expr->val.node->exprB,_sum);
+      }
+
+      else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST){
+        mpq_set(_infQ, exprB_expr->inf->val.mpq); // Constant
+        mpq_set(_supQ, exprB_expr->sup->val.mpq); // Constant
+        mpq_add(_suml, _sum->inf->val.mpq, _infQ);
+        mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
+        ap_interval_set_mpq(_sum,_suml,_sumr);
+        abstractExpr(expr->val.node->exprA,_sum);
+      }
+
+      else{ // a * x + b * y
+        abstractExpr(expr->val.node->exprA,_sum);
+        abstractExpr(expr->val.node->exprB,_sum);
+      }
+
+    } // end expr->val.node->op==AP_TEXPR_ADD
+
+  } // end expr->discr == AP_TEXPR_NODE
+
+  else if(expr->discr==AP_TEXPR_CST){
+    mpq_set(_infQ, expr->val.cst.val.interval->inf->val.mpq); // Constant
+    mpq_set(_supQ, expr->val.cst.val.interval->sup->val.mpq); // Constant
+    mpq_add(_suml, _sum->inf->val.mpq, _infQ);
+    mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
+    ap_interval_set_mpq(_sum,_suml,_sumr);
+  }
+
+  else{
+    ikos_unreachable("unreachable");
   }
 
 mpq_clears(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
-
-if (expr->discr == AP_TEXPR_NODE) {
-  abstractExpr(expr->val.node->exprA,_sum);
-  abstractExpr(expr->val.node->exprB,_sum);
-}
-
-}
+} // end function abstractExpr
 
 void abstractExprArr(ap_tcons0_array_t ap_csts[], std::size_t num) {
   std::size_t i = 0;
