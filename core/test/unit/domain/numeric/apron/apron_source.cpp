@@ -35,38 +35,93 @@ using ApronDomain = ikos::core::numeric::
     ApronDomain< ikos::core::numeric::apron::PplPolyhedra, FNumber, Variable >;
 
 BOOST_AUTO_TEST_CASE(to_ap_expr_FNumber) {
-  float f=0.1f;
-  double g=0.1;
+  float f = 0.1f;
+  double g = 0.1;
   FNumber _f(f);
   FNumber _g(g);
-//  std::cout.precision(30);
-//  std::cout<<g<<std::endl;
+  //  std::cout.precision(30);
+  //  std::cout<<g<<std::endl;
   ap_texpr0_t* _a(ikos::core::numeric::apron::to_ap_expr(_f));
   ap_texpr0_print(_a, nullptr);
-  std::cout<<std::endl;
+  std::cout << std::endl;
   ap_texpr0_t* _b(ikos::core::numeric::apron::to_ap_expr(_g));
   ap_texpr0_print(_b, nullptr);
 }
 
 BOOST_AUTO_TEST_CASE(function_abstractExpr) {
-  mpq_t a,b;
-  ap_texpr0_t * expr;
-  ap_interval_t* _sum=ap_interval_alloc();
-  mpq_inits(a,b,NULL);
+  mpq_t a, b;
+  ap_texpr0_t* expr;
+  ap_interval_t* _sum = ap_interval_alloc();
+  mpq_inits(a, b, NULL);
 
   // Try using ap_texpr0_t*
-  mpq_set_d(a,1.0);
-  mpq_set_d(b,2.0);
-  expr= ap_texpr0_cst_interval_mpq(a,b);
+  mpq_set_d(a, 0.1);
+  mpq_set_d(b, 0.2);
+  expr = ap_texpr0_cst_interval_mpq(a, b);
+  std::cout << "expr: " << std::endl;
   ap_texpr0_print(expr, nullptr);
-  std::cout<<std::endl;
+  std::cout << std::endl;
 
   // Try using ap_interval_t*
-  ap_interval_set_mpq(_sum,a,b);
+  mpq_set_d(a, 0);
+  mpq_set_d(b, 0);
+  ap_interval_set_mpq(_sum, a, b);
+  std::cout << "_sum: " << std::endl;
   ap_interval_print(_sum);
-  std::cout<<std::endl;
+  std::cout << std::endl;
 
   // Try using abstractExpr
-  ikos::core::numeric::apron::abstractExpr(expr,_sum);
-  mpq_clears(a,b,NULL);
+  ikos::core::numeric::apron::abstractExpr(expr, _sum);
+  std::cout << "_sum: " << std::endl;
+  ap_interval_print(_sum);
+  mpq_clears(a, b, NULL);
+}
+
+BOOST_AUTO_TEST_CASE(function_abstractExpr_NODE) {
+  VariableFactory vfac;
+  Variable x(vfac.get("x"));
+  Variable y(vfac.get("y"));
+
+  auto inv1 = ApronDomain::top();
+  /// bugs here!!! function intervalLinearization
+  //  inv1.set(x, Interval(0));
+  //  BOOST_CHECK(inv1.leq(ApronDomain::top()));
+  //  BOOST_CHECK(!inv1.leq(ApronDomain::bottom()));
+}
+
+BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
+  // 定义变量和常量
+  ap_dim_t x_dim = 0; // 假设 x 是我们要处理的变量
+  mpq_t two, three, a, b;
+  ap_interval_t* _sum = ap_interval_alloc();
+  mpq_inits(two, three, a, b, NULL);
+
+  mpq_set_d(two, 2);
+  mpq_set_d(three, 3);
+  FNumber tw(2.0f);
+  FNumber th(3.0f);
+
+  mpq_set_d(a, 0);
+  mpq_set_d(b, 0);
+  ap_interval_set_mpq(_sum, a, b);
+
+  // 构建表达式 2*x
+  ap_texpr0_t* expr_2x = ap_texpr0_binop(AP_TEXPR_MUL,
+                                         ap_texpr0_dim(x_dim),
+                                         ikos::core::numeric::apron::to_ap_expr(tw),
+                                         AP_RTYPE_SINGLE,
+                                         AP_RDIR_NEAREST);
+
+  // 构建表达式 2*x + 3
+  ap_texpr0_t* expr_2x_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
+                                                expr_2x,
+                                                ikos::core::numeric::apron::to_ap_expr(th),
+                                                AP_RTYPE_SINGLE,
+                                                AP_RDIR_NEAREST);
+
+  ikos::core::numeric::apron::abstractExpr(expr_2x_plus_3, _sum);
+  std::cout << "_sum: " << std::endl;
+  ap_interval_print(_sum);
+
+  mpq_clears(two, three, a, b, NULL);
 }

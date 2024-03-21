@@ -363,15 +363,12 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_set_d(_suml, 0);
   mpq_set_d(_sumr, 0);
 
-  ap_interval_t* exprA_expr = ap_interval_alloc();
-  ap_interval_t* exprB_expr = ap_interval_alloc();
-
-  exprA_expr =
-      expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
-  exprB_expr =
-      expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
-
   if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
+
+    ap_interval_t* exprA_expr =
+        expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
+    ap_interval_t* exprB_expr =
+        expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
 
     if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
 
@@ -410,7 +407,9 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
                 min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
         mpq_set(exprB_expr->sup->val.mpq,
                 max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
-      } else {
+      }
+
+      else {
         ikos_unreachable("unreachable");
       }
       // Constant term
@@ -489,7 +488,7 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
 
 } // end function abstractExpr
 
-void abstractExprArr(ap_tcons0_array_t ap_csts, std::size_t num) {
+void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   std::size_t i = 0;
   for (i = 0; i < num; i++) {
     ap_interval_t* _sum = ap_interval_alloc();
@@ -499,12 +498,13 @@ void abstractExprArr(ap_tcons0_array_t ap_csts, std::size_t num) {
 }
 
 /// \todo Add interval linearization method in this place. By zoush99
+/*
 template < typename Number, typename VariableRef >
-void intervalLinearization(ap_tcons0_array_t ap_csts, std::size_t num) {
+void intervalLinearization(ap_tcons0_array_t& ap_csts, std::size_t num) {
   std::size_t i = 0;
   mpq_t _infQ, _supQ, _sum, t;
+  mpq_inits(_infQ, _supQ, _sum, t, NULL);
   for (i = 0; i < num; i++) {
-    mpq_inits(_infQ, _supQ, _sum, t);
     mpq_set_d(t, 2);
     /// \todo Should iterate through all leaf nodes then interval linearization
     mpq_set(_infQ, ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpq);
@@ -513,8 +513,120 @@ void intervalLinearization(ap_tcons0_array_t ap_csts, std::size_t num) {
     mpq_div(t, _sum, t);
     mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
   }
-  mpq_clears(_infQ, _supQ, _sum, t);
+  mpq_clears(_infQ, _supQ, _sum, t, NULL);
 }
+*/
+
+
+template < typename Number, typename VariableRef >
+void intervalLinearization(ap_tcons0_array_t& ap_csts, std::size_t num) {
+  std::size_t i = 0;
+  mpq_t _infQ, _supQ, _sum, t;
+  mpq_inits(_infQ, _supQ, _sum, t, NULL);
+  for (i = 0; i < num; i++) {
+    ap_texpr0_t* expr=ap_csts.p[i].texpr0;
+    if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
+
+      ap_interval_t* exprA_expr =
+          expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
+      ap_interval_t* exprB_expr =
+          expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
+
+      if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
+
+        if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+            expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
+          mpq_set(_infQ, exprA_expr->inf->val.mpq);
+          mpq_set(_supQ, exprA_expr->sup->val.mpq);
+          /// \todo
+        }
+
+        else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+                 expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
+          mpq_set(_infQ, exprB_expr->inf->val.mpq);
+          mpq_set(_supQ, exprB_expr->sup->val.mpq);
+        }
+
+        else {
+          ikos_unreachable("unreachable");
+        }
+
+        // Constant term
+        mpq_mul(r1, _infQ, lAE);
+        mpq_mul(r2, _infQ, rAE);
+        mpq_mul(r3, _supQ, rAE);
+        mpq_mul(r4, _supQ, rAE);
+        mpq_add(_suml,
+                _sum->inf->val.mpq,
+                min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
+        mpq_add(_sumr,
+                _sum->sup->val.mpq,
+                max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
+        ap_interval_set_mpq(_sum, _suml, _sumr);
+
+        return;
+      } // end expr->val.node->op==AP_TEXPR_MUL
+
+      else if (expr->val.node->op ==
+               AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
+
+        if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+            expr->val.node->exprB->discr == AP_TEXPR_NODE) {
+          /// \todo
+          mpq_set(_infQ, exprA_expr->inf->val.mpq); // Constant
+          mpq_set(_supQ, exprA_expr->sup->val.mpq); // Constant
+          mpq_add(_suml, _sum->inf->val.mpq, _infQ);
+          mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
+          ap_interval_set_mpq(_sum, _suml, _sumr);
+          abstractExpr(expr->val.node->exprB, _sum);
+        }
+
+        else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
+                 expr->val.node->exprB->discr == AP_TEXPR_CST) {
+          /// \todo
+          mpq_set(_infQ, exprB_expr->inf->val.mpq); // Constant
+          mpq_set(_supQ, exprB_expr->sup->val.mpq); // Constant
+          mpq_add(_suml, _sum->inf->val.mpq, _infQ);
+          mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
+          ap_interval_set_mpq(_sum, _suml, _sumr);
+          abstractExpr(expr->val.node->exprA, _sum);
+        }
+
+        else { // a * x + b * y
+          /// \todo
+          abstractExpr(expr->val.node->exprA, _sum);
+          abstractExpr(expr->val.node->exprB, _sum);
+        }
+
+      } // end expr->val.node->op==AP_TEXPR_ADD
+
+    } // end expr->discr == AP_TEXPR_NODE
+
+    else if (expr->discr == AP_TEXPR_CST) {
+      /// \todo
+      mpq_set(_infQ, expr->val.cst.val.interval->inf->val.mpq); // Constant
+      mpq_set(_supQ, expr->val.cst.val.interval->sup->val.mpq); // Constant
+      mpq_add(_suml, _sum->inf->val.mpq, _infQ);
+      mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
+      ap_interval_set_mpq(_sum, _suml, _sumr);
+    }
+
+    else {
+      ikos_unreachable("unreachable");
+    }
+
+
+/*    mpq_set_d(t, 2);
+    /// \todo Should iterate through all leaf nodes then interval linearization
+    mpq_set(_infQ, ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpq);
+    mpq_set(_supQ, ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpq);
+    mpq_add(_sum, _infQ, _supQ);
+    mpq_div(t, _sum, t);
+    mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);*/
+  }
+  mpq_clears(_infQ, _supQ, _sum, t, NULL);
+}
+
 } // end namespace apron
 
 /// \brief Wrapper for APRON abstract domains
@@ -1330,9 +1442,6 @@ public:
     size_t num = i - 1;
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
-      /// \todo Abstract representation of the relationship between variables in
-      /// an expression. By zoush99
-
       /// _begin
       apron::abstractExprArr(ap_csts, num);
       /// _end
@@ -1411,6 +1520,7 @@ public:
       this->set_to_bottom();
     } else {
       this->forget(x);
+      /// (debug), It's all right until get here.
       this->refine(x, value);
     }
   }
@@ -1462,9 +1572,6 @@ public:
     } else {
       std::lock_guard< std::mutex > lock(this->_mutex);
       ap_tcons0_array_t csts = ap_tcons0_array_make(1);
-      /// \todo bugs here!!!
-      /// In template: no member named 'residue' in
-      /// 'ikos::core::numeric::Congruence<ikos::core::FNumber>'
       csts.p[0] =
           ap_tcons0_make(AP_CONS_EQMOD,
                          this->to_ap_expr(VariableExprT(x) - value.residue()),
