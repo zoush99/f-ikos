@@ -517,114 +517,110 @@ void intervalLinearization(ap_tcons0_array_t& ap_csts, std::size_t num) {
 }
 */
 
-
 template < typename Number, typename VariableRef >
-void intervalLinearization(ap_tcons0_array_t& ap_csts, std::size_t num) {
-  std::size_t i = 0;
+void intervalLinearization(ap_texpr0_t* expr) {
   mpq_t _infQ, _supQ, _sum, t;
   mpq_inits(_infQ, _supQ, _sum, t, NULL);
-  for (i = 0; i < num; i++) {
-    ap_texpr0_t* expr=ap_csts.p[i].texpr0;
-    if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
 
-      ap_interval_t* exprA_expr =
-          expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
-      ap_interval_t* exprB_expr =
-          expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
+  if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
 
-      if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
+    ap_interval_t* exprA_expr =
+        expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
+    ap_interval_t* exprB_expr =
+        expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
 
-        if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-            expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
-          mpq_set(_infQ, exprA_expr->inf->val.mpq);
-          mpq_set(_supQ, exprA_expr->sup->val.mpq);
-          /// \todo
-        }
+    if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
 
-        else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
-                 expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
-          mpq_set(_infQ, exprB_expr->inf->val.mpq);
-          mpq_set(_supQ, exprB_expr->sup->val.mpq);
-        }
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
+        /// \todo
+        mpq_set_d(t, 2);
+        mpq_set(_infQ, exprA_expr->inf->val.mpq);
+        mpq_set(_supQ, exprA_expr->sup->val.mpq);
+        mpq_add(_sum, _infQ, _supQ);
+        mpq_div(t, _sum, t);
+        mpq_set(expr->val.node->exprA->val.cst.val.scalar->val.mpq, t);
+      }
 
-        else {
-          ikos_unreachable("unreachable");
-        }
+      else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
+        /// \todo
+        mpq_set_d(t, 2);
+        mpq_set(_infQ, exprB_expr->inf->val.mpq);
+        mpq_set(_supQ, exprB_expr->sup->val.mpq);
+        mpq_add(_sum, _infQ, _supQ);
+        mpq_div(t, _sum, t);
+        mpq_set(expr->val.node->exprB->val.cst.val.scalar->val.mpq, t);
+      }
 
-        // Constant term
-        mpq_mul(r1, _infQ, lAE);
-        mpq_mul(r2, _infQ, rAE);
-        mpq_mul(r3, _supQ, rAE);
-        mpq_mul(r4, _supQ, rAE);
-        mpq_add(_suml,
-                _sum->inf->val.mpq,
-                min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
-        mpq_add(_sumr,
-                _sum->sup->val.mpq,
-                max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
-        ap_interval_set_mpq(_sum, _suml, _sumr);
+      else {
+        ikos_unreachable("unreachable");
+      }
 
-        return;
-      } // end expr->val.node->op==AP_TEXPR_MUL
+      return;
+    } // end expr->val.node->op==AP_TEXPR_MUL
 
-      else if (expr->val.node->op ==
-               AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
+    else if (expr->val.node->op ==
+             AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
 
-        if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-            expr->val.node->exprB->discr == AP_TEXPR_NODE) {
-          /// \todo
-          mpq_set(_infQ, exprA_expr->inf->val.mpq); // Constant
-          mpq_set(_supQ, exprA_expr->sup->val.mpq); // Constant
-          mpq_add(_suml, _sum->inf->val.mpq, _infQ);
-          mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
-          ap_interval_set_mpq(_sum, _suml, _sumr);
-          abstractExpr(expr->val.node->exprB, _sum);
-        }
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_NODE) {
+        /// \todo
+        mpq_set_d(t, 2);
+        mpq_set(_infQ, exprA_expr->inf->val.mpq);
+        mpq_set(_supQ, exprA_expr->sup->val.mpq);
+        mpq_add(_sum, _infQ, _supQ);
+        mpq_div(t, _sum, t);
+        mpq_set(expr->val.node->exprA->val.cst.val.scalar->val.mpq, t);
+        /// \todo
+        intervalLinearization< Number, VariableRef >()(expr->val.node->exprB);
+      }
 
-        else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
-                 expr->val.node->exprB->discr == AP_TEXPR_CST) {
-          /// \todo
-          mpq_set(_infQ, exprB_expr->inf->val.mpq); // Constant
-          mpq_set(_supQ, exprB_expr->sup->val.mpq); // Constant
-          mpq_add(_suml, _sum->inf->val.mpq, _infQ);
-          mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
-          ap_interval_set_mpq(_sum, _suml, _sumr);
-          abstractExpr(expr->val.node->exprA, _sum);
-        }
+      else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST) {
+        /// \todo
+        mpq_set_d(t, 2);
+        mpq_set(_infQ, exprB_expr->inf->val.mpq);
+        mpq_set(_supQ, exprB_expr->sup->val.mpq);
+        mpq_add(_sum, _infQ, _supQ);
+        mpq_div(t, _sum, t);
+        mpq_set(expr->val.node->exprB->val.cst.val.scalar->val.mpq, t);
+        /// \todo
+        intervalLinearization< Number, VariableRef >()(expr->val.node->exprA);
+      }
 
-        else { // a * x + b * y
-          /// \todo
-          abstractExpr(expr->val.node->exprA, _sum);
-          abstractExpr(expr->val.node->exprB, _sum);
-        }
+      else { // a * x + b * y
+        /// \todo
+        intervalLinearization< Number, VariableRef >()(expr->val.node->exprA);
+        intervalLinearization< Number, VariableRef >()(expr->val.node->exprB);
+      }
 
-      } // end expr->val.node->op==AP_TEXPR_ADD
+    } // end expr->val.node->op==AP_TEXPR_ADD
 
-    } // end expr->discr == AP_TEXPR_NODE
+  } // end expr->discr == AP_TEXPR_NODE
 
-    else if (expr->discr == AP_TEXPR_CST) {
-      /// \todo
-      mpq_set(_infQ, expr->val.cst.val.interval->inf->val.mpq); // Constant
-      mpq_set(_supQ, expr->val.cst.val.interval->sup->val.mpq); // Constant
-      mpq_add(_suml, _sum->inf->val.mpq, _infQ);
-      mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
-      ap_interval_set_mpq(_sum, _suml, _sumr);
-    }
-
-    else {
-      ikos_unreachable("unreachable");
-    }
-
-
-/*    mpq_set_d(t, 2);
-    /// \todo Should iterate through all leaf nodes then interval linearization
-    mpq_set(_infQ, ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpq);
-    mpq_set(_supQ, ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpq);
+  else if (expr->discr == AP_TEXPR_CST) {
+    /// \todo
+    mpq_set_d(t, 2);
+    mpq_set(_infQ, expr->val.cst.val.interval->inf->val.mpq);
+    mpq_set(_supQ, expr->val.cst.val.interval->sup->val.mpq);
     mpq_add(_sum, _infQ, _supQ);
     mpq_div(t, _sum, t);
-    mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);*/
+    mpq_set(expr->val.cst.val.scalar->val.mpq, t);
   }
+
+  else {
+    ikos_unreachable("unreachable");
+  }
+
   mpq_clears(_infQ, _supQ, _sum, t, NULL);
+}
+template < typename Number, typename VariableRef>
+void intervalLinearizationArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
+  std::size_t i;
+  for (i = 0; i < num; i++) {
+    intervalLinearization<Number,VariableRef>(ap_csts.p[i]);
+  }
 }
 
 } // end namespace apron
