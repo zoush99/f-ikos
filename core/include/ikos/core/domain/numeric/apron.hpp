@@ -209,19 +209,12 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return QNumber(mpq_class(scalar->val.mpq));
 }
 
-/// By zoush99, ap_scalar_t -> FNumber
+/// By zoush99, ap_scalar_t* -> FNumber
 template <>
 inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   ikos_assert(ap_scalar_infty(scalar) == 0);
   ikos_assert(scalar->discr == AP_SCALAR_MPQ);
-
-  if (scalar->val.mpfr->_mpfr_prec == 32) { // fl
-    return FNumber(mpfr_get_flt(scalar->val.mpfr, MPFR_RNDN));
-  } else if (scalar->val.mpfr->_mpfr_prec == 64) { // do
-    return FNumber(mpfr_get_d(scalar->val.mpfr, MPFR_RNDN));
-  } else {
-    ikos_unreachable("unreachable");
-  }
+  return FNumber(mpq_get_d(scalar->val.mpq));
 }
 
 /// \brief Conversion from ap_coeff_t* to ikos::ZNumber/QNumber
@@ -497,27 +490,7 @@ void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   } // end for circulate
 }
 
-/// \todo Add interval linearization method in this place. By zoush99
-/*
-template < typename Number, typename VariableRef >
-void intervalLinearization(ap_tcons0_array_t& ap_csts, std::size_t num) {
-  std::size_t i = 0;
-  mpq_t _infQ, _supQ, _sum, t;
-  mpq_inits(_infQ, _supQ, _sum, t, NULL);
-  for (i = 0; i < num; i++) {
-    mpq_set_d(t, 2);
-    /// \todo Should iterate through all leaf nodes then interval linearization
-    mpq_set(_infQ, ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpq);
-    mpq_set(_supQ, ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpq);
-    mpq_add(_sum, _infQ, _supQ);
-    mpq_div(t, _sum, t);
-    mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
-  }
-  mpq_clears(_infQ, _supQ, _sum, t, NULL);
-}
-*/
-
-template < typename Number, typename VariableRef >
+/// \brief Add interval linearization method in this place. By zoush99
 void intervalLinearization(ap_texpr0_t* expr) {
   mpq_t _infQ, _supQ, _sum, t;
   mpq_inits(_infQ, _supQ, _sum, t, NULL);
@@ -573,7 +546,7 @@ void intervalLinearization(ap_texpr0_t* expr) {
         mpq_div(t, _sum, t);
         mpq_set(expr->val.node->exprA->val.cst.val.scalar->val.mpq, t);
         /// \todo
-        intervalLinearization< Number, VariableRef >()(expr->val.node->exprB);
+        intervalLinearization(expr->val.node->exprB);
       }
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
@@ -586,13 +559,13 @@ void intervalLinearization(ap_texpr0_t* expr) {
         mpq_div(t, _sum, t);
         mpq_set(expr->val.node->exprB->val.cst.val.scalar->val.mpq, t);
         /// \todo
-        intervalLinearization< Number, VariableRef >()(expr->val.node->exprA);
+        intervalLinearization(expr->val.node->exprA);
       }
 
       else { // a * x + b * y
         /// \todo
-        intervalLinearization< Number, VariableRef >()(expr->val.node->exprA);
-        intervalLinearization< Number, VariableRef >()(expr->val.node->exprB);
+        intervalLinearization(expr->val.node->exprA);
+        intervalLinearization(expr->val.node->exprB);
       }
 
     } // end expr->val.node->op==AP_TEXPR_ADD
@@ -620,7 +593,7 @@ template < typename Number, typename VariableRef>
 void intervalLinearizationArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   std::size_t i;
   for (i = 0; i < num; i++) {
-    intervalLinearization<Number,VariableRef>(ap_csts.p[i]);
+    intervalLinearization(ap_csts.p[i].texpr0);
   }
 }
 
@@ -1445,7 +1418,7 @@ public:
 
       /// \todo Add interval linearization method in this place. By zoush99
       /// _begin
-      apron::intervalLinearizationArr< Number, VariableRef >(ap_csts);
+      apron::intervalLinearizationArr< Number, VariableRef >(ap_csts,num);
       /// _end
     }
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);

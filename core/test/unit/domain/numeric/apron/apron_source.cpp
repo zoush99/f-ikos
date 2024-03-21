@@ -84,9 +84,9 @@ BOOST_AUTO_TEST_CASE(function_abstractExpr_NODE) {
 
   auto inv1 = ApronDomain::top();
   /// bugs here!!! function intervalLinearization
-  //  inv1.set(x, Interval(0));
-  //  BOOST_CHECK(inv1.leq(ApronDomain::top()));
-  //  BOOST_CHECK(!inv1.leq(ApronDomain::bottom()));
+    inv1.set(x, Interval(0));
+    BOOST_CHECK(inv1.leq(ApronDomain::top()));
+    BOOST_CHECK(!inv1.leq(ApronDomain::bottom()));
 }
 
 BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
@@ -124,4 +124,101 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   ap_interval_print(_sum);
 
   mpq_clears(two, three, a, b, NULL);
+}
+
+/// bugs here!!!
+BOOST_AUTO_TEST_CASE(leq) {
+  VariableFactory vfac;
+  Variable x(vfac.get("x"));
+  Variable y(vfac.get("y"));
+  Variable z(vfac.get("z"));
+  Variable a(vfac.get("a"));
+  Variable b(vfac.get("b"));
+
+  BOOST_CHECK(ApronDomain::bottom().leq(ApronDomain::top()));
+  BOOST_CHECK(ApronDomain::bottom().leq(ApronDomain::bottom()));
+  BOOST_CHECK(!ApronDomain::top().leq(ApronDomain::bottom()));
+  BOOST_CHECK(ApronDomain::top().leq(ApronDomain::top()));
+
+  auto inv1 = ApronDomain::top();
+  inv1.set(x, Interval(0));
+  BOOST_CHECK(inv1.leq(ApronDomain::top()));
+  BOOST_CHECK(!inv1.leq(ApronDomain::bottom()));
+
+  auto inv2 = ApronDomain::top();
+  inv2.set(x, Interval(Bound(-1), Bound(1)));
+  BOOST_CHECK(inv2.leq(ApronDomain::top()));
+  BOOST_CHECK(!inv2.leq(ApronDomain::bottom()));
+  BOOST_CHECK(inv1.leq(inv2));
+  BOOST_CHECK(!inv2.leq(inv1));
+
+  auto inv3 = ApronDomain::top();
+  inv3.set(x, Interval(0));
+  inv3.set(y, Interval(Bound(-1), Bound(1)));
+  BOOST_CHECK(inv3.leq(ApronDomain::top()));
+  BOOST_CHECK(!inv3.leq(ApronDomain::bottom()));
+  BOOST_CHECK(inv3.leq(inv1));
+  BOOST_CHECK(!inv1.leq(inv3));
+
+  auto inv4 = ApronDomain::top();
+  inv4.set(x, Interval(0));
+  inv4.set(y, Interval(Bound(0), Bound(2)));
+  BOOST_CHECK(inv4.leq(ApronDomain::top()));
+  BOOST_CHECK(!inv4.leq(ApronDomain::bottom()));
+  BOOST_CHECK(!inv3.leq(inv4));
+  BOOST_CHECK(!inv4.leq(inv3));
+
+  auto inv5 = ApronDomain::top();
+  inv5.set(x, Interval(0));
+  inv5.set(y, Interval(Bound(0), Bound(2)));
+  inv5.set(z, Interval(Bound::minus_infinity(), Bound(0)));
+  BOOST_CHECK(inv5.leq(ApronDomain::top()));
+  BOOST_CHECK(!inv5.leq(ApronDomain::bottom()));
+  BOOST_CHECK(!inv5.leq(inv3));
+  BOOST_CHECK(!inv3.leq(inv5));
+  BOOST_CHECK(inv5.leq(inv4));
+  BOOST_CHECK(!inv4.leq(inv5));
+
+  inv1.set_to_top();
+  inv2.set_to_top();
+  inv1.assign(x, 1);
+  BOOST_CHECK(inv1.leq(inv2));
+
+  inv2.add(VariableExpr(x) <= 1);
+  BOOST_CHECK(inv1.leq(inv2)); // {x = 1} <= {x <= 1}
+
+  inv2.set_to_top();
+  inv2.add(VariableExpr(x) <= 0);
+  BOOST_CHECK(!inv1.leq(inv2)); // not {x = 1} <= {x <= 0}
+
+  inv1.assign(y, 2);
+  inv2.set_to_top();
+  inv2.add(VariableExpr(x) <= 1);
+  BOOST_CHECK(inv1.leq(inv2)); // {x = 1, y = 2} <= {x <= 1}
+
+  inv2.add(VariableExpr(z) <= 4);
+  BOOST_CHECK(!inv1.leq(inv2)); // not {x = 1, y = 2} <= {x <= 1, z <= 4}
+
+  inv1.set_to_top();
+  inv2.set_to_top();
+
+  inv1.assign(x, 1);
+  inv1.add(VariableExpr(y) <= 2);
+  inv1.assign(z, 3);
+  inv1.add(VariableExpr(a) >= 4);
+  inv1.assign(b, 5);
+
+  inv2.add(VariableExpr(y) <= 3);
+  inv2.add(VariableExpr(a) >= 1);
+  inv2.assign(z, 3);
+  inv2.set(x, Interval(Bound(-1), Bound(1)));
+
+  // {x = 1, y <= 2, z = 3, a >= 4, b = 5} <= {-1 <= x <= 1, y <= 3, z = 3, a >=
+  // 1}
+  BOOST_CHECK(inv1.leq(inv2));
+
+  inv2.add(VariableExpr(a) >= 5);
+  // {x = 1, y <= 2, z = 3, a >= 4, b = 5} <= {-1 <= x <= 1, y <= 3, z = 3, a >=
+  // 5}
+  BOOST_CHECK(!inv1.leq(inv2));
 }
