@@ -15,39 +15,39 @@ namespace core {
 namespace detail {
 /// \brief Covert floating point numbers to binary representation
 template < typename T >
-void decompose_float(T float_value,
+void decompose_fl(T _value,
                      int& sign_bit,
                      int& exponent,
                      long long& mantissa) {
   if (std::is_same< T, float >::value) { // fl
-    int float_bits = *reinterpret_cast< int* >(&float_value);
+    int _bits = *reinterpret_cast< int* >(&_value);
 
-    sign_bit = float_bits >> 31 & 1;
-    exponent = float_bits >> 23 & 0xFF;
-    mantissa = float_bits & 0x7FFFFF;
+    sign_bit = _bits >> 31 & 1;
+    exponent = _bits >> 23 & 0xFF;
+    mantissa = _bits & 0x7FFFFF;
   } else { // do
-    long long double_bits = *reinterpret_cast< long long* >(&float_value);
+    long long _bits = *reinterpret_cast< long long* >(&_value);
 
-    sign_bit = double_bits >> 63 & 1;
-    exponent = double_bits >> 52 & 0x7FF;
-    mantissa = double_bits & 0xFFFFFFFFFFFFFLL;
+    sign_bit = _bits >> 63 & 1;
+    exponent = _bits >> 52 & 0x7FF;
+    mantissa = _bits & 0xFFFFFFFFFFFFFLL;
   }
 }
 
 /// \brief Convert binary representations to floating point numbers
 template < typename T >
-T compose_float(int sign_bit, int exponent, long long mantissa) {
+T compose_fl(int sign_bit, int exponent, long long mantissa) {
   if (std::is_same< T, float >::value) { // fl
-    int float_bits = (sign_bit << 31) | (exponent << 23) | mantissa;
+    int _bits = (sign_bit << 31) | (exponent << 23) | mantissa;
 
-    T result = *reinterpret_cast< float* >(&float_bits);
+    T result = *reinterpret_cast< float* >(&_bits);
     return result;
   } else { // do
-    long long double_bits = (static_cast< long long >(sign_bit) << 63) |
+    long long _bits = (static_cast< long long >(sign_bit) << 63) |
                             (static_cast< long long >(exponent) << 52) |
                             mantissa;
 
-    T result = *reinterpret_cast< double* >(&double_bits);
+    T result = *reinterpret_cast< double* >(&_bits);
     return result;
   }
 }
@@ -55,10 +55,10 @@ T compose_float(int sign_bit, int exponent, long long mantissa) {
 /// \brief Find the nearest floating point number that is less than the nearest
 /// neighbor
 template < typename T >
-T find_next_value_down(T float_value) {
+T find_next_value_down(T _value) {
   int sign_bit, exponent;
   long long mantissa;
-  decompose_float< T >(float_value, sign_bit, exponent, mantissa);
+  decompose_fl< T >(_value, sign_bit, exponent, mantissa);
 
   if (exponent == 0 && mantissa == 0) { // Non-normalized number
     mantissa -= 1;
@@ -75,16 +75,16 @@ T find_next_value_down(T float_value) {
     }
   }
 
-  return compose_float< T >(sign_bit, exponent, mantissa);
+  return compose_fl< T >(sign_bit, exponent, mantissa);
 }
 
 /// \brief Find the nearest floating point number that is greater than the
 /// nearest neighbor
 template < typename T >
-T find_next_value_up(T float_value) {
+T find_next_value_up(T _value) {
   int sign_bit, exponent;
   long long mantissa;
-  decompose_float< T >(float_value, sign_bit, exponent, mantissa);
+  decompose_fl< T >(_value, sign_bit, exponent, mantissa);
 
   if (exponent == 0 && mantissa == 0) { // Non-normalized number
     mantissa += 1;
@@ -102,7 +102,7 @@ T find_next_value_up(T float_value) {
     }
   }
 
-  return compose_float< T >(sign_bit, exponent, mantissa);
+  return compose_fl< T >(sign_bit, exponent, mantissa);
 }
 
 } // namespace detail

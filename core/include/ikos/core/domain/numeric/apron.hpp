@@ -62,7 +62,7 @@
 #include <ikos/core/linear_constraint.hpp>
 #include <ikos/core/linear_expression.hpp>
 #include <ikos/core/number.hpp>
-#include <ikos/core/number/f_relational_interval_number.hpp> // By zoush99
+//#include <ikos/core/number/f_relational_interval_number.hpp> // By zoush99
 #include <ikos/core/support/assert.hpp>
 #include <ikos/core/value/numeric/congruence.hpp>
 #include <ikos/core/value/numeric/interval.hpp>
@@ -314,7 +314,7 @@ inline ap_manager_t* alloc_domain_manager(Domain d) {
 }
 
 /// \brief Get the minimum of two element. By zoush99
-const __mpq_struct* min_mpq(const mpq_t a, const mpq_t b) {
+inline const __mpq_struct* minimum_mpq(const mpq_t a, const mpq_t b) {
   if (mpq_cmp(a, b) <= 0) {
     return a;
   } else {
@@ -323,7 +323,7 @@ const __mpq_struct* min_mpq(const mpq_t a, const mpq_t b) {
 }
 
 /// \brief Get the maximum of two element. By zoush99
-const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
+inline const __mpq_struct* maximum_mpq(const mpq_t a, const mpq_t b) {
   if (mpq_cmp(a, b) >= 0) {
     return a;
   } else {
@@ -334,7 +334,7 @@ const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
 /// \todo Abstract representation of the relationship between variables in
 /// an expression. By zoush99
 // template < typename Number, typename VariableRef >
-void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
+inline void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_t _infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr;
   mpq_inits(_infQ,
             _supQ,
@@ -349,10 +349,10 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
             _suml,
             _sumr,
             NULL);
-  mpq_set_d(lRE, RelativeError.floatlRE); // 1 - pow(2, -23);
-  mpq_set_d(rRE, RelativeError.floatrRE); // 1 + pow(2, -23);
-  mpq_set_d(lAE, AbsoluteError.floatlAE); //   - pow(2, -149);
-  mpq_set_d(rAE, AbsoluteError.floatrAE); //   + pow(2, -149);
+  mpq_set_d(lRE, 1 - pow(2, -23)); // 1 - pow(2, -23);
+  mpq_set_d(rRE, 1 + pow(2, -23)); // 1 + pow(2, -23);
+  mpq_set_d(lAE, -pow(2, -149)); //   - pow(2, -149);
+  mpq_set_d(rAE, pow(2, -149)); //   + pow(2, -149);
   mpq_set_d(_suml, 0);
   mpq_set_d(_sumr, 0);
 
@@ -389,17 +389,17 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
         mpq_set(exprA_expr->inf->val.mpq,
-                min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
+                minimum_mpq(minimum_mpq(minimum_mpq(r1, r2), r3), r4)); // min
         mpq_set(exprA_expr->sup->val.mpq,
-                max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
+                maximum_mpq(maximum_mpq(maximum_mpq(r1, r2), r3), r4)); // max
       }
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
         mpq_set(exprB_expr->inf->val.mpq,
-                min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
+                minimum_mpq(minimum_mpq(minimum_mpq(r1, r2), r3), r4)); // min
         mpq_set(exprB_expr->sup->val.mpq,
-                max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
+                maximum_mpq(maximum_mpq(maximum_mpq(r1, r2), r3), r4)); // max
       }
 
       else {
@@ -412,10 +412,10 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
       mpq_mul(r4, _supQ, rAE);
       mpq_add(_suml,
               _sum->inf->val.mpq,
-              min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
+              minimum_mpq(minimum_mpq(minimum_mpq(r1, r2), r3), r4));
       mpq_add(_sumr,
               _sum->sup->val.mpq,
-              max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
+              maximum_mpq(maximum_mpq(maximum_mpq(r1, r2), r3), r4));
       ap_interval_set_mpq(_sum, _suml, _sumr);
 
       return;
@@ -481,7 +481,7 @@ void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
 
 } // end function abstractExpr
 
-void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
+inline void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   std::size_t i = 0;
   for (i = 0; i < num; i++) {
     ap_interval_t* _sum = ap_interval_alloc();
@@ -491,7 +491,7 @@ void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
 }
 
 /// \brief Add interval linearization method in this place. By zoush99
-void intervalLinearization(ap_texpr0_t* expr) {
+inline void intervalLinearization(ap_texpr0_t* expr) {
   mpq_t _infQ, _supQ, _sum, t;
   mpq_inits(_infQ, _supQ, _sum, t, NULL);
 
@@ -590,7 +590,7 @@ void intervalLinearization(ap_texpr0_t* expr) {
 }
 
 template < typename Number, typename VariableRef>
-void intervalLinearizationArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
+inline void intervalLinearizationArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   std::size_t i;
   for (i = 0; i < num; i++) {
     intervalLinearization(ap_csts.p[i].texpr0);
