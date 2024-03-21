@@ -615,6 +615,7 @@ void intervalLinearization(ap_texpr0_t* expr) {
 
   mpq_clears(_infQ, _supQ, _sum, t, NULL);
 }
+
 template < typename Number, typename VariableRef>
 void intervalLinearizationArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   std::size_t i;
@@ -1444,31 +1445,7 @@ public:
 
       /// \todo Add interval linearization method in this place. By zoush99
       /// _begin
-      apron::intervalLinearization< Number, VariableRef >(ap_csts, num);
-      /*std::size_t num = i - 1;
-           mpq_t _infQ, _supQ, sum, t;
-           for (i = 0; i < num; i++) {
-             mpq_init(_infQ);
-             mpq_init(_supQ);
-             mpq_init(sum);
-             mpq_init(t);
-             mpq_set_d(t, 2);
-             mpfr_get_q(_infQ,
-                        ap_csts.p[i].texpr0->val.cst.val.interval->inf->val.mpfr);
-             mpfr_get_q(_supQ,
-                        ap_csts.p[i].texpr0->val.cst.val.interval->sup->val.mpfr);
-             mpq_add(sum, _infQ, _supQ);
-             mpq_div(t, sum, t);
-             mpq_set(ap_csts.p[i].texpr0->val.cst.val.scalar->val.mpq, t);
-             *//*
-         *1. 将区间两端类型从mpfr转变成mpq
-         *2.
-         *再用mpq中的运算取中点：将系数存在一个矩阵中，然后对矩阵中所有的区间取中点运算
-         *3. 再将系数返还给原约束表达式，这个过程便完成了最简单的区间线性化
-         *//*
-      }
-      mpq_clears(_infQ, _supQ, sum, t);*/
-
+      apron::intervalLinearizationArr< Number, VariableRef >(ap_csts);
       /// _end
     }
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
