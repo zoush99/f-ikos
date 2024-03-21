@@ -159,38 +159,28 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
 
-/// \todo bugs here!!!
-/// zoush99, FNumber -> [mpfr_t,mpfr_t] -> ap_texpr0_t
+/// zoush99, FNumber -> [mpq_t,mpq_t] -> ap_texpr0_t*
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-  mpfr_t _f1, _f2;
+  mpq_t _infQ, _supQ;
+  mpq_inits(_infQ, _supQ, NULL);
   ap_texpr0_t* result = nullptr;
   if (f.bit_width() == 32) { // fl
-    mpfr_init2(_f1, 32);
-    mpfr_init2(_f2, 32);
-    mpfr_set_flt(_f1,
-                 ikos::core::detail::find_next_value_down(f.value< float >()),
-                 MPFR_RNDN);
-    mpfr_set_flt(_f2,
-                 ikos::core::detail::find_next_value_up(f.value< float >()),
-                 MPFR_RNDN);
-    result = ap_texpr0_cst_interval_mpfr(_f1, _f2);
+    mpq_set_d(_infQ,
+              ikos::core::detail::find_next_value_down(f.value< float >()));
+    mpq_set_d(_supQ,
+              ikos::core::detail::find_next_value_up(f.value< float >()));
+    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
   } else if (f.bit_width() == 64) { // do
-    mpfr_init2(_f1, 64);
-    mpfr_init2(_f2, 64);
-    mpfr_set_d(_f1,
-               ikos::core::detail::find_next_value_down(f.value< double >()),
-               MPFR_RNDN);
-    mpfr_set_d(_f2,
-               ikos::core::detail::find_next_value_up(f.value< double >()),
-               MPFR_RNDN);
-    result = ap_texpr0_cst_interval_mpfr(_f1, _f2);
+    mpq_set_d(_infQ,
+              ikos::core::detail::find_next_value_down(f.value< double >()));
+    mpq_set_d(_supQ,
+              ikos::core::detail::find_next_value_up(f.value< double >()));
+    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
   } else {
     ikos_unreachable("unreachable");
   }
-  mpfr_clear(_f1);
-  mpfr_clear(_f2);
-
+  mpq_clears(_infQ, _supQ, NULL);
   return result;
 }
 
@@ -350,10 +340,22 @@ const __mpq_struct* max_mpq(const mpq_t a, const mpq_t b) {
 
 /// \todo Abstract representation of the relationship between variables in
 /// an expression. By zoush99
-//template < typename Number, typename VariableRef >
-void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
+// template < typename Number, typename VariableRef >
+void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_t _infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr;
-  mpq_inits(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
+  mpq_inits(_infQ,
+            _supQ,
+            lRE,
+            rRE,
+            lAE,
+            rAE,
+            r1,
+            r2,
+            r3,
+            r4,
+            _suml,
+            _sumr,
+            NULL);
   mpq_set_d(lRE, RelativeError.floatlRE); // 1 - pow(2, -23);
   mpq_set_d(rRE, RelativeError.floatrRE); // 1 + pow(2, -23);
   mpq_set_d(lAE, AbsoluteError.floatlAE); //   - pow(2, -149);
@@ -361,14 +363,17 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_set_d(_suml, 0);
   mpq_set_d(_sumr, 0);
 
-  ap_interval_t* exprA_expr =
+  ap_interval_t* exprA_expr = ap_interval_alloc();
+  ap_interval_t* exprB_expr = ap_interval_alloc();
+
+  exprA_expr =
       expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
-  ap_interval_t* exprB_expr =
+  exprB_expr =
       expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
 
   if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
 
-    if (expr->val.node->op==AP_TEXPR_MUL) { // MUL: n * x or x * n
+    if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
 
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
@@ -405,7 +410,7 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
                 min_mpq(min_mpq(min_mpq(r1, r2), r3), r4)); // min
         mpq_set(exprB_expr->sup->val.mpq,
                 max_mpq(max_mpq(max_mpq(r1, r2), r3), r4)); // max
-      } else{
+      } else {
         ikos_unreachable("unreachable");
       }
       // Constant term
@@ -413,66 +418,83 @@ void abstractExpr(ap_texpr0_t* expr,ap_interval_t* _sum) { // ap_csts->p[i]
       mpq_mul(r2, _infQ, rAE);
       mpq_mul(r3, _supQ, rAE);
       mpq_mul(r4, _supQ, rAE);
-      mpq_add(_suml, _sum->inf->val.mpq, min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
-      mpq_add(_sumr, _sum->sup->val.mpq, max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
-      ap_interval_set_mpq(_sum,_suml,_sumr);
+      mpq_add(_suml,
+              _sum->inf->val.mpq,
+              min_mpq(min_mpq(min_mpq(r1, r2), r3), r4));
+      mpq_add(_sumr,
+              _sum->sup->val.mpq,
+              max_mpq(max_mpq(max_mpq(r1, r2), r3), r4));
+      ap_interval_set_mpq(_sum, _suml, _sumr);
 
       return;
     } // end expr->val.node->op==AP_TEXPR_MUL
 
-    else if (expr->val.node->op==AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
+    else if (expr->val.node->op ==
+             AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
 
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-          expr->val.node->exprB->discr == AP_TEXPR_NODE){
+          expr->val.node->exprB->discr == AP_TEXPR_NODE) {
         mpq_set(_infQ, exprA_expr->inf->val.mpq); // Constant
         mpq_set(_supQ, exprA_expr->sup->val.mpq); // Constant
         mpq_add(_suml, _sum->inf->val.mpq, _infQ);
         mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
-        ap_interval_set_mpq(_sum,_suml,_sumr);
-        abstractExpr(expr->val.node->exprB,_sum);
+        ap_interval_set_mpq(_sum, _suml, _sumr);
+        abstractExpr(expr->val.node->exprB, _sum);
       }
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
-               expr->val.node->exprB->discr == AP_TEXPR_CST){
+               expr->val.node->exprB->discr == AP_TEXPR_CST) {
         mpq_set(_infQ, exprB_expr->inf->val.mpq); // Constant
         mpq_set(_supQ, exprB_expr->sup->val.mpq); // Constant
         mpq_add(_suml, _sum->inf->val.mpq, _infQ);
         mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
-        ap_interval_set_mpq(_sum,_suml,_sumr);
-        abstractExpr(expr->val.node->exprA,_sum);
+        ap_interval_set_mpq(_sum, _suml, _sumr);
+        abstractExpr(expr->val.node->exprA, _sum);
       }
 
-      else{ // a * x + b * y
-        abstractExpr(expr->val.node->exprA,_sum);
-        abstractExpr(expr->val.node->exprB,_sum);
+      else { // a * x + b * y
+        abstractExpr(expr->val.node->exprA, _sum);
+        abstractExpr(expr->val.node->exprB, _sum);
       }
 
     } // end expr->val.node->op==AP_TEXPR_ADD
 
   } // end expr->discr == AP_TEXPR_NODE
 
-  else if(expr->discr==AP_TEXPR_CST){
+  else if (expr->discr == AP_TEXPR_CST) {
     mpq_set(_infQ, expr->val.cst.val.interval->inf->val.mpq); // Constant
     mpq_set(_supQ, expr->val.cst.val.interval->sup->val.mpq); // Constant
     mpq_add(_suml, _sum->inf->val.mpq, _infQ);
     mpq_add(_sumr, _sum->sup->val.mpq, _supQ);
-    ap_interval_set_mpq(_sum,_suml,_sumr);
+    ap_interval_set_mpq(_sum, _suml, _sumr);
   }
 
-  else{
+  else {
     ikos_unreachable("unreachable");
   }
 
-mpq_clears(_infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr);
+  mpq_clears(_infQ,
+             _supQ,
+             lRE,
+             rRE,
+             lAE,
+             rAE,
+             r1,
+             r2,
+             r3,
+             r4,
+             _suml,
+             _sumr,
+             NULL);
 
 } // end function abstractExpr
 
 void abstractExprArr(ap_tcons0_array_t ap_csts, std::size_t num) {
   std::size_t i = 0;
   for (i = 0; i < num; i++) {
-    ap_interval_t* _sum;
-    ap_interval_set_double(_sum,0,0);
-    abstractExpr(ap_csts.p[i].texpr0,_sum);
+    ap_interval_t* _sum = ap_interval_alloc();
+    ap_interval_set_double(_sum, 0, 0);
+    abstractExpr(ap_csts.p[i].texpr0, _sum);
   } // end for circulate
 }
 
@@ -720,11 +742,12 @@ private:
     }
 
     for (auto it = e.begin(), et = e.end(); it != et; ++it) {
-      ap_texpr0_t* term =
-          apron::binop_expr< Number >(AP_TEXPR_MUL,
-                                      apron::to_ap_expr(it->second),  // Number -> ap_texpr0_t*
-                                      this->to_ap_expr(it->first),  // VariableRef/LinearExpression -> ap_texpr0_t*
-                                      d);
+      ap_texpr0_t* term = apron::binop_expr<
+          Number >(AP_TEXPR_MUL,
+                   apron::to_ap_expr(it->second), // Number -> ap_texpr0_t*
+                   this->to_ap_expr(it->first), // VariableRef/LinearExpression
+                                                // -> ap_texpr0_t*
+                   d);
       r = apron::binop_expr< Number >(AP_TEXPR_ADD, r, term, d);
     }
 
@@ -1311,7 +1334,7 @@ public:
       /// an expression. By zoush99
 
       /// _begin
-      apron::abstractExprArr(ap_csts,num);
+      apron::abstractExprArr(ap_csts, num);
       /// _end
 
       /// \todo Add interval linearization method in this place. By zoush99
