@@ -473,27 +473,37 @@ inline void abstractExpr(ap_texpr0_t* expr,
              NULL);
 } // end function abstractExpr
 
-inline void abstractConstant(ap_texpr0_t* expr,ap_interval_t* _sum){
-  if (expr->discr==AP_TEXPR_NODE){
-    if (expr->val.node->op==AP_TEXPR_MUL){
-
-      if(expr->val.node->exprA->discr == AP_TEXPR_CST &&
-          expr->val.node->exprB->discr == AP_TEXPR_NODE){
-        expr->val.node->exprA=ap_texpr0_cst_interval(_sum);
-      }else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
-                 expr->val.node->exprB->discr == AP_TEXPR_CST){
-        expr->val.node->exprB=ap_texpr0_cst_interval(_sum);
-      }else{
+inline void abstractConstant(ap_texpr0_t* expr, ap_interval_t* _sum) {
+  if (expr->discr == AP_TEXPR_NODE) {
+    if (expr->val.node->op == AP_TEXPR_MUL) {
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_DIM) {
+        expr->val.node->exprA = ap_texpr0_cst_interval(_sum);
+      } else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+                 expr->val.node->exprB->discr == AP_TEXPR_CST) {
+        expr->val.node->exprB = ap_texpr0_cst_interval(_sum);
+      } else {
         ikos_unreachable("unreachable");
       }
-
+    }else if(expr->val.node->op == AP_TEXPR_ADD){
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_NODE) {
+        expr->val.node->exprA = ap_texpr0_cst_interval(_sum);
+      } else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
+                 expr->val.node->exprB->discr == AP_TEXPR_CST) {
+        expr->val.node->exprB = ap_texpr0_cst_interval(_sum);
+      } else {
+        ikos_unreachable("unreachable");
+      }
+    } else{
+      ikos_unreachable("unreachable");
     }
 
-  }else if (expr->discr==AP_TEXPR_CST){
-    expr=ap_texpr0_cst_interval(_sum);
-  }else{
-    abstractConstant(expr->val.node->exprA,_sum);
-    abstractConstant(expr->val.node->exprB,_sum);
+  } else if (expr->discr == AP_TEXPR_CST) {
+    expr = ap_texpr0_cst_interval(_sum);
+  } else {
+    abstractConstant(expr->val.node->exprA, _sum);
+    abstractConstant(expr->val.node->exprB, _sum);
   }
 }
 
@@ -506,6 +516,7 @@ inline void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
     mpq_set_d(_t, 0);
     ap_interval_set_mpq(_sum, _t, _t);
     abstractExpr(ap_csts.p[i].texpr0, _sum);
+    abstractConstant(ap_csts.p[i].texpr0, _sum);
   } // end for circulate
   mpq_clear(_t);
 }
