@@ -150,12 +150,18 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   std::cout<<std::endl;
   std::cout<<std::endl;
 
-/*  ikos::core::numeric::apron::intervalLinearization(expr_2x_plus_4y_plus_3);
+  std::cout<<"最终抽象后的实数表达式："<<std::endl;
+  ikos::core::numeric::apron::abstractConstant(expr_2x_plus_4y_plus_3,_sum);
+  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+
+  ikos::core::numeric::apron::intervalLinearization(expr_2x_plus_4y_plus_3);
 
   std::cout<<"区间线性化后的实数表达式（不包括常数项）："<<std::endl;
   ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
   std::cout<<std::endl;
-  std::cout<<std::endl;*/
+  std::cout<<std::endl;
 
   mpq_clears(two, three, a, b, NULL);
 }
