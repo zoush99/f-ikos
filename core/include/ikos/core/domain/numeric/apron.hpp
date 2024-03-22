@@ -98,7 +98,6 @@ inline ap_texpr0_t* binop_expr< QNumber >(ap_texpr_op_t op,
   return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
 }
 
-/// \todo
 /// By zoush99
 template <>
 inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
@@ -126,24 +125,15 @@ inline ap_scalar_t* to_ap_scalar(const QNumber& n) {
   return ap_scalar_alloc_set_mpq(e.get_mpq_t());
 }
 
-/// By zoush99, FNumber ->mpfr_t -> ap_scalar_t
+/// By zoush99, FNumber ->mpq_t -> ap_scalar_t*
 /// \brief Conversion from ikos::FNumber to ap_scalar_t*
 inline ap_scalar_t* to_ap_scalar(const FNumber& f) {
-  mpfr_t _f;
-  ap_scalar_t* _r;
-  if (f.bit_width() == 32) { // fl
-    mpfr_init2(_f, 32);
-    mpfr_set_flt(_f, f.value< float >(), MPFR_RNDN);
-    _r = ap_scalar_alloc_set_mpfr(_f);
-  } else if (f.bit_width() == 64) { // do
-    mpfr_init2(_f, 64);
-    mpfr_set_d(_f, f.value< double >(), MPFR_RNDN);
-    _r = ap_scalar_alloc_set_mpfr(_f);
-  } else {
-    _r = NULL;
-    ikos_unreachable("unreachable");
-  }
-  mpfr_clear(_f);
+  mpq_t _q;
+  mpq_init(_q);
+  ap_scalar_t* _r=ap_scalar_alloc();
+  mpq_set_d(_q,f.value<double>());
+  ap_scalar_set_mpq(_r,_q);
+  mpq_clear(_q);
   return _r;
 }
 
@@ -225,7 +215,9 @@ inline Number to_ikos_number(ap_coeff_t* coeff, bool round_upper) {
   return to_ikos_number< Number >(coeff->val.scalar, round_upper);
 }
 
-/// ap_scalar_t -> Bound< Number >
+/// \todo Conversion from ap_coeff_t* to ikos::FNumebr. By zoush99
+
+/// ap_scalar_t* -> Bound< Number >
 /// \brief Conversion from ap_scalar_t* to ikos::bound< Number >
 template < typename Number >
 inline Bound< Number > to_ikos_bound(ap_scalar_t* scalar, bool round_upper) {
@@ -333,7 +325,6 @@ inline const __mpq_struct* maximum_mpq(const mpq_t a, const mpq_t b) {
 
 /// \todo Abstract representation of the relationship between variables in
 /// an expression. By zoush99
-// template < typename Number, typename VariableRef >
 inline void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p[i]
   mpq_t _infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr;
   mpq_inits(_infQ,
@@ -381,9 +372,10 @@ inline void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p
         ikos_unreachable("unreachable");
       }
 
+      // Calculation of updated coefficients
       mpq_mul(r1, _infQ, lRE);
       mpq_mul(r2, _infQ, rRE);
-      mpq_mul(r3, _supQ, rRE);
+      mpq_mul(r3, _supQ, lRE);
       mpq_mul(r4, _supQ, rRE);
 
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
@@ -408,7 +400,7 @@ inline void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p
       // Constant term
       mpq_mul(r1, _infQ, lAE);
       mpq_mul(r2, _infQ, rAE);
-      mpq_mul(r3, _supQ, rAE);
+      mpq_mul(r3, _supQ, lAE);
       mpq_mul(r4, _supQ, rAE);
       mpq_add(_suml,
               _sum->inf->val.mpq,
@@ -465,29 +457,19 @@ inline void abstractExpr(ap_texpr0_t* expr, ap_interval_t* _sum) { // ap_csts->p
     ikos_unreachable("unreachable");
   }
 
-  mpq_clears(_infQ,
-             _supQ,
-             lRE,
-             rRE,
-             lAE,
-             rAE,
-             r1,
-             r2,
-             r3,
-             r4,
-             _suml,
-             _sumr,
-             NULL);
-
 } // end function abstractExpr
 
 inline void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
-  std::size_t i = 0;
+  std::size_t i;
+  mpq_t _t;
+  mpq_init(_t);
+  ap_interval_t* _sum = ap_interval_alloc();
   for (i = 0; i < num; i++) {
-    ap_interval_t* _sum = ap_interval_alloc();
-    ap_interval_set_double(_sum, 0, 0);
+    mpq_set_d(_t,0);
+    ap_interval_set_mpq(_sum, _t, _t);
     abstractExpr(ap_csts.p[i].texpr0, _sum);
   } // end for circulate
+  mpq_clear(_t);
 }
 
 /// \brief Add interval linearization method in this place. By zoush99
@@ -1409,9 +1391,9 @@ public:
       ap_csts.p[i++] = this->to_ap_constraint(cst);
     }
 
-    size_t num = i - 1;
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
+      size_t num = i - 1;
       /// _begin
       apron::abstractExprArr(ap_csts, num);
       /// _end
@@ -1421,6 +1403,7 @@ public:
       apron::intervalLinearizationArr< Number, VariableRef >(ap_csts,num);
       /// _end
     }
+
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
 
     // Improve the precision

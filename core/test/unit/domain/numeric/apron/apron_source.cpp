@@ -100,6 +100,7 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   mpq_set_d(three, 3);
   FNumber tw(2.0f);
   FNumber th(3.0f);
+  FNumber fo(4.0f);
 
   mpq_set_d(a, 0);
   mpq_set_d(b, 0);
@@ -112,16 +113,49 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
                                          AP_RTYPE_SINGLE,
                                          AP_RDIR_NEAREST);
 
-  // 构建表达式 2*x + 3
-  ap_texpr0_t* expr_2x_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
+  // 构建表达式 4*y
+  ap_texpr0_t* expr_4y = ap_texpr0_binop(AP_TEXPR_MUL,
+                                         ap_texpr0_dim(x_dim+1),
+                                         ikos::core::numeric::apron::to_ap_expr(fo),
+                                         AP_RTYPE_SINGLE,
+                                         AP_RDIR_NEAREST);
+
+  // 构建表达式 2*x + 4*y
+  ap_texpr0_t* expr_2x_plus_4y = ap_texpr0_binop(AP_TEXPR_ADD,
                                                 expr_2x,
-                                                ikos::core::numeric::apron::to_ap_expr(th),
+                                                expr_4y,
                                                 AP_RTYPE_SINGLE,
                                                 AP_RDIR_NEAREST);
 
-  ikos::core::numeric::apron::abstractExpr(expr_2x_plus_3, _sum);
-  std::cout << "_sum: " << std::endl;
+  // 构建表达式 2*x + 4*y + 3
+  ap_texpr0_t* expr_2x_plus_4y_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
+                                                expr_2x_plus_4y,
+                                                ikos::core::numeric::apron::to_ap_expr(th),
+                                                AP_RTYPE_SINGLE,
+                                                AP_RDIR_NEAREST);
+  std::cout<<"抽象前的浮点表达式："<<std::endl;
+  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+
+  ikos::core::numeric::apron::abstractExpr(expr_2x_plus_4y_plus_3, _sum);
+
+  std::cout<<"抽象后的实数表达式（不包括常数项）："<<std::endl;
+  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+
+  std::cout << "常数项: " << std::endl;
   ap_interval_print(_sum);
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+
+/*  ikos::core::numeric::apron::intervalLinearization(expr_2x_plus_4y_plus_3);
+
+  std::cout<<"区间线性化后的实数表达式（不包括常数项）："<<std::endl;
+  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
+  std::cout<<std::endl;
+  std::cout<<std::endl;*/
 
   mpq_clears(two, three, a, b, NULL);
 }
