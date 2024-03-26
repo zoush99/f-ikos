@@ -133,6 +133,12 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
                                                 ikos::core::numeric::apron::to_ap_expr(th),
                                                 AP_RTYPE_SINGLE,
                                                 AP_RDIR_NEAREST);
+
+  std::cout<<"表达式的维度："<<std::endl;
+  std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y)<<std::endl;
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+
   std::cout<<"抽象前的浮点表达式："<<std::endl;
   ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
   std::cout<<std::endl;
@@ -166,6 +172,69 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   mpq_clears(two, three, a, b, NULL);
 }
 
+BOOST_AUTO_TEST_CASE(intervalLinearlizationC){
+  // 定义变量和常量
+  ap_dim_t x_dim = 0; // 假设 x 是我们要处理的变量
+  mpq_t two, three, a, b;
+  ap_interval_t* _sum = ap_interval_alloc();
+  mpq_inits(two, three, a, b, NULL);
+
+  mpq_set_d(two, 2);
+  mpq_set_d(three, 3);
+  FNumber tw(2.0f);
+  FNumber th(3.0f);
+  FNumber fo(4.0f);
+
+  mpq_set_d(a, 0);
+  mpq_set_d(b, 0);
+  ap_interval_set_mpq(_sum, a, b);
+
+  // 构建表达式 2*x
+  ap_texpr0_t* expr_2x = ap_texpr0_binop(AP_TEXPR_MUL,
+                                         ap_texpr0_dim(x_dim),
+                                         ikos::core::numeric::apron::to_ap_expr(tw),
+                                         AP_RTYPE_SINGLE,
+                                         AP_RDIR_NEAREST);
+
+  // 构建表达式 4*y
+  ap_texpr0_t* expr_4y = ap_texpr0_binop(AP_TEXPR_MUL,
+                                         ap_texpr0_dim(x_dim+1),
+                                         ikos::core::numeric::apron::to_ap_expr(fo),
+                                         AP_RTYPE_SINGLE,
+                                         AP_RDIR_NEAREST);
+
+  // 构建表达式 2*x + 4*y
+  ap_texpr0_t* expr_2x_plus_4y = ap_texpr0_binop(AP_TEXPR_ADD,
+                                                 expr_2x,
+                                                 expr_4y,
+                                                 AP_RTYPE_SINGLE,
+                                                 AP_RDIR_NEAREST);
+
+  // 构建表达式 2*x + 4*y + 3
+  ap_texpr0_t* expr_2x_plus_4y_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
+                                                        expr_2x_plus_4y,
+                                                        ikos::core::numeric::apron::to_ap_expr(th),
+                                                        AP_RTYPE_SINGLE,
+                                                        AP_RDIR_NEAREST);
+
+  std::cout<<"表达式的维度："<<std::endl;
+  std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y)<<std::endl;
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+
+  std::map<unsigned int,ap_interval_t*> myMap;
+  std::cout<<"打印出映射："<<std::endl;
+  myMap=ikos::core::numeric::apron::intervalLinearizationC(expr_2x_plus_4y_plus_3);
+  std::cout << "map 中的所有键值对：" << std::endl;
+  for (const auto& pair : myMap) {
+    std::cout << pair.first << ": ";
+    ap_interval_print(pair.second);
+    std::cout<<std::endl;
+  }
+//  std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y)<<std::endl;
+  std::cout<<std::endl;
+  std::cout<<std::endl;
+}
 /// bugs here!!!
 BOOST_AUTO_TEST_CASE(leq) {
   VariableFactory vfac;

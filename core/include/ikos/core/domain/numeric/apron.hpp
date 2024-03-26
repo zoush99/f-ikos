@@ -538,7 +538,6 @@ inline void intervalLinearization(ap_texpr0_t* expr) {
 
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
-        /// \todo
         mpq_set_d(t, 2);
         mpq_set(_infQ, exprA_expr->inf->val.mpq);
         mpq_set(_supQ, exprA_expr->sup->val.mpq);
@@ -549,7 +548,6 @@ inline void intervalLinearization(ap_texpr0_t* expr) {
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
-        /// \todo
         mpq_set_d(t, 2);
         mpq_set(_infQ, exprB_expr->inf->val.mpq);
         mpq_set(_supQ, exprB_expr->sup->val.mpq);
@@ -569,7 +567,6 @@ inline void intervalLinearization(ap_texpr0_t* expr) {
 
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_NODE) {
-        /// \todo
         mpq_set_d(t, 2);
         mpq_set(_infQ, exprA_expr->inf->val.mpq);
         mpq_set(_supQ, exprA_expr->sup->val.mpq);
@@ -624,21 +621,103 @@ inline void intervalLinearizationArr(ap_tcons0_array_t& ap_csts,
   }
 }
 
+/// \brief
+inline std::map<unsigned int,ap_interval_t*> intervalLinearizationC(ap_texpr0_t* expr) {
+  std::map<unsigned int,ap_interval_t*> coeffMap;
+
+  unsigned int count = ap_texpr0_max_dim(expr);  // Dimensions of the expr
+
+  if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
+
+    ap_interval_t* exprA_expr =
+        expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
+    ap_interval_t* exprB_expr =
+        expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
+
+    if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
+
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
+        /// \todo
+        coeffMap[expr->val.node->exprB->val.dim]=exprA_expr;
+      }
+
+      else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
+        /// \todo
+        coeffMap[expr->val.node->exprA->val.dim]=exprB_expr;
+      }
+
+      else {
+        ikos_unreachable("unreachable");
+      }
+
+    } // end expr->val.node->op==AP_TEXPR_MUL
+
+    else if (expr->val.node->op ==
+             AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
+
+      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
+          expr->val.node->exprB->discr == AP_TEXPR_NODE) {
+        /// \todo
+        coeffMap[count]=exprA_expr;
+        intervalLinearizationC(expr->val.node->exprB);
+      }
+
+      else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
+               expr->val.node->exprB->discr == AP_TEXPR_CST) {
+        /// \todo
+        coeffMap[count]=exprB_expr;
+        intervalLinearizationC(expr->val.node->exprA);
+      }
+
+      else { // a * x + b * y
+        intervalLinearizationC(expr->val.node->exprA);
+        intervalLinearizationC(expr->val.node->exprB);
+      }
+
+    } // end expr->val.node->op==AP_TEXPR_ADD
+
+  } // end expr->discr == AP_TEXPR_NODE
+
+  else if (expr->discr == AP_TEXPR_CST) {
+    /// \todo
+    coeffMap[count]=expr->val.cst.val.interval;
+  }
+
+  else {
+    ikos_unreachable("unreachable");
+  }
+
+} // end function intervalLinearizationC
+
 /// \todo
 /// \brief Convert the interval to a scalar and then find the abstract value
-template < typename Number, typename  VariableRef>
+template < typename Number, typename VariableRef >
 inline void intervalLinearizationArrC(ap_tcons0_array_t& ap_csts,
-                                     std::size_t num) {
-  std::size_t i;
+                                      std::size_t num) {
+  std::size_t i, j;
 
-    /// \brief First take out the upper and lower bounds of the interval coefficients
+  /// \brief First take out the upper and lower bounds of the interval
+  /// coefficients
+  ap_interval_t** _intervalCoeff = ap_interval_array_alloc(num); /// \todo
+  ap_texpr0_t* expr;
 
-    /// \brief Compose the scalar into a new constraint expression and know the
-    /// relationship to the original constraints
+  for (i = 0; i < num; i++) {
+    expr = ap_csts.p[i].texpr0;
+    std::size_t count = ap_texpr0_max_dim(expr);
+    ap_coeff_t* _coeff;
 
-    /// \brief Get the abstract value of the original problem
+    for (j = 0; j < count; j++) {
+    }
+
+  } // end circle for
+
+  /// \brief Compose the scalar into a new constraint expression and know the
+  /// relationship to the original constraints
+
+  /// \brief Get the abstract value of the original problem
 }
-
 } // end namespace apron
 
 /// \brief Wrapper for APRON abstract domains
@@ -1465,8 +1544,6 @@ public:
 
       /// \todo Strict interval linearization
 
-
-
       /*  1. 将抽象域的约束集合转换为抽象值
        *  2. 将抽象值与原抽象值进行取交，得到了新的抽象值
        *  需要考虑的问题有：用了新的API会不会更加耗时了？之后想办法将一些操作更简单处理。
@@ -1477,7 +1554,8 @@ public:
       ap_abstract0_meet(manager(),
                         true,
                         this->_inv.get(),
-                        abstractVal); // Take the intersection of abstract values
+                        abstractVal); // Take the intersection of abstract
+                                      // values
     }
 
     else { // Not FNumber
