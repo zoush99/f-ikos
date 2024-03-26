@@ -622,10 +622,15 @@ inline void intervalLinearizationArr(ap_tcons0_array_t& ap_csts,
 }
 
 /// \brief
-inline std::map<unsigned int,ap_interval_t*> intervalLinearizationC(ap_texpr0_t* expr) {
-  std::map<unsigned int,ap_interval_t*> coeffMap;
-
-  unsigned int count = ap_texpr0_max_dim(expr);  // Dimensions of the expr
+inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
+  unsigned int count = ap_texpr0_max_dim(expr) + 1; // Dimensions of the expr
+  mpq_t zero;
+  mpq_init(zero);
+  mpq_set_d(zero, 0);
+  //  ap_interval_t* t=ap_interval_alloc();
+  //  ap_interval_set_mpq(t,zero,zero);
+  ap_interval_t** coeffArr = ap_interval_array_alloc(count);
+  //  ap_interval_t* coeffArr[count];
 
   if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
 
@@ -639,13 +644,17 @@ inline std::map<unsigned int,ap_interval_t*> intervalLinearizationC(ap_texpr0_t*
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
         /// \todo
-        coeffMap[expr->val.node->exprB->val.dim]=exprA_expr;
+        ap_interval_set_mpq(coeffArr[expr->val.node->exprB->val.dim],
+                            exprA_expr->inf->val.mpq,
+                            exprA_expr->sup->val.mpq);
       }
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
         /// \todo
-        coeffMap[expr->val.node->exprA->val.dim]=exprB_expr;
+        ap_interval_set_mpq(coeffArr[expr->val.node->exprA->val.dim],
+                            exprB_expr->inf->val.mpq,
+                            exprB_expr->sup->val.mpq);
       }
 
       else {
@@ -660,14 +669,19 @@ inline std::map<unsigned int,ap_interval_t*> intervalLinearizationC(ap_texpr0_t*
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_NODE) {
         /// \todo
-        coeffMap[count]=exprA_expr;
+        ap_interval_set_mpq(coeffArr[count - 1],
+                            exprA_expr->inf->val.mpq,
+                            exprA_expr->sup->val.mpq);
         intervalLinearizationC(expr->val.node->exprB);
       }
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) {
         /// \todo
-        coeffMap[count]=exprB_expr;
+        /// bugs here!!!
+        ap_interval_set_mpq(coeffArr[count - 1],
+                            exprB_expr->inf->val.mpq,
+                            exprB_expr->sup->val.mpq);
         intervalLinearizationC(expr->val.node->exprA);
       }
 
@@ -682,13 +696,16 @@ inline std::map<unsigned int,ap_interval_t*> intervalLinearizationC(ap_texpr0_t*
 
   else if (expr->discr == AP_TEXPR_CST) {
     /// \todo
-    coeffMap[count]=expr->val.cst.val.interval;
+    ap_interval_set_mpq(coeffArr[count - 1],
+                        expr->val.cst.val.interval->inf->val.mpq,
+                        expr->val.cst.val.interval->sup->val.mpq);
   }
 
   else {
     ikos_unreachable("unreachable");
   }
 
+  return coeffArr;
 } // end function intervalLinearizationC
 
 /// \todo
