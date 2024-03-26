@@ -485,7 +485,7 @@ inline void abstractConstant(ap_texpr0_t* expr, ap_interval_t* _sum) {
       } else {
         ikos_unreachable("unreachable");
       }
-    }else if(expr->val.node->op == AP_TEXPR_ADD){
+    } else if (expr->val.node->op == AP_TEXPR_ADD) {
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_NODE) {
         expr->val.node->exprA = ap_texpr0_cst_interval(_sum);
@@ -495,7 +495,7 @@ inline void abstractConstant(ap_texpr0_t* expr, ap_interval_t* _sum) {
       } else {
         ikos_unreachable("unreachable");
       }
-    } else{
+    } else {
       ikos_unreachable("unreachable");
     }
 
@@ -622,6 +622,21 @@ inline void intervalLinearizationArr(ap_tcons0_array_t& ap_csts,
   for (i = 0; i < num; i++) {
     intervalLinearization(ap_csts.p[i].texpr0);
   }
+}
+
+/// \todo
+/// \brief Convert the interval to a scalar and then find the abstract value
+template < typename Number, typename  VariableRef>
+inline void intervalLinearizationArrC(ap_tcons0_array_t& ap_csts,
+                                     std::size_t num) {
+  std::size_t i;
+
+    /// \brief First take out the upper and lower bounds of the interval coefficients
+
+    /// \brief Compose the scalar into a new constraint expression and know the
+    /// relationship to the original constraints
+
+    /// \brief Get the abstract value of the original problem
 }
 
 } // end namespace apron
@@ -1439,38 +1454,57 @@ public:
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
       size_t num = i - 1;
+      ap_abstract0_t* abstractVal; // Abstract value obtained from constraints
+
       /// \todo Abstract floating point numbers
       apron::abstractExprArr(ap_csts, num);
 
-      /// \todo Add interval linearization method in this place. Choose a center point
+      /// \todo Add interval linearization method in this place. Choose a center
+      /// point
       apron::intervalLinearizationArr< Number, VariableRef >(ap_csts, num);
 
       /// \todo Strict interval linearization
 
+
+
+      /*  1. 将抽象域的约束集合转换为抽象值
+       *  2. 将抽象值与原抽象值进行取交，得到了新的抽象值
+       *  需要考虑的问题有：用了新的API会不会更加耗时了？之后想办法将一些操作更简单处理。
+       */
+
+      /// \todo Modify num
+      abstractVal = ap_abstract0_of_tcons_array(manager(), 0, num, &ap_csts);
+      ap_abstract0_meet(manager(),
+                        true,
+                        this->_inv.get(),
+                        abstractVal); // Take the intersection of abstract values
     }
 
-    ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
+    else { // Not FNumber
+      ap_abstract0_meet_tcons_array(manager(),
+                                    true,
+                                    this->_inv.get(),
+                                    &ap_csts);
 
-    // Improve the precision
-    for (i = 0; i < csts.size() &&
-                !ap_abstract0_is_bottom(manager(), this->_inv.get());
-         i++) {
-      // Check satisfiability of ap_csts.p[i]
-      ap_tcons0_t& cst = ap_csts.p[i];
-      ap_interval_t* ap_intv =
-          ap_abstract0_bound_texpr(manager(), this->_inv.get(), cst.texpr0);
-      IntervalT intv = apron::to_ikos_interval< Number >(ap_intv);
-      if (intv.is_bottom() ||
-          (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
-          (cst.constyp == AP_CONS_SUPEQ && intv.ub() < BoundT(0)) ||
-          (cst.constyp == AP_CONS_DISEQ && intv == IntervalT(0))) {
-        // Cst is not satisfiable
-        this->set_to_bottom();
+      for (i = 0; i < csts.size() &&
+                  !ap_abstract0_is_bottom(manager(), this->_inv.get());
+           i++) {
+        // Check satisfiability of ap_csts.p[i]
+        ap_tcons0_t& cst = ap_csts.p[i];
+        ap_interval_t* ap_intv =
+            ap_abstract0_bound_texpr(manager(), this->_inv.get(), cst.texpr0);
+        IntervalT intv = apron::to_ikos_interval< Number >(ap_intv);
+        if (intv.is_bottom() ||
+            (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
+            (cst.constyp == AP_CONS_SUPEQ && intv.ub() < BoundT(0)) ||
+            (cst.constyp == AP_CONS_DISEQ && intv == IntervalT(0))) {
+          // Cst is not satisfiable
+          this->set_to_bottom();
+        }
+
+        ap_interval_free(ap_intv);
       }
-
-      ap_interval_free(ap_intv);
     }
-
     ap_tcons0_array_clear(&ap_csts);
   }
 
@@ -1494,7 +1528,6 @@ public:
       this->set_to_bottom();
     } else {
       this->forget(x);
-      /// (debug), It's all right until get here.
       this->refine(x, value);
     }
   }
