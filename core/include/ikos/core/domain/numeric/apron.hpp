@@ -630,7 +630,6 @@ inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
   //  ap_interval_t* t=ap_interval_alloc();
   //  ap_interval_set_mpq(t,zero,zero);
   ap_interval_t** coeffArr = ap_interval_array_alloc(count);
-  //  ap_interval_t* coeffArr[count];
 
   if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
 
@@ -644,17 +643,28 @@ inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
       if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
         /// \todo
-        ap_interval_set_mpq(coeffArr[expr->val.node->exprB->val.dim],
+        /// bugs here!!!
+/*        ap_interval_set_mpq(coeffArr[expr->val.node->exprB->val.dim],
                             exprA_expr->inf->val.mpq,
-                            exprA_expr->sup->val.mpq);
+                            exprA_expr->sup->val.mpq);*/
+        /// bugs here!!!
+        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->inf->val.mpq,exprA_expr->inf->val.mpq);
+        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->sup->val.mpq,exprA_expr->sup->val.mpq);
+
+        std::cout<<"B的维度:"<<expr->val.node->exprB->val.dim<<std::endl;
       }
 
       else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
         /// \todo
-        ap_interval_set_mpq(coeffArr[expr->val.node->exprA->val.dim],
+        /// bugs here!!!
+/*        ap_interval_set_mpq(coeffArr[expr->val.node->exprA->val.dim],
                             exprB_expr->inf->val.mpq,
-                            exprB_expr->sup->val.mpq);
+                            exprB_expr->sup->val.mpq);*/
+        /// \bugs here!!!
+        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->inf->val.mpq,exprB_expr->inf->val.mpq);
+        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->sup->val.mpq,exprB_expr->sup->val.mpq);
+        std::cout<<"A的维度:"<<expr->val.node->exprA->val.dim<<std::endl;
       }
 
       else {
@@ -678,7 +688,6 @@ inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
       else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
                expr->val.node->exprB->discr == AP_TEXPR_CST) {
         /// \todo
-        /// bugs here!!!
         ap_interval_set_mpq(coeffArr[count - 1],
                             exprB_expr->inf->val.mpq,
                             exprB_expr->sup->val.mpq);

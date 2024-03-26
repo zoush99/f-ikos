@@ -230,6 +230,16 @@ BOOST_AUTO_TEST_CASE(intervalLinearlizationC){
   ap_interval_t** inteA;
   inteA=ikos::core::numeric::apron::intervalLinearizationC(expr_2x_plus_4y_plus_3);
   std::cout << "map 中的所有键值对：" << std::endl;
+//  mpq_out_str(stdout,10,inteA[0]->inf->val.mpq);
+  printf("%d",inteA[0]->inf->val.dbl);
+  printf("%d",inteA[0]->sup->val.dbl);
+  printf("%d",inteA[1]->sup->val.dbl);
+  printf("%d",inteA[1]->sup->val.dbl);
+  printf("%d",inteA[2]->inf->val.dbl);
+  printf("%d",inteA[2]->sup->val.dbl);
+  mpq_out_str(stdout,10,inteA[2]->inf->val.mpq);
+  mpq_out_str(stdout,10,inteA[2]->sup->val.mpq);
+
   ap_interval_print(inteA[0]);
   ap_interval_print(inteA[1]);
   ap_interval_print(inteA[2]);
