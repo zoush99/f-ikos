@@ -519,6 +519,7 @@ inline void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
     abstractConstant(ap_csts.p[i].texpr0, _sum);
   } // end for circulate
   mpq_clear(_t);
+  ap_interval_free(_sum);
 }
 
 /// \brief Add interval linearization method in this place. By zoush99
@@ -1438,14 +1439,14 @@ public:
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
       size_t num = i - 1;
-      /// _begin
+      /// \todo Abstract floating point numbers
       apron::abstractExprArr(ap_csts, num);
-      /// _end
 
-      /// \todo Add interval linearization method in this place. By zoush99
-      /// _begin
+      /// \todo Add interval linearization method in this place. Choose a center point
       apron::intervalLinearizationArr< Number, VariableRef >(ap_csts, num);
-      /// _end
+
+      /// \todo Strict interval linearization
+
     }
 
     ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
