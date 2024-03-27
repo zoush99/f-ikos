@@ -875,13 +875,13 @@ public:
   /// By zoush99
   /// @{
   /// \brief Return the modulus
-  const FNumber& modulus() const {
+  const FNumber modulus() const {
     ikos_assert(!this->is_bottom());
     return FNumber(1);
   }
 
   /// \brief Return the residue
-  const FNumber& residue() const {
+  const FNumber residue() const {
     ikos_assert(!this->is_bottom());
     return FNumber(0);
   }

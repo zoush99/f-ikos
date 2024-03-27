@@ -96,11 +96,11 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   ap_interval_t* _sum = ap_interval_alloc();
   mpq_inits(two, three, a, b, NULL);
 
-  mpq_set_d(two, 2);
-  mpq_set_d(three, 3);
-  FNumber tw(2.0f);
-  FNumber th(3.0f);
-  FNumber fo(4.0f);
+  mpq_set_d(two, 2.2);
+  mpq_set_d(three, 3.2);
+  FNumber tw(2.2f);
+  FNumber th(3.2f);
+  FNumber fo(4.2f);
 
   mpq_set_d(a, 0);
   mpq_set_d(b, 0);
@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   ap_texpr0_t* expr_2x_plus_4y_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
                                                 expr_2x_plus_4y,
                                                 ikos::core::numeric::apron::to_ap_expr(th),
-                                                AP_RTYPE_SINGLE,
+                                                AP_RTYPE_DOUBLE,
                                                 AP_RDIR_NEAREST);
 
   std::cout<<"表达式的维度："<<std::endl;
@@ -144,30 +144,16 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   std::cout<<std::endl;
   std::cout<<std::endl;
 
-  ikos::core::numeric::apron::abstractExpr(expr_2x_plus_4y_plus_3, _sum);
+  bool T =true;
+  bool F = false;
+  bool* tptr=&T;
+  bool* fptr=&F;
+  ap_manager_t* Man = ap_ppl_poly_manager_alloc(false);
 
-  std::cout<<"抽象后的实数表达式（不包括常数项）："<<std::endl;
-  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
-  std::cout<<std::endl;
-  std::cout<<std::endl;
+  /// \brief Interval-linearization to a scalar coefficient
+  ap_intlinearize_tcons0_array(Man, this->_inv.get(),expr_2x_plus_4y_plus_3,
+                               tptr,AP_SCALAR_MPQ,AP_LINEXPR_QUASILINEAR,tptr, tptr,2, fptr);
 
-  std::cout << "常数项: " << std::endl;
-  ap_interval_print(_sum);
-  std::cout<<std::endl;
-  std::cout<<std::endl;
-
-  std::cout<<"最终抽象后的实数表达式："<<std::endl;
-  ikos::core::numeric::apron::abstractConstant(expr_2x_plus_4y_plus_3,_sum);
-  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
-  std::cout<<std::endl;
-  std::cout<<std::endl;
-
-  ikos::core::numeric::apron::intervalLinearization(expr_2x_plus_4y_plus_3);
-
-  std::cout<<"区间线性化后的实数表达式（不包括常数项）："<<std::endl;
-  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
-  std::cout<<std::endl;
-  std::cout<<std::endl;
 
   mpq_clears(two, three, a, b, NULL);
 }
@@ -226,26 +212,6 @@ BOOST_AUTO_TEST_CASE(intervalLinearlizationC){
   ikos::core::numeric::apron::abstractConstant(expr_2x_plus_4y_plus_3,_sum);
   ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
 
-  std::cout<<"打印出映射："<<std::endl;
-  ap_interval_t** inteA;
-  inteA=ikos::core::numeric::apron::intervalLinearizationC(expr_2x_plus_4y_plus_3);
-  std::cout << "map 中的所有键值对：" << std::endl;
-//  mpq_out_str(stdout,10,inteA[0]->inf->val.mpq);
-  printf("%d",inteA[0]->inf->val.dbl);
-  printf("%d",inteA[0]->sup->val.dbl);
-  printf("%d",inteA[1]->sup->val.dbl);
-  printf("%d",inteA[1]->sup->val.dbl);
-  printf("%d",inteA[2]->inf->val.dbl);
-  printf("%d",inteA[2]->sup->val.dbl);
-  mpq_out_str(stdout,10,inteA[2]->inf->val.mpq);
-  mpq_out_str(stdout,10,inteA[2]->sup->val.mpq);
-
-  ap_interval_print(inteA[0]);
-  ap_interval_print(inteA[1]);
-  ap_interval_print(inteA[2]);
-//  std::cout<<std::endl;
-//  std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y_plus_3)<<std::endl;
-//  std::cout<<std::endl;
 }
 
 

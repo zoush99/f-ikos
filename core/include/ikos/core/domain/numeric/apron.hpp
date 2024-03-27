@@ -159,12 +159,10 @@ inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpq_init(_f);
   ap_texpr0_t* result = nullptr;
   if (f.bit_width() == 32) { // fl
-    mpq_set_d(_f,
-              f.value< float >());
+    mpq_set_d(_f, f.value< float >());
     result = ap_texpr0_cst_scalar_mpq(_f);
   } else if (f.bit_width() == 64) { // do
-    mpq_set_d(_f,
-              f.value< double >());
+    mpq_set_d(_f, f.value< double >());
     result = ap_texpr0_cst_scalar_mpq(_f);
   } else {
     ikos_unreachable("unreachable");
@@ -1434,12 +1432,27 @@ public:
     if (std::is_same< Number, FNumber >::value) {
       /// \brief Convert to real expression
 
-      /// \brief Intervallinearlization to a scalar coefficient
+      bool T =true;
+      bool F = false;
+      bool* tptr=&T;
+      bool* fptr=&F;
 
-      /// \brief meet
-      ap_generic_meet_intlinearize_tcons_array(manager(), true,this->_inv.get(),&ap_csts,AP_SCALAR_MPQ,&ap_csts);
+      /// \brief Interval-linearization to a scalar coefficient
+      ap_intlinearize_tcons0_array(manager(), this->_inv.get(),&ap_csts,
+                                   tptr,AP_SCALAR_MPQ,AP_LINEXPR_QUASILINEAR,tptr, tptr,2, fptr);
+
+      /// \brief Interval-linearization and  meet
+
+/*      ap_generic_meet_intlinearize_tcons_array(manager(),
+                                               true,
+                                               this->_inv.get(),
+                                               &ap_csts,
+                                               AP_SCALAR_MPQ,
+                                               AP_LINEXPR_QUASILINEAR,
+          reinterpret_cast<
+              void* (*)(ap_manager_t*, bool, void*, ap_lincons0_array_t*) >(
+              &ap_csts));*/
     }
-
     else { // Not FNumber
       ap_abstract0_meet_tcons_array(manager(),
                                     true,
