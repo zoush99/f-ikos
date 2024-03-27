@@ -644,12 +644,13 @@ inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
           expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
         /// \todo
         /// bugs here!!!
-/*        ap_interval_set_mpq(coeffArr[expr->val.node->exprB->val.dim],
+        int i=expr->val.node->exprB->val.dim;
+        ap_interval_set_mpq(coeffArr[i],
                             exprA_expr->inf->val.mpq,
-                            exprA_expr->sup->val.mpq);*/
+                            exprA_expr->sup->val.mpq);
         /// bugs here!!!
-        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->inf->val.mpq,exprA_expr->inf->val.mpq);
-        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->sup->val.mpq,exprA_expr->sup->val.mpq);
+//        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->inf->val.mpq,exprA_expr->inf->val.mpq);
+//        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->sup->val.mpq,exprA_expr->sup->val.mpq);
 
         std::cout<<"B的维度:"<<expr->val.node->exprB->val.dim<<std::endl;
       }
@@ -658,12 +659,13 @@ inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
                expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
         /// \todo
         /// bugs here!!!
-/*        ap_interval_set_mpq(coeffArr[expr->val.node->exprA->val.dim],
+        int i=expr->val.node->exprB->val.dim;
+        ap_interval_set_mpq(coeffArr[i],
                             exprB_expr->inf->val.mpq,
-                            exprB_expr->sup->val.mpq);*/
+                            exprB_expr->sup->val.mpq);
         /// \bugs here!!!
-        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->inf->val.mpq,exprB_expr->inf->val.mpq);
-        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->sup->val.mpq,exprB_expr->sup->val.mpq);
+//        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->inf->val.mpq,exprB_expr->inf->val.mpq);
+//        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->sup->val.mpq,exprB_expr->sup->val.mpq);
         std::cout<<"A的维度:"<<expr->val.node->exprA->val.dim<<std::endl;
       }
 
