@@ -56,13 +56,17 @@
 #include <oct.h>
 #include <pk.h>
 #include <pkeq.h>
+// By zoush99
+// _Begin
+#include "ap_generic.h"
+
+// _End
 
 #include <ikos/core/adt/patricia_tree/map.hpp>
 #include <ikos/core/domain/numeric/abstract_domain.hpp>
 #include <ikos/core/linear_constraint.hpp>
 #include <ikos/core/linear_expression.hpp>
 #include <ikos/core/number.hpp>
-// #include <ikos/core/number/f_relational_interval_number.hpp> // By zoush99
 #include <ikos/core/support/assert.hpp>
 #include <ikos/core/value/numeric/congruence.hpp>
 #include <ikos/core/value/numeric/interval.hpp>
@@ -149,28 +153,23 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
 
-/// zoush99, FNumber -> [mpq_t,mpq_t] -> ap_texpr0_t*
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-  mpq_t _infQ, _supQ;
-  mpq_inits(_infQ, _supQ, NULL);
+  mpq_t _f;
+  mpq_init(_f);
   ap_texpr0_t* result = nullptr;
   if (f.bit_width() == 32) { // fl
-    mpq_set_d(_infQ,
-              ikos::core::detail::find_next_value_down(f.value< float >()));
-    mpq_set_d(_supQ,
-              ikos::core::detail::find_next_value_up(f.value< float >()));
-    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
+    mpq_set_d(_f,
+              f.value< float >());
+    result = ap_texpr0_cst_scalar_mpq(_f);
   } else if (f.bit_width() == 64) { // do
-    mpq_set_d(_infQ,
-              ikos::core::detail::find_next_value_down(f.value< double >()));
-    mpq_set_d(_supQ,
-              ikos::core::detail::find_next_value_up(f.value< double >()));
-    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
+    mpq_set_d(_f,
+              f.value< double >());
+    result = ap_texpr0_cst_scalar_mpq(_f);
   } else {
     ikos_unreachable("unreachable");
   }
-  mpq_clears(_infQ, _supQ, NULL);
+  mpq_clear(_f);
   return result;
 }
 
@@ -214,8 +213,6 @@ inline Number to_ikos_number(ap_coeff_t* coeff, bool round_upper) {
 
   return to_ikos_number< Number >(coeff->val.scalar, round_upper);
 }
-
-/// \todo Conversion from ap_coeff_t* to ikos::FNumebr. By zoush99
 
 /// ap_scalar_t* -> Bound< Number >
 /// \brief Conversion from ap_scalar_t* to ikos::bound< Number >
@@ -621,131 +618,6 @@ inline void intervalLinearizationArr(ap_tcons0_array_t& ap_csts,
   }
 }
 
-/// \brief
-inline ap_interval_t** intervalLinearizationC(ap_texpr0_t* expr) {
-  unsigned int count = ap_texpr0_max_dim(expr) + 1; // Dimensions of the expr
-  mpq_t zero;
-  mpq_init(zero);
-  mpq_set_d(zero, 0);
-  //  ap_interval_t* t=ap_interval_alloc();
-  //  ap_interval_set_mpq(t,zero,zero);
-  ap_interval_t** coeffArr = ap_interval_array_alloc(count);
-
-  if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
-
-    ap_interval_t* exprA_expr =
-        expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
-    ap_interval_t* exprB_expr =
-        expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
-
-    if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
-
-      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-          expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
-        /// \todo
-        /// bugs here!!!
-        int i=expr->val.node->exprB->val.dim;
-        ap_interval_set_mpq(coeffArr[i],
-                            exprA_expr->inf->val.mpq,
-                            exprA_expr->sup->val.mpq);
-        /// bugs here!!!
-//        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->inf->val.mpq,exprA_expr->inf->val.mpq);
-//        mpq_set(coeffArr[expr->val.node->exprB->val.dim]->sup->val.mpq,exprA_expr->sup->val.mpq);
-
-        std::cout<<"B的维度:"<<expr->val.node->exprB->val.dim<<std::endl;
-      }
-
-      else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
-               expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
-        /// \todo
-        /// bugs here!!!
-        int i=expr->val.node->exprB->val.dim;
-        ap_interval_set_mpq(coeffArr[i],
-                            exprB_expr->inf->val.mpq,
-                            exprB_expr->sup->val.mpq);
-        /// \bugs here!!!
-//        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->inf->val.mpq,exprB_expr->inf->val.mpq);
-//        mpq_set(coeffArr[expr->val.node->exprA->val.dim]->sup->val.mpq,exprB_expr->sup->val.mpq);
-        std::cout<<"A的维度:"<<expr->val.node->exprA->val.dim<<std::endl;
-      }
-
-      else {
-        ikos_unreachable("unreachable");
-      }
-
-    } // end expr->val.node->op==AP_TEXPR_MUL
-
-    else if (expr->val.node->op ==
-             AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
-
-      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-          expr->val.node->exprB->discr == AP_TEXPR_NODE) {
-        /// \todo
-        ap_interval_set_mpq(coeffArr[count - 1],
-                            exprA_expr->inf->val.mpq,
-                            exprA_expr->sup->val.mpq);
-        intervalLinearizationC(expr->val.node->exprB);
-      }
-
-      else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
-               expr->val.node->exprB->discr == AP_TEXPR_CST) {
-        /// \todo
-        ap_interval_set_mpq(coeffArr[count - 1],
-                            exprB_expr->inf->val.mpq,
-                            exprB_expr->sup->val.mpq);
-        intervalLinearizationC(expr->val.node->exprA);
-      }
-
-      else { // a * x + b * y
-        intervalLinearizationC(expr->val.node->exprA);
-        intervalLinearizationC(expr->val.node->exprB);
-      }
-
-    } // end expr->val.node->op==AP_TEXPR_ADD
-
-  } // end expr->discr == AP_TEXPR_NODE
-
-  else if (expr->discr == AP_TEXPR_CST) {
-    /// \todo
-    ap_interval_set_mpq(coeffArr[count - 1],
-                        expr->val.cst.val.interval->inf->val.mpq,
-                        expr->val.cst.val.interval->sup->val.mpq);
-  }
-
-  else {
-    ikos_unreachable("unreachable");
-  }
-
-  return coeffArr;
-} // end function intervalLinearizationC
-
-/// \todo
-/// \brief Convert the interval to a scalar and then find the abstract value
-template < typename Number, typename VariableRef >
-inline void intervalLinearizationArrC(ap_tcons0_array_t& ap_csts,
-                                      std::size_t num) {
-  std::size_t i, j;
-
-  /// \brief First take out the upper and lower bounds of the interval
-  /// coefficients
-  ap_interval_t** _intervalCoeff = ap_interval_array_alloc(num); /// \todo
-  ap_texpr0_t* expr;
-
-  for (i = 0; i < num; i++) {
-    expr = ap_csts.p[i].texpr0;
-    std::size_t count = ap_texpr0_max_dim(expr);
-    ap_coeff_t* _coeff;
-
-    for (j = 0; j < count; j++) {
-    }
-
-  } // end circle for
-
-  /// \brief Compose the scalar into a new constraint expression and know the
-  /// relationship to the original constraints
-
-  /// \brief Get the abstract value of the original problem
-}
 } // end namespace apron
 
 /// \brief Wrapper for APRON abstract domains
@@ -1560,30 +1432,12 @@ public:
 
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
-      size_t num = i - 1;
-      ap_abstract0_t* abstractVal; // Abstract value obtained from constraints
+      /// \brief Convert to real expression
 
-      /// \todo Abstract floating point numbers
-      apron::abstractExprArr(ap_csts, num);
+      /// \brief Intervallinearlization to a scalar coefficient
 
-      /// \todo Add interval linearization method in this place. Choose a center
-      /// point
-      apron::intervalLinearizationArr< Number, VariableRef >(ap_csts, num);
-
-      /// \todo Strict interval linearization
-
-      /*  1. 将抽象域的约束集合转换为抽象值
-       *  2. 将抽象值与原抽象值进行取交，得到了新的抽象值
-       *  需要考虑的问题有：用了新的API会不会更加耗时了？之后想办法将一些操作更简单处理。
-       */
-
-      /// \todo Modify num
-      abstractVal = ap_abstract0_of_tcons_array(manager(), 0, num, &ap_csts);
-      ap_abstract0_meet(manager(),
-                        true,
-                        this->_inv.get(),
-                        abstractVal); // Take the intersection of abstract
-                                      // values
+      /// \brief meet
+      ap_generic_meet_intlinearize_tcons_array(manager(), true,this->_inv.get(),&ap_csts,AP_SCALAR_MPQ,&ap_csts);
     }
 
     else { // Not FNumber
