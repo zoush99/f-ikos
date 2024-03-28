@@ -153,6 +153,7 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
 
+/// \todo?
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpq_t _f;
@@ -1254,6 +1255,7 @@ public:
   }
 
   /// By zoush99
+  /// \todo
   /// \brief Converting Floating Point Data Types to Interval Representation
   void assign(VariableRef x, const LinearExpressionT& e) override {
     std::lock_guard< std::mutex > lock(this->_mutex);
@@ -1288,6 +1290,7 @@ private:
     }
   }
 
+  /// \todo
   /// \brief Apply `x = left op right`
   void apply(BinaryOperator op,
              VariableRef x,
