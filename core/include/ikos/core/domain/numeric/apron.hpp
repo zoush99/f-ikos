@@ -109,9 +109,9 @@ inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* r,
                                           dataty d) {
   if (d == Ffnumber) { // fl
-    return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_NEAREST);
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_UP);
   } else if (d == Fdnumber) { // do
-    return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_NEAREST);
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_UP);
   } else {
     ikos_unreachable("unreachable");
   }
@@ -1262,7 +1262,6 @@ public:
       return;
     }
 
-    // FNumber -> ap_texpr0_t ([a,b] type)
     ap_texpr0_t* t = this->to_ap_expr(e);
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
@@ -1431,27 +1430,22 @@ public:
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
       /// \brief Convert to real expression
-
+      std::size_t num = i;
       bool T =true;
       bool F = false;
       bool* tptr=&T;
       bool* fptr=&F;
 
+      ap_lincons0_array_t ap_lin_csts = ap_lincons0_array_make(num);
+
       /// \brief Interval-linearization to a scalar coefficient
-      ap_intlinearize_tcons0_array(manager(), this->_inv.get(),&ap_csts,
+      ap_lin_csts = ap_intlinearize_tcons0_array(manager(), this->_inv.get(),&ap_csts,
                                    tptr,AP_SCALAR_MPQ,AP_LINEXPR_QUASILINEAR,tptr, tptr,2, fptr);
 
-      /// \brief Interval-linearization and  meet
+      /// \brief Meet to update the abstract value
+      ap_abstract0_meet_lincons_array(manager(), true,this->_inv.get(),&ap_lin_csts);
 
-/*      ap_generic_meet_intlinearize_tcons_array(manager(),
-                                               true,
-                                               this->_inv.get(),
-                                               &ap_csts,
-                                               AP_SCALAR_MPQ,
-                                               AP_LINEXPR_QUASILINEAR,
-          reinterpret_cast<
-              void* (*)(ap_manager_t*, bool, void*, ap_lincons0_array_t*) >(
-              &ap_csts));*/
+      ap_lincons0_array_clear(&ap_lin_csts);
     }
     else { // Not FNumber
       ap_abstract0_meet_tcons_array(manager(),

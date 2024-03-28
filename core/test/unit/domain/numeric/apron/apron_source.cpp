@@ -84,9 +84,9 @@ BOOST_AUTO_TEST_CASE(function_abstractExpr_NODE) {
 
   auto inv1 = ApronDomain::top();
   /// bugs here!!! function intervalLinearization
-    inv1.set(x, Interval(0));
-    BOOST_CHECK(inv1.leq(ApronDomain::top()));
-    BOOST_CHECK(!inv1.leq(ApronDomain::bottom()));
+  inv1.set(x, Interval(0));
+  BOOST_CHECK(inv1.leq(ApronDomain::top()));
+  BOOST_CHECK(!inv1.leq(ApronDomain::bottom()));
 }
 
 BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
@@ -107,58 +107,50 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   ap_interval_set_mpq(_sum, a, b);
 
   // 构建表达式 2*x
-  ap_texpr0_t* expr_2x = ap_texpr0_binop(AP_TEXPR_MUL,
-                                         ap_texpr0_dim(x_dim),
-                                         ikos::core::numeric::apron::to_ap_expr(tw),
-                                         AP_RTYPE_SINGLE,
-                                         AP_RDIR_NEAREST);
+  ap_texpr0_t* expr_2x =
+      ap_texpr0_binop(AP_TEXPR_MUL,
+                      ap_texpr0_dim(x_dim),
+                      ikos::core::numeric::apron::to_ap_expr(tw),
+                      AP_RTYPE_SINGLE,
+                      AP_RDIR_UP);
 
   // 构建表达式 4*y
-  ap_texpr0_t* expr_4y = ap_texpr0_binop(AP_TEXPR_MUL,
-                                         ap_texpr0_dim(x_dim+1),
-                                         ikos::core::numeric::apron::to_ap_expr(fo),
-                                         AP_RTYPE_SINGLE,
-                                         AP_RDIR_NEAREST);
+  ap_texpr0_t* expr_4y =
+      ap_texpr0_binop(AP_TEXPR_MUL,
+                      ap_texpr0_dim(x_dim + 1),
+                      ikos::core::numeric::apron::to_ap_expr(fo),
+                      AP_RTYPE_SINGLE,
+                      AP_RDIR_UP);
 
   // 构建表达式 2*x + 4*y
   ap_texpr0_t* expr_2x_plus_4y = ap_texpr0_binop(AP_TEXPR_ADD,
-                                                expr_2x,
-                                                expr_4y,
-                                                AP_RTYPE_SINGLE,
-                                                AP_RDIR_NEAREST);
+                                                 expr_2x,
+                                                 expr_4y,
+                                                 AP_RTYPE_SINGLE,
+                                                 AP_RDIR_UP);
 
   // 构建表达式 2*x + 4*y + 3
-  ap_texpr0_t* expr_2x_plus_4y_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
-                                                expr_2x_plus_4y,
-                                                ikos::core::numeric::apron::to_ap_expr(th),
-                                                AP_RTYPE_DOUBLE,
-                                                AP_RDIR_NEAREST);
+  ap_texpr0_t* expr_2x_plus_4y_plus_3 =
+      ap_texpr0_binop(AP_TEXPR_ADD,
+                      expr_2x_plus_4y,
+                      ikos::core::numeric::apron::to_ap_expr(th),
+                      AP_RTYPE_DOUBLE,
+                      AP_RDIR_UP);
 
-  std::cout<<"表达式的维度："<<std::endl;
-  std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y)<<std::endl;
-  std::cout<<std::endl;
-  std::cout<<std::endl;
+  std::cout << "表达式的维度：" << std::endl;
+  std::cout << ap_texpr0_max_dim(expr_2x_plus_4y) << std::endl;
+  std::cout << std::endl;
+  std::cout << std::endl;
 
-  std::cout<<"抽象前的浮点表达式："<<std::endl;
+  std::cout << "抽象前的浮点表达式：" << std::endl;
   ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
-  std::cout<<std::endl;
-  std::cout<<std::endl;
-
-  bool T =true;
-  bool F = false;
-  bool* tptr=&T;
-  bool* fptr=&F;
-  ap_manager_t* Man = ap_ppl_poly_manager_alloc(false);
-
-  /// \brief Interval-linearization to a scalar coefficient
-  ap_intlinearize_tcons0_array(Man, this->_inv.get(),expr_2x_plus_4y_plus_3,
-                               tptr,AP_SCALAR_MPQ,AP_LINEXPR_QUASILINEAR,tptr, tptr,2, fptr);
-
+  std::cout << std::endl;
+  std::cout << std::endl;
 
   mpq_clears(two, three, a, b, NULL);
 }
 
-BOOST_AUTO_TEST_CASE(intervalLinearlizationC){
+BOOST_AUTO_TEST_CASE(intervalLinearlizationC) {
   // 定义变量和常量
   ap_dim_t x_dim = 0; // 假设 x 是我们要处理的变量
   mpq_t two, three, a, b;
@@ -176,18 +168,20 @@ BOOST_AUTO_TEST_CASE(intervalLinearlizationC){
   ap_interval_set_mpq(_sum, a, b);
 
   // 构建表达式 2*x
-  ap_texpr0_t* expr_2x = ap_texpr0_binop(AP_TEXPR_MUL,
-                                         ap_texpr0_dim(x_dim),
-                                         ikos::core::numeric::apron::to_ap_expr(tw),
-                                         AP_RTYPE_SINGLE,
-                                         AP_RDIR_NEAREST);
+  ap_texpr0_t* expr_2x =
+      ap_texpr0_binop(AP_TEXPR_MUL,
+                      ap_texpr0_dim(x_dim),
+                      ikos::core::numeric::apron::to_ap_expr(tw),
+                      AP_RTYPE_SINGLE,
+                      AP_RDIR_NEAREST);
 
   // 构建表达式 4*y
-  ap_texpr0_t* expr_4y = ap_texpr0_binop(AP_TEXPR_MUL,
-                                         ap_texpr0_dim(x_dim+1),
-                                         ikos::core::numeric::apron::to_ap_expr(fo),
-                                         AP_RTYPE_SINGLE,
-                                         AP_RDIR_NEAREST);
+  ap_texpr0_t* expr_4y =
+      ap_texpr0_binop(AP_TEXPR_MUL,
+                      ap_texpr0_dim(x_dim + 1),
+                      ikos::core::numeric::apron::to_ap_expr(fo),
+                      AP_RTYPE_SINGLE,
+                      AP_RDIR_NEAREST);
 
   // 构建表达式 2*x + 4*y
   ap_texpr0_t* expr_2x_plus_4y = ap_texpr0_binop(AP_TEXPR_ADD,
@@ -197,21 +191,19 @@ BOOST_AUTO_TEST_CASE(intervalLinearlizationC){
                                                  AP_RDIR_NEAREST);
 
   // 构建表达式 2*x + 4*y + 3
-  ap_texpr0_t* expr_2x_plus_4y_plus_3 = ap_texpr0_binop(AP_TEXPR_ADD,
-                                                        expr_2x_plus_4y,
-                                                        ikos::core::numeric::apron::to_ap_expr(th),
-                                                        AP_RTYPE_SINGLE,
-                                                        AP_RDIR_NEAREST);
+  ap_texpr0_t* expr_2x_plus_4y_plus_3 =
+      ap_texpr0_binop(AP_TEXPR_ADD,
+                      expr_2x_plus_4y,
+                      ikos::core::numeric::apron::to_ap_expr(th),
+                      AP_RTYPE_SINGLE,
+                      AP_RDIR_NEAREST);
 
-/*  std::cout<<"表达式的维度："<<std::endl;
-  std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y)<<std::endl;
-  std::cout<<std::endl;
-  std::cout<<std::endl;*/
+  /*  std::cout<<"表达式的维度："<<std::endl;
+    std::cout<<ap_texpr0_max_dim(expr_2x_plus_4y)<<std::endl;
+    std::cout<<std::endl;
+    std::cout<<std::endl;*/
 
   ikos::core::numeric::apron::abstractExpr(expr_2x_plus_4y_plus_3, _sum);
-  ikos::core::numeric::apron::abstractConstant(expr_2x_plus_4y_plus_3,_sum);
+  ikos::core::numeric::apron::abstractConstant(expr_2x_plus_4y_plus_3, _sum);
   ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
-
 }
-
-
