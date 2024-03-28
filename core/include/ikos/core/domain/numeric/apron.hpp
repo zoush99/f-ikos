@@ -73,6 +73,102 @@
 
 namespace ikos {
 namespace core {
+
+namespace detail {
+/// \brief Covert floating point numbers to binary representation
+template < typename T >
+void decompose_fl(T _value,
+                  int& sign_bit,
+                  int& exponent,
+                  long long& mantissa) {
+  if (std::is_same< T, float >::value) { // fl
+    int _bits = *reinterpret_cast< int* >(&_value);
+
+    sign_bit = _bits >> 31 & 1;
+    exponent = _bits >> 23 & 0xFF;
+    mantissa = _bits & 0x7FFFFF;
+  } else { // do
+    long long _bits = *reinterpret_cast< long long* >(&_value);
+
+    sign_bit = _bits >> 63 & 1;
+    exponent = _bits >> 52 & 0x7FF;
+    mantissa = _bits & 0xFFFFFFFFFFFFFLL;
+  }
+}
+
+/// \brief Convert binary representations to floating point numbers
+template < typename T >
+T compose_fl(int sign_bit, int exponent, long long mantissa) {
+  if (std::is_same< T, float >::value) { // fl
+    int _bits = (sign_bit << 31) | (exponent << 23) | mantissa;
+
+    T result = *reinterpret_cast< float* >(&_bits);
+    return result;
+  } else { // do
+    long long _bits = (static_cast< long long >(sign_bit) << 63) |
+                      (static_cast< long long >(exponent) << 52) |
+                      mantissa;
+
+    T result = *reinterpret_cast< double* >(&_bits);
+    return result;
+  }
+}
+
+/// \brief Find the nearest floating point number that is less than the nearest
+/// neighbor
+template < typename T >
+T find_next_value_down(T _value) {
+  int sign_bit, exponent;
+  long long mantissa;
+  decompose_fl< T >(_value, sign_bit, exponent, mantissa);
+
+  if (exponent == 0 && mantissa == 0) { // Non-normalized number
+    mantissa -= 1;
+  } else {
+    if (mantissa == 0) {                     // Sub-normal number
+      if (std::is_same< T, float >::value) { // fl
+        mantissa = (1LL << 23) - 1;
+      } else { // do
+        mantissa = (1LL << 52) - 1;
+      }
+      exponent -= 1;
+    } else { // Normalized number
+      mantissa -= 1;
+    }
+  }
+
+  return compose_fl< T >(sign_bit, exponent, mantissa);
+}
+
+/// \brief Find the nearest floating point number that is greater than the
+/// nearest neighbor
+template < typename T >
+T find_next_value_up(T _value) {
+  int sign_bit, exponent;
+  long long mantissa;
+  decompose_fl< T >(_value, sign_bit, exponent, mantissa);
+
+  if (exponent == 0 && mantissa == 0) { // Non-normalized number
+    mantissa += 1;
+  } else {
+    if (std::is_same< T, float >::value &&
+        mantissa == (1LL << 23) - 1) { // fl // Sub-normal number
+      mantissa = 0;
+      exponent += 1;
+    } else if (std::is_same< T, double >::value &&
+               mantissa == (1LL << 52) - 1) { // do // Sub-normal number
+      mantissa = 0;
+      exponent += 1;
+    } else { // Normalized number
+      mantissa += 1;
+    }
+  }
+
+  return compose_fl< T >(sign_bit, exponent, mantissa);
+}
+
+} // namespace detail
+
 namespace numeric {
 
 namespace apron {
@@ -152,7 +248,7 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   mpq_class e(q.mpq());
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
-
+/*
 /// \todo?
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
@@ -169,6 +265,31 @@ inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
     ikos_unreachable("unreachable");
   }
   mpq_clear(_f);
+  return result;
+}*/
+
+/// zoush99, FNumber -> [mpq_t,mpq_t] -> ap_texpr0_t*
+/// \brief Conversion from ikos::FNumber to ap_texpr0_t*
+inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
+  mpq_t _infQ, _supQ;
+  mpq_inits(_infQ, _supQ, NULL);
+  ap_texpr0_t* result = nullptr;
+  if (f.bit_width() == 32) { // fl
+    mpq_set_d(_infQ,
+              ikos::core::detail::find_next_value_down(f.value< float >()));
+    mpq_set_d(_supQ,
+              ikos::core::detail::find_next_value_up(f.value< float >()));
+    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
+  } else if (f.bit_width() == 64) { // do
+    mpq_set_d(_infQ,
+              ikos::core::detail::find_next_value_down(f.value< double >()));
+    mpq_set_d(_supQ,
+              ikos::core::detail::find_next_value_up(f.value< double >()));
+    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
+  } else {
+    ikos_unreachable("unreachable");
+  }
+  mpq_clears(_infQ, _supQ, NULL);
   return result;
 }
 
@@ -1255,7 +1376,6 @@ public:
   }
 
   /// By zoush99
-  /// \todo
   /// \brief Converting Floating Point Data Types to Interval Representation
   void assign(VariableRef x, const LinearExpressionT& e) override {
     std::lock_guard< std::mutex > lock(this->_mutex);
@@ -1433,7 +1553,14 @@ public:
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
       /// \brief Convert to real expression
-      std::size_t num = i;
+
+      size_t num = i - 1;
+      ap_abstract0_t* abstractVal; // Abstract value obtained from constraints
+
+      /// \todo Abstract floating point numbers
+      apron::abstractExprArr(ap_csts, num);
+
+      num = i;
       bool T =true;
       bool F = false;
       bool* tptr=&T;
