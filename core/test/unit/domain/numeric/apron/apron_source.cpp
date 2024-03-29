@@ -98,9 +98,9 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
 
   mpq_set_d(two, 2.2);
   mpq_set_d(three, 3.2);
-  FNumber tw(2.2f);
-  FNumber th(3.2f);
-  FNumber fo(4.2f);
+  FNumber tw(1.0f);
+  FNumber th(2.0f);
+  FNumber fo(3.0f);
 
   mpq_set_d(a, 0);
   mpq_set_d(b, 0);
@@ -137,16 +137,18 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
                       AP_RTYPE_DOUBLE,
                       AP_RDIR_UP);
 
-  std::cout << "表达式的维度：" << std::endl;
-  std::cout << ap_texpr0_max_dim(expr_2x_plus_4y) << std::endl;
-  std::cout << std::endl;
-  std::cout << std::endl;
-
   std::cout << "抽象前的浮点表达式：" << std::endl;
   ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
   std::cout << std::endl;
   std::cout << std::endl;
 
+  ikos::core::numeric::apron::abstractExpr(expr_2x_plus_4y_plus_3,_sum);
+  ikos::core::numeric::apron::abstractConstant(expr_2x_plus_4y_plus_3,_sum);
+
+  std::cout << "抽象后的浮点表达式：" << std::endl;
+  ap_texpr0_print(expr_2x_plus_4y_plus_3, nullptr);
+  std::cout << std::endl;
+  std::cout << std::endl;
   mpq_clears(two, three, a, b, NULL);
 }
 

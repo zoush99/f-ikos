@@ -82,14 +82,14 @@ void decompose_fl(T _value,
                   int& exponent,
                   long long& mantissa) {
   if (std::is_same< T, float >::value) { // fl
-    int _bits = *reinterpret_cast< int* >(&_value);
-
+    int _bits;
+    memcpy(&_bits, &_value, sizeof(_value));
     sign_bit = _bits >> 31 & 1;
     exponent = _bits >> 23 & 0xFF;
     mantissa = _bits & 0x7FFFFF;
   } else { // do
-    long long _bits = *reinterpret_cast< long long* >(&_value);
-
+    long long _bits;
+    memcpy(&_bits, &_value, sizeof(_value));
     sign_bit = _bits >> 63 & 1;
     exponent = _bits >> 52 & 0x7FF;
     mantissa = _bits & 0xFFFFFFFFFFFFFLL;
@@ -102,14 +102,16 @@ T compose_fl(int sign_bit, int exponent, long long mantissa) {
   if (std::is_same< T, float >::value) { // fl
     int _bits = (sign_bit << 31) | (exponent << 23) | mantissa;
 
-    T result = *reinterpret_cast< float* >(&_bits);
+    T result ;
+    memcpy(&result,&_bits,sizeof(_bits));
     return result;
   } else { // do
     long long _bits = (static_cast< long long >(sign_bit) << 63) |
                       (static_cast< long long >(exponent) << 52) |
                       mantissa;
 
-    T result = *reinterpret_cast< double* >(&_bits);
+    T result ;
+    memcpy(&result,&_bits,sizeof(_bits));
     return result;
   }
 }
@@ -248,25 +250,6 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
   mpq_class e(q.mpq());
   return ap_texpr0_cst_scalar_mpq(e.get_mpq_t());
 }
-/*
-/// \todo?
-/// \brief Conversion from ikos::FNumber to ap_texpr0_t*
-inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-  mpq_t _f;
-  mpq_init(_f);
-  ap_texpr0_t* result = nullptr;
-  if (f.bit_width() == 32) { // fl
-    mpq_set_d(_f, f.value< float >());
-    result = ap_texpr0_cst_scalar_mpq(_f);
-  } else if (f.bit_width() == 64) { // do
-    mpq_set_d(_f, f.value< double >());
-    result = ap_texpr0_cst_scalar_mpq(_f);
-  } else {
-    ikos_unreachable("unreachable");
-  }
-  mpq_clear(_f);
-  return result;
-}*/
 
 /// zoush99, FNumber -> [mpq_t,mpq_t] -> ap_texpr0_t*
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
@@ -326,12 +309,22 @@ inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return FNumber(mpq_get_d(scalar->val.mpq));
 }
 
-/// \brief Conversion from ap_coeff_t* to ikos::ZNumber/QNumber
+template <typename Number>
+inline FNumber to_ikos_number(ap_interval_t* interval ,bool /*round_upper*/){
+  return FNumber(ikos::core::detail::find_next_value_up(static_cast<float>(mpq_get_d(interval->inf->val.mpq))));
+}
+
+/// \brief Conversion from ap_coeff_t* to ikos::ZNumber/QNumber/FNumber
 template < typename Number >
 inline Number to_ikos_number(ap_coeff_t* coeff, bool round_upper) {
   ikos_assert(coeff->discr == AP_COEFF_SCALAR);
-
-  return to_ikos_number< Number >(coeff->val.scalar, round_upper);
+  if ((std::is_same<Number,ZNumber>::value) || (std::is_same<Number,QNumber>::value)){
+    return to_ikos_number< Number >(coeff->val.scalar, round_upper);
+  }else if(std::is_same<Number,FNumber>::value){
+    return to_ikos_number<Number>(coeff->val.interval,round_upper);
+  }else{
+    ikos_unreachable("unreachable");
+  }
 }
 
 /// ap_scalar_t* -> Bound< Number >
@@ -637,105 +630,6 @@ inline void abstractExprArr(ap_tcons0_array_t& ap_csts, std::size_t num) {
   } // end for circulate
   mpq_clear(_t);
   ap_interval_free(_sum);
-}
-
-/// \brief Add interval linearization method in this place. By zoush99
-inline void intervalLinearization(ap_texpr0_t* expr) {
-  mpq_t _infQ, _supQ, _sum, t;
-  mpq_inits(_infQ, _supQ, _sum, t, NULL);
-
-  if (expr->discr == AP_TEXPR_NODE) { // Two child nodes
-
-    ap_interval_t* exprA_expr =
-        expr->val.node->exprA->val.cst.val.interval; // Interval coefficient
-    ap_interval_t* exprB_expr =
-        expr->val.node->exprB->val.cst.val.interval; // Interval coefficient
-
-    if (expr->val.node->op == AP_TEXPR_MUL) { // MUL: n * x or x * n
-
-      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-          expr->val.node->exprB->discr == AP_TEXPR_DIM) { // n * x
-        mpq_set_d(t, 2);
-        mpq_set(_infQ, exprA_expr->inf->val.mpq);
-        mpq_set(_supQ, exprA_expr->sup->val.mpq);
-        mpq_add(_sum, _infQ, _supQ);
-        mpq_div(t, _sum, t);
-        expr->val.node->exprA = ap_texpr0_cst_scalar_mpq(t);
-      }
-
-      else if (expr->val.node->exprA->discr == AP_TEXPR_DIM &&
-               expr->val.node->exprB->discr == AP_TEXPR_CST) { // x * n
-        mpq_set_d(t, 2);
-        mpq_set(_infQ, exprB_expr->inf->val.mpq);
-        mpq_set(_supQ, exprB_expr->sup->val.mpq);
-        mpq_add(_sum, _infQ, _supQ);
-        mpq_div(t, _sum, t);
-        expr->val.node->exprB = ap_texpr0_cst_scalar_mpq(t);
-      }
-
-      else {
-        ikos_unreachable("unreachable");
-      }
-
-    } // end expr->val.node->op==AP_TEXPR_MUL
-
-    else if (expr->val.node->op ==
-             AP_TEXPR_ADD) { // ADD: a + n * x or a + x * n
-
-      if (expr->val.node->exprA->discr == AP_TEXPR_CST &&
-          expr->val.node->exprB->discr == AP_TEXPR_NODE) {
-        mpq_set_d(t, 2);
-        mpq_set(_infQ, exprA_expr->inf->val.mpq);
-        mpq_set(_supQ, exprA_expr->sup->val.mpq);
-        mpq_add(_sum, _infQ, _supQ);
-        mpq_div(t, _sum, t);
-        expr->val.node->exprA = ap_texpr0_cst_scalar_mpq(t);
-        intervalLinearization(expr->val.node->exprB);
-      }
-
-      else if (expr->val.node->exprA->discr == AP_TEXPR_NODE &&
-               expr->val.node->exprB->discr == AP_TEXPR_CST) {
-        mpq_set_d(t, 2);
-        mpq_set(_infQ, exprB_expr->inf->val.mpq);
-        mpq_set(_supQ, exprB_expr->sup->val.mpq);
-        mpq_add(_sum, _infQ, _supQ);
-        mpq_div(t, _sum, t);
-        expr->val.node->exprB = ap_texpr0_cst_scalar_mpq(t);
-        intervalLinearization(expr->val.node->exprA);
-      }
-
-      else { // a * x + b * y
-        intervalLinearization(expr->val.node->exprA);
-        intervalLinearization(expr->val.node->exprB);
-      }
-
-    } // end expr->val.node->op==AP_TEXPR_ADD
-
-  } // end expr->discr == AP_TEXPR_NODE
-
-  else if (expr->discr == AP_TEXPR_CST) {
-    mpq_set_d(t, 2);
-    mpq_set(_infQ, expr->val.cst.val.interval->inf->val.mpq);
-    mpq_set(_supQ, expr->val.cst.val.interval->sup->val.mpq);
-    mpq_add(_sum, _infQ, _supQ);
-    mpq_div(t, _sum, t);
-    expr = ap_texpr0_cst_scalar_mpq(t);
-  }
-
-  else {
-    ikos_unreachable("unreachable");
-  }
-
-  mpq_clears(_infQ, _supQ, _sum, t, NULL);
-} // end function intervalLinearization
-
-template < typename Number, typename VariableRef >
-inline void intervalLinearizationArr(ap_tcons0_array_t& ap_csts,
-                                     std::size_t num) {
-  std::size_t i;
-  for (i = 0; i < num; i++) {
-    intervalLinearization(ap_csts.p[i].texpr0);
-  }
 }
 
 } // end namespace apron
@@ -1555,7 +1449,6 @@ public:
       /// \brief Convert to real expression
 
       size_t num = i - 1;
-      ap_abstract0_t* abstractVal; // Abstract value obtained from constraints
 
       /// \todo Abstract floating point numbers
       apron::abstractExprArr(ap_csts, num);
