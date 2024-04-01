@@ -249,6 +249,7 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
 
 /// zoush99, FNumber -> [mpq_t,mpq_t] -> ap_texpr0_t*
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
+/// \bugs here!!!
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpq_t _infQ, _supQ;
   mpq_inits(_infQ, _supQ, NULL);

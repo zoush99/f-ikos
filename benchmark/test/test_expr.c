@@ -1,13 +1,14 @@
 #include <stdio.h>
  int main() {
-     int x,y;
-     int i=0;
+     double x,y;
+     double i;
      y=3;
      x=5;
-     while(i<3){
-        x=x+i;
-        i=i+1;
+     // i=i+x;
+     for(i=1.0;i<3.0;i=i+1.0){
+        i=i+2.0;
      }
-     y= y/(x-8);
+    //  i=i+0.1;
+     y= y/(i-4.0);
      return y;
  }
