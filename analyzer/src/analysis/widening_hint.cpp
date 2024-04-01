@@ -65,11 +65,13 @@ private:
   using WtoCycleT = core::WtoCycle< ar::Code* >;
 
 private:
-  WideningHints& _hints;
+//  WideningHints& _hints;
+  WideningHints<MachineInt>& _hints;
 
 public:
   /// \brief Constructor
-  explicit WideningHintWtoVisitor(WideningHints& hints) : _hints(hints) {}
+//  explicit WideningHintWtoVisitor(WideningHints& hints) : _hints(hints) {}
+  explicit WideningHintWtoVisitor(WideningHints<MachineInt>& hints) : _hints(hints) {}
 
   /// \brief No copy constructor
   WideningHintWtoVisitor(const WideningHintWtoVisitor&) = delete;

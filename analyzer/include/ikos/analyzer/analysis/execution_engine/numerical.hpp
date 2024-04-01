@@ -607,7 +607,6 @@ private:
   }; // end class IntegerImplicitBitcast
 
   /// \brief Floating point variable implement bitcast
-  /// Finishing modifying by zoush99
   class FloatingPointImplicitBitcast : public ScalarLit::template Visitor<> {
   private:
     Variable* _lhs;
@@ -967,6 +966,7 @@ public:
                  this->_lit_factory.get(s->operand()));
   }
 
+  /// \todo
   /// \brief Execute an UnaryOperation statement
   void exec(ar::UnaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {

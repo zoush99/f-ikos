@@ -59,10 +59,12 @@ namespace ikos {
 namespace analyzer {
 
 /// \brief Widening hints for a control flow graph
+template < typename Number >
 class WideningHints {
 private:
   /// \brief Map of widening hints associated to a given cycle head
-  using Map = llvm::DenseMap< ar::BasicBlock*, MachineInt >;
+//  using Map = llvm::DenseMap< ar::BasicBlock*, MachineInt >;
+  using Map = llvm::DenseMap< ar::BasicBlock*, Number >;
 
 private:
   Map _map;
@@ -91,16 +93,19 @@ public:
   ~WideningHints() = default;
 
   /// \brief Return the widening hint for the given cycle head, if any
-  boost::optional< const MachineInt& > get(ar::BasicBlock* head) const;
+//  boost::optional< const MachineInt& > get(ar::BasicBlock* head) const;
+  boost::optional< const Number& > get(ar::BasicBlock* head) const;
 
   /// \brief Add a widening hint for the given cycle head
-  void add(ar::BasicBlock* head, const MachineInt& hint);
+//  void add(ar::BasicBlock* head, const MachineInt& hint);
+  void add(ar::BasicBlock* head, const Number& hint);
 
   /// \brief Begin iterator over the list of widening hints
   Iterator begin() const { return this->_map.begin(); }
 
   /// \brief End iterator over the list of widening hints
   Iterator end() const { return this->_map.end(); }
+
 
 }; // end class WideningHints
 
@@ -125,7 +130,8 @@ public:
   boost::optional< unsigned > narrowing_iterations;
 
   /// \brief Widening hints
-  WideningHints widening_hints;
+//  WideningHints widening_hints;
+  WideningHints<MachineInt> widening_hints;
 
 public:
   /// \brief Constructor
