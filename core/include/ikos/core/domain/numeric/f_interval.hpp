@@ -288,8 +288,6 @@ public:
           this->set_to_bottom();
           return;
         }
-        /// \todo do some changes by zoush99
-        /// \todo bugs here!!!
         if (yi.ub().is_minus_infinity() || xi.lb().is_plus_infinity()) {
           this->set_to_bottom();
           return;

@@ -77,10 +77,7 @@ namespace core {
 namespace detail {
 /// \brief Covert floating point numbers to binary representation
 template < typename T >
-void decompose_fl(T _value,
-                  int& sign_bit,
-                  int& exponent,
-                  long long& mantissa) {
+void decompose_fl(T _value, int& sign_bit, int& exponent, long long& mantissa) {
   if (std::is_same< T, float >::value) { // fl
     int _bits;
     memcpy(&_bits, &_value, sizeof(_value));
@@ -102,16 +99,15 @@ T compose_fl(int sign_bit, int exponent, long long mantissa) {
   if (std::is_same< T, float >::value) { // fl
     int _bits = (sign_bit << 31) | (exponent << 23) | mantissa;
 
-    T result ;
-    memcpy(&result,&_bits,sizeof(_bits));
+    T result;
+    memcpy(&result, &_bits, sizeof(_bits));
     return result;
   } else { // do
     long long _bits = (static_cast< long long >(sign_bit) << 63) |
-                      (static_cast< long long >(exponent) << 52) |
-                      mantissa;
+                      (static_cast< long long >(exponent) << 52) | mantissa;
 
-    T result ;
-    memcpy(&result,&_bits,sizeof(_bits));
+    T result;
+    memcpy(&result, &_bits, sizeof(_bits));
     return result;
   }
 }
@@ -309,20 +305,22 @@ inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return FNumber(mpq_get_d(scalar->val.mpq));
 }
 
-template <typename Number>
-inline FNumber to_ikos_number(ap_interval_t* interval ,bool /*round_upper*/){
-  return FNumber(ikos::core::detail::find_next_value_up(static_cast<float>(mpq_get_d(interval->inf->val.mpq))));
+template < typename Number >
+inline FNumber to_ikos_number(ap_interval_t* interval, bool /*round_upper*/) {
+  return FNumber(ikos::core::detail::find_next_value_up(
+      static_cast< float >(mpq_get_d(interval->inf->val.mpq))));
 }
 
 /// \brief Conversion from ap_coeff_t* to ikos::ZNumber/QNumber/FNumber
 template < typename Number >
 inline Number to_ikos_number(ap_coeff_t* coeff, bool round_upper) {
   ikos_assert(coeff->discr == AP_COEFF_SCALAR);
-  if ((std::is_same<Number,ZNumber>::value) || (std::is_same<Number,QNumber>::value)){
+  if ((std::is_same< Number, ZNumber >::value) ||
+      (std::is_same< Number, QNumber >::value)) {
     return to_ikos_number< Number >(coeff->val.scalar, round_upper);
-  }else if(std::is_same<Number,FNumber>::value){
-    return to_ikos_number<Number>(coeff->val.interval,round_upper);
-  }else{
+  } else if (std::is_same< Number, FNumber >::value) {
+    return to_ikos_number< Number >(coeff->val.interval, round_upper);
+  } else {
     ikos_unreachable("unreachable");
   }
 }
@@ -868,6 +866,19 @@ private:
       r = apron::binop_expr< Number >(AP_TEXPR_ADD, r, term, d);
     }
 
+    /// By zoush99
+    if (std::is_same< Number, FNumber >::value) {
+      mpq_t _t;
+      mpq_init(_t);
+      ap_interval_t* _sum = ap_interval_alloc();
+        mpq_set_d(_t, 0);
+        ap_interval_set_mpq(_sum, _t, _t);
+        ikos::core::numeric::apron::abstractExpr(r, _sum);
+        ikos::core::numeric::apron::abstractConstant(r, _sum);
+      mpq_clear(_t);
+      ap_interval_free(_sum);
+    }
+
     return r;
   }
 
@@ -1279,6 +1290,8 @@ public:
     }
 
     ap_texpr0_t* t = this->to_ap_expr(e);
+    /// \todo
+
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
                               true,
@@ -1446,30 +1459,44 @@ public:
 
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
-      /// \brief Convert to real expression
+/*      /// \brief Convert to real expression
 
-      size_t num = i - 1;
+      std::size_t num = i - 1;
 
       /// \todo Abstract floating point numbers
       apron::abstractExprArr(ap_csts, num);
+      */
 
-      num = i;
-      bool T =true;
+      std::size_t num = i;
+      bool T = true;
       bool F = false;
-      bool* tptr=&T;
-      bool* fptr=&F;
+      bool* tptr = &T;
+      bool* fptr = &F;
 
       ap_lincons0_array_t ap_lin_csts = ap_lincons0_array_make(num);
 
       /// \brief Interval-linearization to a scalar coefficient
-      ap_lin_csts = ap_intlinearize_tcons0_array(manager(), this->_inv.get(),&ap_csts,
-                                   tptr,AP_SCALAR_MPQ,AP_LINEXPR_QUASILINEAR,tptr, tptr,2, fptr);
+      ap_lin_csts = ap_intlinearize_tcons0_array(manager(),
+                                                 this->_inv.get(),
+                                                 &ap_csts,
+                                                 tptr,
+                                                 AP_SCALAR_MPQ,
+                                                 AP_LINEXPR_QUASILINEAR,
+                                                 tptr,
+                                                 tptr,
+                                                 2,
+                                                 fptr);
 
       /// \brief Meet to update the abstract value
-      ap_abstract0_meet_lincons_array(manager(), true,this->_inv.get(),&ap_lin_csts);
+      ap_abstract0_meet_lincons_array(manager(),
+                                      true,
+                                      this->_inv.get(),
+                                      &ap_lin_csts);
 
+      ap_tcons0_array_clear(&ap_csts);
       ap_lincons0_array_clear(&ap_lin_csts);
     }
+
     else { // Not FNumber
       ap_abstract0_meet_tcons_array(manager(),
                                     true,
