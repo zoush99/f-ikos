@@ -1459,13 +1459,6 @@ public:
 
     /// \brief The coefficients are already in interval form
     if (std::is_same< Number, FNumber >::value) {
-/*      /// \brief Convert to real expression
-
-      std::size_t num = i - 1;
-
-      /// \todo Abstract floating point numbers
-      apron::abstractExprArr(ap_csts, num);
-      */
 
       std::size_t num = i;
       bool T = true;
