@@ -100,26 +100,32 @@ AssertProverChecker::CheckResult AssertProverChecker::check_assert(
   }
 
   auto flag = IntInterval::bottom(32, Unsigned);
+  auto flagF = FnuInterval::bottom();
   if (cond.is_machine_int()) {
     flag = IntInterval(cond.machine_int());
   } else if (cond.is_machine_int_var()) {
     flag = inv.normal().int_to_interval(cond.var());
-  } else 
-  /// \todo(Consider floating-point types.)
-  {
+  } else if (cond.is_floating_point()) {
+    flagF=FnuInterval (cond.floating_point());
+  } else if (cond.is_floating_point_var()) {
+    flagF=inv.normal().float_to_interval(cond.var());
+  } else {
     log::error("unexpected argument to __ikos_assert()");
     return {CheckKind::UnexpectedOperand, Result::Error};
   }
 
   boost::optional< MachineInt > v = flag.singleton();
+  boost::optional< FNumber > vF = flagF.singleton();
 
-  if (v && (*v).is_zero()) {
+  if ((v && (*v).is_zero()) || (vF && (*vF).is_zero())) {
     // The condition is definitely 0
     if (auto msg = this->display_assert_check(Result::Error, call)) {
       *msg << ": ∀x ∈ " << cond << ", x == 0\n";
     }
     return {CheckKind::Assert, Result::Error};
-  } else if (flag.contains(MachineInt::zero(32, Unsigned))) {  /// \todo(floating point)
+  } else if (flag.contains(
+                 MachineInt::zero(32, Unsigned)) || flagF.contains(
+                 FNumber::zero(32,Signedness::Signed))) {
     // The condition may be 0
     if (auto msg = this->display_assert_check(Result::Warning, call)) {
       *msg << ": (∃x ∈ " << cond << ", x == 0) and (∃x ∈ " << cond

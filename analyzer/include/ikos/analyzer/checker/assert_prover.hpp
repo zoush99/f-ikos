@@ -52,6 +52,7 @@ namespace analyzer {
 class AssertProverChecker final : public Checker {
 private:
   using IntInterval = core::machine_int::Interval;
+  using FnuInterval = core::numeric::Interval<FNumber>;
 
 public:
   /// \brief Constructor

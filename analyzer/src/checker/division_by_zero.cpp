@@ -60,7 +60,6 @@ const char* DivisionByZeroChecker::description() const {
   return "Division by zero checker";
 }
 
-/// \todo(floating point)
 void DivisionByZeroChecker::check(ar::Statement* stmt,
                                   const value::AbstractDomain& inv,
                                   CallContext* call_context) {
@@ -130,10 +129,10 @@ DivisionByZeroChecker::CheckResult DivisionByZeroChecker::check_division(
       *msg << ": ∀d ∈ divisor, d == 0\n";
     }
     return {CheckKind::DivisionByZero, Result::Error, {}};
-  } else if ((divisor.contains(
-                 MachineInt::zero(divisor.bit_width(), divisor.sign()))) ||
-             (fdivisor.contains(
-                 FNumber ::zero(32, Signedness::Signed) ))){
+  } else if (divisor.contains(
+                 MachineInt::zero(divisor.bit_width(), divisor.sign())) ||
+             fdivisor.contains(
+                 FNumber ::zero(32, Signedness::Signed) )){
     // The second operand may be 0
     if (auto msg = this->display_division_check(Result::Warning, stmt)) {
       *msg << ": ∃d ∈ divisor, d == 0\n";

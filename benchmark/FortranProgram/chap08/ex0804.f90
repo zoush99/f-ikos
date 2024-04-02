@@ -1,15 +1,33 @@
 program  ex0804
 implicit none
-  integer :: a = 1
-  integer :: b = 2
-  call add(a,b)  ! 把变量a及b交给子程序add来处理
+  real::first,second
+  real,external::adds
+  real r
+  first=1
+  second=2
+  call add(first,second)
+  
+  r=adds(first,second)
   stop
 end
 
-subroutine add(first, second)
+subroutine add(first,second)
 implicit none
-  integer :: first, second ! first,second的内容会从CALL时得到
-  write(*,*) first+second
+  real::first,second
+  real::c ,d
+  c = 3
+  d = c
+  first = c / (c - d)
   return
 end
 
+real function adds(a,b) result(r)
+implicit none
+real::a,b
+real::c ,d
+! real r
+c = 3
+d = 3
+r = c / (c - d)
+return
+end

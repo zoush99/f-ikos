@@ -184,6 +184,7 @@ class Interval:
         return self.lb == self.ub
 
     def to_constraints(self, var):
+        # bugs here!!! By zoush99
         assert not self.is_bottom()
 
         if self.is_top():

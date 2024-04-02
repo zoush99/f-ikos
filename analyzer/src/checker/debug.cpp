@@ -107,6 +107,20 @@ static void print_interval(LogMessage& msg,
   }
 }
 
+/// \brief Print the interval of an floating point variable
+static void print_interval(LogMessage& msg,
+                           const std::string& repr,
+                           const core::numeric::Interval<FNumber>& i) {
+  msg << "\t" << repr;
+  if (i.is_bottom()) {
+    msg << " is bottom\n";
+  } else if (auto x = i.singleton()) {
+    msg << " is " << *x << "\n";
+  } else {
+    msg << " is in [" << i.lb() << ", " << i.ub() << "]\n";
+  }
+}
+
 /// \brief Remove the '&' at the beginning of a string
 static std::string deref(std::string s) {
   if (!s.empty() && s[0] == '&') {

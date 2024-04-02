@@ -1,8 +1,9 @@
-#include <stdio.h>
  int main() {
-     double x=3;
-     double y=3;
-     double i=0;
+     int x=3;
+     int y=3;
+     int i=0;
+     int a=1;
+     int b =1;
      x = x / (y-x);
      return x;
  }
