@@ -1,8 +1,8 @@
 program ex0821
-  implicit none声明func是个自定义函数
+  implicit none ! 声明func是个自定义函数
   real, intrinsic :: sin  ! 声明sin是库函数
-
-  call ExecFunc(func)
+  real :: num = 1
+  call ExecFunc(num)
   call ExecFunc(sin)
 
   stop
@@ -18,6 +18,6 @@ end
 real function func(num)
   implicit none
   real :: num
-  func = num*2
+  num = num*2
   return
 end function

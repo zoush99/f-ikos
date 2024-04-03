@@ -11,7 +11,7 @@ program  ex0826
   call sub(1)   ! 使用1个参数
   call sub(2,3) ! 使用2个参数
   stop
-end program ex0817
+end program ex0826
 
 subroutine sub(a,b)
   implicit none
