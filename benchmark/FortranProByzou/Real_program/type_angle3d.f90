@@ -28,6 +28,7 @@
 ! OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ! ------------------------------------------------------------------------------
 
+! 这个文件中有结构体类型，不知道能不能分析，如果能分析就可以用这个分析。
 ! from https://github.com/astrofrog/fortranlib/blob/master/src/type_angle3d.f90
 module type_angle3d
 
@@ -157,7 +158,7 @@ module type_angle3d
   
     end function dot_product_dp
   
-  
+    ! \todo
     subroutine rotate_angle3d_dp(a_local,a_coord,a_final)
   
       ! This subroutine is used to add a local angle, such as as

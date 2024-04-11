@@ -35,8 +35,8 @@ using ApronDomain = ikos::core::numeric::
     ApronDomain< ikos::core::numeric::apron::PplPolyhedra, FNumber, Variable >;
 
 BOOST_AUTO_TEST_CASE(to_ap_expr_FNumber) {
-  float f = 0.1f;
-  double g = 0.1;
+  float f = 0;
+  float g = 0.7f;
   FNumber _f(f);
   FNumber _g(g);
   //  std::cout.precision(30);

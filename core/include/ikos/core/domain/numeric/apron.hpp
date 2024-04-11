@@ -254,7 +254,12 @@ inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpq_t _infQ, _supQ;
   mpq_inits(_infQ, _supQ, NULL);
   ap_texpr0_t* result = nullptr;
-  if (f.bit_width() == 32) { // fl
+  if(f.is_zero()){
+    mpq_set_d(_infQ,0);
+    mpq_set_d(_supQ,0);
+    result = ap_texpr0_cst_interval_mpq(_infQ,_supQ);
+  }
+  else if (f.bit_width() == 32) { // fl
     mpq_set_d(_infQ,
               ikos::core::detail::find_next_value_down(f.value< float >()));
     mpq_set_d(_supQ,
@@ -434,8 +439,8 @@ inline const __mpq_struct* maximum_mpq(const mpq_t a, const mpq_t b) {
 
 /// \todo Abstract representation of the relationship between variables in
 /// an expression. By zoush99
-inline void abstractExpr(ap_texpr0_t* expr,
-                         ap_interval_t* _sum) { // ap_csts->p[i]
+inline void abstractExpr(ap_texpr0_t* expr, // ap_csts->p[i]
+                         ap_interval_t* _sum) {
   mpq_t _infQ, _supQ, lRE, rRE, lAE, rAE, r1, r2, r3, r4, _suml, _sumr;
   mpq_inits(_infQ,
             _supQ,
@@ -1291,7 +1296,6 @@ public:
     }
 
     ap_texpr0_t* t = this->to_ap_expr(e);
-    /// \todo
 
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),

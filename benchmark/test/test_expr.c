@@ -11,6 +11,6 @@
      x = i + 1.0;
      }
 
-     y= y/(i-x);
+     y= y+(i-x);
      return y;
  }

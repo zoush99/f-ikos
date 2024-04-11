@@ -18,7 +18,7 @@ module types
        complex(dp), pointer :: vec(:) => null()
     end type
     
-    end module
+end module
 
 module constants
 use types, only: dp
@@ -403,6 +403,7 @@ module utils
         
         contains
         
+        !!! \todo
         real(dp) function bisect(f, a, b, tol) result(c)
         ! Solves f(x) = 0 on the interval [a, b] using the bisection method
         procedure(func) :: f
@@ -429,6 +430,7 @@ module utils
         c = (a_ + b_)/2
         end function
         
+        ! \todo
         real(dp) function secant(f, a,b,tol, maxiter) result (c)
         !Solves f(x) = 0 on using the a and b as starting values
         procedure(func) :: f
@@ -651,6 +653,7 @@ module special
     
     contains
     
+    ! \todo
     function besseljn_real(order, x) result(res)
         integer, intent(in) :: order
         real(dp), intent(in) :: x
@@ -728,7 +731,7 @@ module special
         endif
     end function besseljv_complex
     
-    
+    ! \todo
     function besselyn_real(order, x) result(res)
         integer, intent(in) :: order
         real(dp), intent(in) :: x
@@ -1441,6 +1444,7 @@ module special
         res = resReal + i_*resImag
     end function dairybi
     
+    ! \todo
     ! rotate Hankel functions of negative order:
     function Hrotate(hkind, order) result(factor)
         integer, intent(in) :: hkind
