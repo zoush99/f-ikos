@@ -83,34 +83,6 @@ public:
       this->_bit_width = 64;
     }
   }
-/*
-
-  /// \brief Create a floating point number from a ZNumber
-  FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign)
-      : _bit_width(bit_width), _sign(sign) {
-    ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    if (bit_width == 32) { // fl
-      this->_n.f = n.to< int >();
-      this->_bit_width = 32;
-    } else { // do
-      this->_n.d = n.to< int >();
-      this->_bit_width = 64;
-    }
-  }
-
-  /// \brief Create a floating point number from a ZNumber
-  FNumber(const ZNumber& n, uint64_t bit_width, Signedness sign, NormalizedTag)
-      : _bit_width(bit_width), _sign(sign) {
-    ikos_assert_msg((bit_width == 32 || bit_width == 64), "invalid bit width");
-    if (bit_width == 32) { // fl
-      this->_n.f = n.to< int >();
-      this->_bit_width = 32;
-    } else { // do
-      this->_n.d = n.to< int >();
-      this->_bit_width = 64;
-    }
-  }
-*/
 
   /// \brief Create a floating point number from a type
   template <
@@ -226,12 +198,13 @@ public:
       typename T,
       class = std::enable_if_t< IsSupportedIntegralOrFloat< T >::value > >
   FNumber& operator=(T n) {
-    if (this->is_fl()) {
-      this->_n.f = static_cast< float >(n);
+    if (std::is_same< T, float >::value ||
+        std::is_same< T, int >::value) { // fl
       this->_bit_width = 32;
-    } else {
-      this->_n.d = static_cast< double >(n);
+      this->_n.f = static_cast< float >(n);
+    } else { // do
       this->_bit_width = 64;
+      this->_n.d = static_cast< double >(n);
     }
     this->_sign = Signed;
     return *this;
