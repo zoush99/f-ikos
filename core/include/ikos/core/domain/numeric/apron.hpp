@@ -1294,8 +1294,22 @@ public:
     if (ap_abstract0_is_bottom(manager(), this->_inv.get())) {
       return;
     }
-
+    /// By zoush99
     ap_texpr0_t* t = this->to_ap_expr(e);
+    if (std::is_same< Number, FNumber >::value) { // FNumber
+      bool T = true;
+      bool* tptr = &T;
+
+      ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
+                                                this->_inv.get(),
+                                                t,
+                                                tptr,
+                                                AP_SCALAR_MPQ,
+                                                true);
+
+      t = ap_texpr0_from_linexpr0(l);
+      ap_linexpr0_free(l);
+    }
 
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
