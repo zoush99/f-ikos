@@ -197,13 +197,14 @@ inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
                                           ap_texpr0_t* r,
                                           dataty d) {
-  if (d == Ffnumber) { // fl
-    return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_UP);
-  } else if (d == Fdnumber) { // do
-    return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_UP);
-  } else {
-    ikos_unreachable("unreachable");
-  }
+//  if (d == Ffnumber) { // fl
+//    return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_UP);
+//  } else if (d == Fdnumber) { // do
+//    return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_UP);
+//  } else {
+//    ikos_unreachable("unreachable");
+//  }
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_scalar_t*
@@ -252,49 +253,31 @@ inline ap_texpr0_t* to_ap_expr(const QNumber& q) {
 /// zoush99, FNumber -> [mpq_t,mpq_t] -> ap_texpr0_t*([ap_scalar_t*,ap_scalar_t*])
 /// \brief Conversion from ikos::FNumber to ap_texpr0_t*
 /// \bugs here!!!
-//inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-//  mpq_t _infQ, _supQ;
-//  mpq_inits(_infQ, _supQ, NULL);
-//  ap_texpr0_t* result = nullptr;
-//  if(f.is_zero()){
-//    mpq_set_d(_infQ,0);
-//    mpq_set_d(_supQ,0);
-//    result = ap_texpr0_cst_interval_mpq(_infQ,_supQ);
-//  }
-//  else if (f.bit_width() == 32) { // fl
-//    mpq_set_d(_infQ,
-//              ikos::core::detail::find_next_value_down(f.value< float >()));
-//    mpq_set_d(_supQ,
-//              ikos::core::detail::find_next_value_up(f.value< float >()));
-//    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
-//  } else if (f.bit_width() == 64) { // do
-//    mpq_set_d(_infQ,
-//              ikos::core::detail::find_next_value_down(f.value< double >()));
-//    mpq_set_d(_supQ,
-//              ikos::core::detail::find_next_value_up(f.value< double >()));
-//    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
-//  } else {
-//    ikos_unreachable("unreachable");
-//  }
-//  mpq_clears(_infQ, _supQ, NULL);
-//  return result;
-//}
-
-/// \todo
 inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
-  mpq_t  _f;
-  mpq_init(_f);
+  mpq_t _infQ, _supQ;
+  mpq_inits(_infQ, _supQ, NULL);
   ap_texpr0_t* result = nullptr;
-  if(f.bit_width()==32){
-    mpq_set_d(_f,f.value<float>());
-    result = ap_texpr0_cst_scalar_mpq(_f);
-  }else if(f.bit_width()==64){
-    mpq_set_d(_f,f.value<double>());
-    result = ap_texpr0_cst_scalar_mpq(_f);
-  }else{
+  if(f.is_zero()){
+    mpq_set_d(_infQ,0);
+    mpq_set_d(_supQ,0);
+    result = ap_texpr0_cst_interval_mpq(_infQ,_supQ);
+  }
+  else if (f.bit_width() == 32) { // fl
+    mpq_set_d(_infQ,
+              ikos::core::detail::find_next_value_down(f.value< float >()));
+    mpq_set_d(_supQ,
+              ikos::core::detail::find_next_value_up(f.value< float >()));
+    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
+  } else if (f.bit_width() == 64) { // do
+    mpq_set_d(_infQ,
+              ikos::core::detail::find_next_value_down(f.value< double >()));
+    mpq_set_d(_supQ,
+              ikos::core::detail::find_next_value_up(f.value< double >()));
+    result = ap_texpr0_cst_interval_mpq(_infQ, _supQ);
+  } else {
     ikos_unreachable("unreachable");
   }
-  mpq_clear(_f);
+  mpq_clears(_infQ, _supQ, NULL);
   return result;
 }
 
@@ -331,26 +314,24 @@ inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return FNumber(mpq_get_d(scalar->val.mpq));
 }
 
-//template < typename Number >
-//inline FNumber to_ikos_number(ap_interval_t* interval, bool /*round_upper*/) {
-//  return FNumber(ikos::core::detail::find_next_value_up(
-//      static_cast< float >(mpq_get_d(interval->inf->val.mpq))));
-//}
+template < typename Number >
+inline FNumber to_ikos_number(ap_interval_t* interval, bool /*round_upper*/) {
+  return FNumber(ikos::core::detail::find_next_value_up(
+      static_cast< float >(mpq_get_d(interval->inf->val.mpq))));
+}
 
-/// \todo
 /// \brief Conversion from ap_coeff_t* to ikos::ZNumber/QNumber/FNumber
 template < typename Number >
 inline Number to_ikos_number(ap_coeff_t* coeff, bool round_upper) {
 //  ikos_assert(coeff->discr == AP_COEFF_SCALAR);
-//  if ((std::is_same< Number, ZNumber >::value) ||
-//      (std::is_same< Number, QNumber >::value)) {
-//    return to_ikos_number< Number >(coeff->val.scalar, round_upper);
-//  } else if (std::is_same< Number, FNumber >::value) {  /// bugs here!
-//    return to_ikos_number< Number >(coeff->val.scalar, round_upper);
-//  } else {
-//    ikos_unreachable("unreachable");
-//  }
-  return to_ikos_number< Number >(coeff->val.scalar, round_upper);
+  if ((std::is_same< Number, ZNumber >::value) ||
+      (std::is_same< Number, QNumber >::value)) {
+    return to_ikos_number< Number >(coeff->val.scalar, round_upper);
+  } else if (std::is_same< Number, FNumber >::value) {  /// bugs here!
+    return to_ikos_number< Number >(coeff->val.interval, round_upper);
+  } else {
+    ikos_unreachable("unreachable");
+  }
 }
 
 /// ap_scalar_t* -> Bound< Number >
@@ -1509,7 +1490,7 @@ public:
 
       ap_lincons0_array_t ap_lin_csts = ap_lincons0_array_make(num);
 
-      /// \brief Interval-linearization to a scalar coefficient
+      /// \brief Linearization to a scalar coefficient
       ap_lin_csts = ap_intlinearize_tcons0_array(manager(),
                                                  this->_inv.get(),
                                                  &ap_csts,
