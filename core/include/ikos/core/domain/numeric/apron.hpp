@@ -885,6 +885,20 @@ private:
         ikos::core::numeric::apron::abstractConstant(r, _sum);
       mpq_clear(_t);
       ap_interval_free(_sum);
+
+//      /// By zoush99
+//      bool T = true;
+//      bool* tptr = &T;
+//
+//      ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
+//                                                this->_inv.get(),
+//                                                r,
+//                                                tptr,
+//                                                AP_SCALAR_MPQ,
+//                                                true);
+//
+//      r = ap_texpr0_from_linexpr0(l);
+//      ap_linexpr0_free(l);
     }
 
     return r;
