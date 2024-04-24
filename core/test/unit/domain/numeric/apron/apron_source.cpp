@@ -36,11 +36,11 @@ using ApronDomain = ikos::core::numeric::
 
 BOOST_AUTO_TEST_CASE(to_ap_expr_FNumber) {
   float f = 0;
-  float g = 0.7f;
+  float g = 0.1;
   FNumber _f(f);
   FNumber _g(g);
-  //  std::cout.precision(30);
-  //  std::cout<<g<<std::endl;
+//    std::cout.precision(30);
+//    std::cout<<g<<std::endl;
   ap_texpr0_t* _a(ikos::core::numeric::apron::to_ap_expr(_f));
   ap_texpr0_print(_a, nullptr);
   std::cout << std::endl;
@@ -55,8 +55,8 @@ BOOST_AUTO_TEST_CASE(function_abstractExpr) {
   mpq_inits(a, b, NULL);
 
   // Try using ap_texpr0_t*
-  mpq_set_d(a, 0.1);
-  mpq_set_d(b, 0.2);
+  mpq_set_d(a, 3.0);
+  mpq_set_d(b, 4.0);
   expr = ap_texpr0_cst_interval_mpq(a, b);
   std::cout << "expr: " << std::endl;
   ap_texpr0_print(expr, nullptr);
@@ -96,11 +96,11 @@ BOOST_AUTO_TEST_CASE(check_mul_var_expr) {
   ap_interval_t* _sum = ap_interval_alloc();
   mpq_inits(two, three, a, b, NULL);
 
-  mpq_set_d(two, 2.2);
-  mpq_set_d(three, 3.2);
-  FNumber tw(1.0f);
-  FNumber th(2.0f);
-  FNumber fo(3.0f);
+  mpq_set_d(two, 2.0);
+  mpq_set_d(three, 3.0);
+  FNumber tw(2.0f);
+  FNumber th(3.0f);
+  FNumber fo(4.0f);
 
   mpq_set_d(a, 0);
   mpq_set_d(b, 0);

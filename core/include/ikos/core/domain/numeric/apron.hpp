@@ -197,14 +197,13 @@ inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
                                           ap_texpr0_t* l,
                                           ap_texpr0_t* r,
                                           dataty d) {
-//  if (d == Ffnumber) { // fl
-//    return ap_texpr0_binop(op, l, r, AP_RTYPE_SINGLE, AP_RDIR_UP);
-//  } else if (d == Fdnumber) { // do
-//    return ap_texpr0_binop(op, l, r, AP_RTYPE_DOUBLE, AP_RDIR_UP);
-//  } else {
-//    ikos_unreachable("unreachable");
-//  }
+  if (d == Ffnumber) { // fl
     return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
+  } else if (d == Fdnumber) { // do
+    return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_NEAREST);
+  } else {
+    ikos_unreachable("unreachable");
+  }
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_scalar_t*
@@ -1297,8 +1296,9 @@ public:
     if (ap_abstract0_is_bottom(manager(), this->_inv.get())) {
       return;
     }
-    /// By zoush99
     ap_texpr0_t* t = this->to_ap_expr(e);
+
+    /// By zoush99
     if (std::is_same< Number, FNumber >::value) { // FNumber
       bool T = true;
       bool* tptr = &T;
@@ -1372,6 +1372,22 @@ private:
       default: {
         ikos_unreachable("unsupported operator");
       }
+    }
+
+    /// By zoush99
+    if (std::is_same< Number, FNumber >::value) { // FNumber
+      bool T = true;
+      bool* tptr = &T;
+
+      ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
+                                                this->_inv.get(),
+                                                t,
+                                                tptr,
+                                                AP_SCALAR_MPQ,
+                                                true);
+
+      t = ap_texpr0_from_linexpr0(l);
+      ap_linexpr0_free(l);
     }
 
     ap_dim_t x_dim = this->var_dim_insert(x);
@@ -1536,8 +1552,8 @@ public:
 
         ap_interval_free(ap_intv);
       }
+      ap_tcons0_array_clear(&ap_csts);
     }
-    ap_tcons0_array_clear(&ap_csts);
   }
 
   /// By zoush99
