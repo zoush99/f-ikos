@@ -98,7 +98,7 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
                            make_bottom_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
                            make_bottom_numeric_abstract_value(
-                               MachineIntDomainOption::ApronPplPolyhedra),  // By zoush99
+                               MachineIntDomainOption::FInterval),  // By zoush99
                            NullityAbstractDomain::bottom()),
       LifetimeAbstractDomain::bottom());
 
@@ -119,7 +119,7 @@ MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
                            make_top_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
                            make_top_numeric_abstract_value(
-                               MachineIntDomainOption::ApronPplPolyhedra),  // By zoush99
+                               MachineIntDomainOption::FInterval),  // By zoush99
                            NullityAbstractDomain::top()),
       LifetimeAbstractDomain::top());
 

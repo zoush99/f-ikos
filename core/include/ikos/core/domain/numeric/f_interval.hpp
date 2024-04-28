@@ -248,6 +248,15 @@ public:
   /// { @
   /// \brief Add the constraint `x pred y`
   void add(Predicate pred, VariableRef x, VariableRef y) override {
+    return;
+  }
+  void add(Predicate pred, VariableRef x, const Number& y) override {
+    return;
+  }
+  void add(Predicate pred, const Number& x, VariableRef y) override {
+    return;
+  }
+  /*void add(Predicate pred, VariableRef x, VariableRef y) override {
     if (this->is_bottom()) {
       return;
     }
@@ -267,10 +276,10 @@ public:
           return;
         }
         if (xi.singleton()) {
-          this->_inv.set(y, /*yi = */ trim_bound(yi, *xi.singleton()));
+          this->_inv.set(y, *//*yi = *//* trim_bound(yi, *xi.singleton()));
         }
         if (yi.singleton()) {
-          this->_inv.set(x, /*xi = */ trim_bound(xi, *yi.singleton()));
+          this->_inv.set(x, *//*xi = *//* trim_bound(xi, *yi.singleton()));
         }
       } break;
       case Predicate::GT: {
@@ -320,7 +329,7 @@ public:
         this->_inv.set(x, i);
       } break;
       case Predicate::NE: {
-        this->_inv.set(x, /*xi = */trim_bound(xi, y));
+        this->_inv.set(x, *//*xi = *//*trim_bound(xi, y));
       } break;
       case Predicate::GT: {
         if (y.is_max()) {
@@ -349,7 +358,7 @@ public:
   void add(Predicate pred, const Number& x, VariableRef y) override {
     Parent::add(pred, x, y);
   }
-  /// @ }
+  /// @ }*/
 
   void set(VariableRef x, const IntervalT& value) override {
     this->_inv.set(x, value);
