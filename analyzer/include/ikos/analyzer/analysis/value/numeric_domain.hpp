@@ -66,11 +66,12 @@ using NumericAbstractDomain =
 NumericAbstractDomain make_top_numeric_interval();
 NumericAbstractDomain make_bottom_numeric_interval();
 
-//NumericAbstractDomain make_top_numeric_apron_polka_polyhedra();
-//NumericAbstractDomain make_bottom_numeric_apron_polka_polyhedra();
+NumericAbstractDomain make_top_numeric_apron_polka_polyhedra();
+NumericAbstractDomain make_bottom_numeric_apron_polka_polyhedra();
 
-NumericAbstractDomain make_top_numeric_apron_ppl_polyhedra();
-NumericAbstractDomain make_bottom_numeric_apron_ppl_polyhedra();
+//NumericAbstractDomain make_top_numeric_apron_ppl_polyhedra();
+//NumericAbstractDomain make_bottom_numeric_apron_ppl_polyhedra();
+
 
 /// @}
 

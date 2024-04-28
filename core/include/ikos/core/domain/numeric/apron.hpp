@@ -104,13 +104,13 @@ inline ap_texpr0_t* binop_expr< FNumber >(ap_texpr_op_t op,
                                          ap_texpr0_t* l,
                                          ap_texpr0_t* r,
                                          dataty d) {
- if (d == Ffnumber) { // fl
+// if (d == Ffnumber) { // fl
    return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_UP);
- } else if (d == Fdnumber) { // do
-   return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_UP);
- } else {
-   ikos_unreachable("unreachable");
- }
+// } else if (d == Fdnumber) { // do
+//   return ap_texpr0_binop(op, l, r, AP_RTYPE_REAL, AP_RDIR_UP);
+// } else {
+//   ikos_unreachable("unreachable");
+// }
 }
 
 /// \brief Conversion from ikos::ZNumber to ap_scalar_t*

@@ -238,7 +238,7 @@ add_executable(ikos-analyzer
   src/analysis/value/machine_int_domain/var_pack_dbm.cpp
   src/analysis/value/machine_int_domain/var_pack_dbm_congruence.cpp
   src/analysis/value/numeric/f_interval.cpp # By zoush99
-  src/analysis/value/numeric/apron_ppl_polyhedra.cpp # By zoush99
+  src/analysis/value/numeric/apron_polka_polyhedra.cpp # By zoush99
   src/analysis/variable.cpp
   src/analysis/widening_hint.cpp
   src/checker/assert_prover.cpp

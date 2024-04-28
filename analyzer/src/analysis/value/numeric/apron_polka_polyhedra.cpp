@@ -17,11 +17,11 @@ namespace value {
 namespace {
 
 using RuntimeNumericDomain = core::numeric::
-    ApronDomain< core::numeric::apron::PplPolyhedra, FNumber, Variable* >;
+    ApronDomain< core::numeric::apron::PolkaPolyhedra, FNumber, Variable* >;
 } // end anonymous namespace
 #endif
 
-NumericAbstractDomain make_top_numeric_apron_ppl_polyhedra() {
+NumericAbstractDomain make_top_numeric_apron_polka_polyhedra() {
 #ifdef HAS_APRON
   return NumericAbstractDomain(RuntimeNumericDomain::top());
 #else
@@ -29,7 +29,7 @@ NumericAbstractDomain make_top_numeric_apron_ppl_polyhedra() {
 #endif
 }
 
-NumericAbstractDomain make_bottom_numeric_apron_ppl_polyhedra() {
+NumericAbstractDomain make_bottom_numeric_apron_polka_polyhedra() {
 #ifdef HAS_APRON
   return NumericAbstractDomain(RuntimeNumericDomain::bottom());
 #else
