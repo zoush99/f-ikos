@@ -162,13 +162,25 @@ inline ap_texpr0_t* to_ap_expr(const FNumber& f) {
   mpq_t _f;
   mpq_init(_f);
   ap_texpr0_t* _t;
+//  double d;
   if (f.bit_width() == 32) {
+//    d = static_cast< double >(f.value< float >());
     mpq_set_d(_f, static_cast< double >(f.value< float >()));
   } else if (f.bit_width() == 64) {
+//    d = f.value< double >();
     mpq_set_d(_f, f.value< double >());
   } else {
     ikos_unreachable("unreachable");
   }
+  /// _new
+//  mpq_t _inf, _sup;
+//  ap_texpr0_t* _mult;
+//  ap_texpr0_t* _add;
+//  mpq_inits(_inf, _sup, NULL);
+//  mpq_set_d(_inf, 1 - pow(2, -23)*d- pow(2,-149));
+//  mpq_set_d(_sup, 1 + pow(2, -23)*d+pow(2,-149));
+//  _t = ap_texpr0_cst_interval_mpq(_inf,_sup);
+  /// _new
   _t = ap_texpr0_cst_scalar_mpq(_f);
   mpq_clear(_f);
   return _t;
@@ -946,40 +958,33 @@ public:
     ap_texpr0_t* t = this->to_ap_expr(e);
 
     /// By zoush99
-    if (std::is_same< Number, FNumber >::value) { // FNumber
-
-      /// Latest: t * [1-e,1+e] + [-d,d]
-      /// Abstraction
-      mpq_t _inf, _sup;
-      ap_texpr0_t* _mult;
-      ap_texpr0_t* _add;
-      mpq_inits(_inf, _sup, NULL);
-      mpq_set_d(_inf, 1 - pow(2, -23));
-      mpq_set_d(_sup, 1 + pow(2, -23));
-      _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
-      t = apron::binop_expr< Number >(AP_TEXPR_MUL, _mult, t, apron::Ffnumber);
-      mpq_set_d(_inf, -pow(2, -149));
-      mpq_set_d(_sup, pow(2, -149));
-      _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
-      t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _add, apron::Ffnumber);
-
-      /// Linearization
-      bool T = true;
-      bool* tptr = &T;
-      ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
-                                                this->_inv.get(),
-                                                t,
-                                                tptr,
-                                                AP_SCALAR_MPQ,
-                                                true);
-
-      t = ap_texpr0_from_linexpr0(l);
-
-      mpq_clears(_inf, _sup, NULL);
-      ap_texpr0_free(_mult);
-      ap_texpr0_free(_add);
-      ap_linexpr0_free(l);
-    }
+//    if (std::is_same< Number, FNumber >::value) { // FNumber
+//      /// Latest: t * [1-e,1+e] + [-d,d]
+//      /// Abstraction
+//
+//      if (t->discr==AP_TEXPR_CST){
+//        mpq_t _inf, _sup;
+//        double d = mpq_get_d(t->val.cst.val.scalar->val.mpq);
+//        mpq_inits(_inf, _sup, NULL);
+//        mpq_set_d(_inf, (1 - pow(2, -23))*d-pow(2, -149));
+//        mpq_set_d(_sup, (1 + pow(2, -23))*d+-pow(2, -149));
+//        t = ap_texpr0_cst_interval_mpq(_inf,_sup);
+//        mpq_clears(_inf, _sup, NULL);
+//      }
+//      /// Linearization
+//      bool T = true;
+//      bool* tptr = &T;
+//
+//      ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
+//                                            this->_inv.get(),
+//                                            t,
+//                                            tptr,
+//                                            AP_SCALAR_MPQ,
+//                                            true);
+//      t = ap_texpr0_from_linexpr0(l);
+//
+//      ap_linexpr0_free(l);
+//    }
 
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
@@ -1023,7 +1028,8 @@ private:
     switch (op) {
       case BinaryOperator::Add: {
         /// Latest: left +_f,r right
-        if (std::is_same< Number, QNumber >::value) {
+        t = apron::binop_expr< Number >(AP_TEXPR_ADD, left, right, d);
+        if (std::is_same< Number, FNumber >::value) {
           mpq_t _inf, _sup;
           ap_texpr0_t* _mult;
           ap_texpr0_t* _add;
@@ -1061,12 +1067,11 @@ private:
           ap_texpr0_free(_mult);
           ap_texpr0_free(_add);
           ap_linexpr0_free(l);
-        } else {
-          t = apron::binop_expr< Number >(AP_TEXPR_ADD, left, right, d);
         }
       } break;
       case BinaryOperator::Sub: {
-        if (std::is_same< Number, QNumber >::value) {
+        t = apron::binop_expr< Number >(AP_TEXPR_SUB, left, right, d);
+        if (std::is_same< Number, FNumber >::value) {
           mpq_t _inf, _sup;
           ap_texpr0_t* _mult;
           ap_texpr0_t* _add;
@@ -1104,13 +1109,11 @@ private:
           ap_texpr0_free(_mult);
           ap_texpr0_free(_add);
           ap_linexpr0_free(l);
-        } else {
-          t = apron::binop_expr< Number >(AP_TEXPR_SUB, left, right, d);
         }
       } break;
 
       case BinaryOperator::Mul: {
-        if (std::is_same< Number, QNumber >::value) {
+        if (std::is_same< Number, FNumber >::value) {
           ap_interval_t* intv =
               ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
 
@@ -1164,7 +1167,7 @@ private:
         }
       } break;
       case BinaryOperator::Div: {
-        if (std::is_same< Number, QNumber >::value) {
+        if (std::is_same< Number, FNumber >::value) {
           ap_interval_t* intv =
               ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
 

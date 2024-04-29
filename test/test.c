@@ -2,13 +2,10 @@
 
 int main()
 {
-    float a,b;
-    a = 1.2;
-    b = 1.2;
-    float c =1.2;
-    
-    a = a - b;
-    b = a + b;
-    b = b / a;
-    return b;
+    int c =2;
+    int d =2;
+    c = c - d;
+    d = d / c;
+
+    return d;
 }
