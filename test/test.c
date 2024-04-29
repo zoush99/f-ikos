@@ -6,7 +6,7 @@ int main()
     a = 1.2;
     b = 1.2;
     float c =1.2;
-    a = b;
+    
     a = a - b;
     b = a + b;
     b = b / a;
