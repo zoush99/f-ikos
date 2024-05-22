@@ -1,167 +1,14 @@
-IKOS
-====
+# F-IKOS
 
-[![License](https://img.shields.io/badge/license-NOSA%201.3-blue.svg)](LICENSE.pdf)
-[![Release](https://img.shields.io/badge/release-v3.2-orange.svg)](https://github.com/NASA-SW-VnV/ikos/releases/tag/v3.2)
-[![Linux Build](https://github.com/NASA-SW-VnV/ikos/actions/workflows/build-linux.yml/badge.svg)](https://github.com/NASA-SW-VnV/ikos/actions/workflows/build-linux.yml)
-[![MacOS Build](https://github.com/NASA-SW-VnV/ikos/actions/workflows/build-macos.yml/badge.svg)](https://github.com/NASA-SW-VnV/ikos/actions/workflows/build-macos.yml)
+F-IKOS is a runtime error analyzer for Fortran programs based on abstract interpretation. Its frontend parser is sourced from [Flang](https://github.com/flang-compiler/flang). Flang is a compiler for Fortran programs that can convert `.f`, `.f90`, `.f95`, and `.f03` files into `.bc` or `.ll` files. The backend analyzer is based on [IKOS](https://github.com/NASA-SW-VnV/ikos), which can analyze `.c`, `.cpp`, or `.bc` files to check for runtime errors. However, [IKOS cannot check numerical properties for floating-point programs](https://github.com/NASA-SW-VnV/ikos/issues/210), and since floating-point types are very common in Fortran programs, we extended IKOS. The extended IKOS supports runtime error checking for programs containing both integer and floating-point types. Notably, the extended IKOS supports reliable analysis of floating points, considering rounding errors in the program, ensuring that the analysis results are reliable. This repository contains the extended IKOS, and to analyze Fortran programs, we also need its frontend, Flang. The installation and usage instructions are provided below.
 
-IKOS (Inference Kernel for Open Static Analyzers) is a static analyzer for C/C++ based on the theory of Abstract Interpretation.
+## Install Flang
 
-Introduction
-------------
+We use the legacy branch from [flang-compiler/flang](https://github.com/flang-compiler/flang) because it and IKOS both support the LLVM-14 environment. Detailed installation instructions for Flang can be found here: [How to build Flang](https://github.com/zoush99/f-ikos/wiki/How-to-build-Flang).
 
-IKOS started as a C++ library designed to facilitate the development of sound static analyzers based on [Abstract Interpretation](https://www.di.ens.fr/~cousot/AI/IntroAbsInt.html). Specialization of a static analyzer for an application or family of applications is critical for achieving both precision and scalability. Developing such an analyzer is arduous and requires significant expertise in Abstract Interpretation.
+If you only need to use the extended IKOS to analyze programs, you do not need to install the Fortran frontend, so you can skip this step.
 
-IKOS provides a generic and efficient implementation of state-of-the-art Abstract Interpretation data structures and algorithms, such as control-flow graphs, fixpoint iterators, numerical abstract domains, etc. IKOS is independent of a particular programming language.
-
-IKOS also provides a C and C++ static analyzer based on [LLVM](https://llvm.org). It implements scalable analyses for detecting and proving the absence of runtime errors in C and C++ programs.
-
-License
--------
-
-IKOS has been released under the NASA Open Source Agreement version 1.3, see [LICENSE.pdf](LICENSE.pdf)
-
-Contact
--------
-
-ikos@lists.nasa.gov
-
-Release notes
--------------
-
-See [Releases](https://github.com/NASA-SW-VnV/ikos/releases).
-
-Troubleshooting
----------------
-
-See [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-
-Installation
-------------
-
-To install IKOS on **Linux** or **macOS**, we recommend to use **[Homebrew](https://brew.sh/)**.
-
-First, install **Homebrew** by following [these instructions](https://docs.brew.sh/Installation).
-
-Then, simply run:
-```
-$ brew install nasa-sw-vnv/core/ikos
-```
-
-For Windows, consider using [Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/install).
-
-How to run IKOS
----------------
-
-Suppose we want to analyze the following C program in a file, called *loop.c*:
-
-```c
- 1: #include <stdio.h>
- 2: int a[10];
- 3: int main(int argc, char *argv[]) {
- 4:     size_t i = 0;
- 5:     for (;i < 10; i++) {
- 6:         a[i] = i;
- 7:     }
- 8:     a[i] = i;
- 9:     printf("%i", a[i]);
-10: }
-```
-
-To analyze this program with IKOS, simply run:
-
-```
-$ ikos loop.c
-```
-
-You shall see the following output. IKOS reports two occurrences of buffer overflow at line 8 and 9.
-
-```
-[*] Compiling loop.c
-[*] Running ikos preprocessor
-[*] Running ikos analyzer
-[*] Translating LLVM bitcode to AR
-[*] Running liveness analysis
-[*] Running widening hint analysis
-[*] Running interprocedural value analysis
-[*] Analyzing entry point 'main'
-[*] Checking properties for entry point 'main'
-
-# Time stats:
-clang        : 0.037 sec
-ikos-analyzer: 0.023 sec
-ikos-pp      : 0.007 sec
-
-# Summary:
-Total number of checks                : 7
-Total number of unreachable checks    : 0
-Total number of safe checks           : 5
-Total number of definite unsafe checks: 2
-Total number of warnings              : 0
-
-The program is definitely UNSAFE
-
-# Results
-loop.c: In function 'main':
-loop.c:8:10: error: buffer overflow, trying to access index 10 of global variable 'a' of 10 elements
-    a[i] = i;
-         ^
-loop.c: In function 'main':
-loop.c:9:18: error: buffer overflow, trying to access index 10 of global variable 'a' of 10 elements
-    printf("%i", a[i]);
-                 ^
-```
-
-The `ikos` command takes a source file (`.c`, `.cpp`) or a LLVM bitcode file (`.bc`) as input, analyzes it to find runtime errors (also called undefined behaviors), creates a result database `output.db` in the current working directory and prints a report.
-
-In the report, each line has one of the following status:
-
-* **safe**: the statement is proven safe;
-* **error**: the statement always results into an error (or is unreachable);
-* **unreachable**: the statement is never executed;
-* **warning** may mean three things:
-   1. the statement results into an error for some executions, or
-   2. the static analyzer did not have enough information to conclude (check dependent on an external input, for instance), or
-   3. the static analyzer was not powerful enough to prove the absence of errors;
-
-By default, ikos shows warnings and errors directly in your terminal, like a compiler would do.
-
-If the analysis report is too big, you shall use:
-* `ikos-report output.db` to examine the report in your terminal
-* `ikos-view output.db` to examine the report in a web interface
-
-Further information:
-* [Analyze a whole project with ikos-scan](analyzer/README.md#analyze-a-whole-project-with-ikos-scan)
-* [Examine a report with ikos-view](analyzer/README.md#examine-a-report-with-ikos-view)
-* [Analysis Options](analyzer/README.md#analysis-options)
-  - [Checks](analyzer/README.md#checks)
-  - [Numerical abstract domains](analyzer/README.md#numerical-abstract-domains)
-  - [Entry points](analyzer/README.md#entry-points)
-  - [Multi-threading](analyzer/README.md#multi-threading)
-  - [Optimization level](analyzer/README.md#optimization-level)
-  - [Inter-procedural vs Intra-procedural](analyzer/README.md#inter-procedural-vs-intra-procedural)
-  - [Fixpoint engine parameters](analyzer/README.md#fixpoint-engine-parameters)
-  - [Partitioning](analyzer/README.md#partitioning)
-  - [Hardware addresses](analyzer/README.md#hardware-addresses)
-  - [Other analysis options](analyzer/README.md#other-analysis-options)
-* [Report Options](analyzer/README.md#report-options)
-  - [Format](analyzer/README.md#format)
-  - [File](analyzer/README.md#file)
-  - [Status Filter](analyzer/README.md#status-filter)
-  - [Analysis Filter](analyzer/README.md#analysis-filter)
-  - [Verbosity](analyzer/README.md#verbosity)
-  - [Other report options](analyzer/README.md#other-report-options)
-* [APRON Support](analyzer/README.md#apron-support)
-* [Analysis Assumptions](analyzer/README.md#analysis-assumptions)
-* [Analyze an embedded software requiring a cross-compiler](analyzer/README.md#analyze-an-embedded-software-requiring-a-cross-compiler)
-* [Model library functions to reduce warnings](analyzer/README.md#model-library-functions-to-reduce-warnings)
-
-Build from source
------------------
-
-Below are instructions to build IKOS from source.
-This is only for advanced users that want to either package IKOS for an operating system or to experiment with the codebase. Otherwise, please follow the instructions [above](#installation).
+## Install Extended IKOS
 
 ### Dependencies
 
@@ -175,13 +22,13 @@ To build and run the analyzer, you will need the following dependencies:
 * SQLite >= 3.6.20
 * TBB >= 2
 * LLVM and Clang 14.0.x
-* (Optional) APRON >= 0.9.10
+* APRON >= 0.9.10
 
 Most of them can be installed using your package manager.
 
 Note: If you build LLVM from source, you need to enable run-time type information (RTTI).
 
-### Build and Install
+## Build and Install
 
 Now that you have all the dependencies on your system, you can build and install IKOS.
 
@@ -204,7 +51,7 @@ As you open the IKOS distribution, you shall see the following directory structu
 └── test
 ```
 
-IKOS uses the CMake build system. You will need to specify an installation directory that will contain all the binaries, libraries and headers after installation. If you do not specify this directory, CMake will install everything under `install` in the root directory of the distribution. In the following steps, we will install IKOS under `/path/to/ikos-install-directory`.
+IKOS uses the CMake build system. You will need to specify an installation directory that will contain all the binaries, libraries, and headers after installation. If you do not specify this directory, CMake will install everything under `install` in the root directory of the distribution. In the following steps, we will install IKOS under `/path/to/ikos-install-directory`.
 
 Here are the steps to build and install IKOS:
 
@@ -216,7 +63,7 @@ $ make
 $ make install
 ```
 
-Then, add IKOS in your PATH (consider adding this in your .bashrc):
+Then, add IKOS to your PATH (consider adding this to your .bashrc):
 
 ```
 $ PATH="/path/to/ikos-install-directory/bin:$PATH"
@@ -230,26 +77,78 @@ To build and run the tests, simply type:
 $ make check
 ```
 
-Contributors
-------------
+## Examples
 
-See [CONTRIBUTORS.md](CONTRIBUTORS.md)
+Suppose we want to analyze the following Fortran program in a file called *cap.f90*:
 
-Publications
-------------
+```fortran
+real function cap(x)
+implicit none
+real, intent(in) :: x
+real :: y
+y = x
+! Cap the value of y based on certain conditions
+if (10.0 > y) then
+  y = 10.0
+else if (15.0 < y) then
+  y = 20.0
+else
+  y = y / (y - x)
+end if
+cap = y
+end function cap
 
-* Sung Kook Kim, Arnaud J. Venet, Aditya V. Thakur. **Deterministic Parallel Fixpoint Computation.** In _Principles of Programming Languages (POPL 2020)_, New Orleans, Louisiana ([PDF](https://arxiv.org/pdf/1909.05951.pdf)).
+program main
+implicit none
+real,external :: cap
+real :: x
+x = 13.3
+! Cap the value of x by calling the cap function
+a = cap(x)
+end program main
+```
 
-* Guillaume Brat, Jorge Navas, Nija Shi and Arnaud Venet. **IKOS: a Framework for Static Analysis based on Abstract Interpretation.** In _Proceedings of the International Conference on Software Engineering and Formal Methods (SEFM 2014)_, Grenoble, France ([PDF](http://ti.arc.nasa.gov/publications/16610/download/)).
+To analyze this program with F-IKOS, simply run:
 
-* Arnaud Venet. **The Gauge Domain: Scalable Analysis of Linear Inequality Invariants.** In _Proceedings of Computer Aided Verification (CAV 2012)_, Berkeley, California, USA 2012. Lecture Notes in Computer Science, pages 139-154, volume 7358, Springer 2012 ([PDF](http://ti.arc.nasa.gov/publications/4767/download/)).
+```sh
+flang -emit-llvm -S -c cap.f90 -o cap.ll
+ikos cap.ll --entry-point=MAIN_ -a='*,-sound,-upa' -d=apron-polka-polyhedra
+```
 
-Coding Standards
-----------------
+You shall see the following output. F-IKOS reports an occurrence of divide-by-zero at line 12.
 
-See [doc/CODING_STANDARDS.md](doc/CODING_STANDARDS.md)
+```
+$ flang -emit-llvm -S -c cap.f90 -o cap.ll
+$ ikos cap.ll --entry-point=MAIN_ -a='*,-sound,-upa' -d=apron-polka-polyhedra
+[*] Running ikos preprocessor
+[*] Running ikos analyzer
+[*] Translating LLVM bitcode to AR
+[*] Running liveness analysis
+[*] Running widening hint analysis
+[*] Running interprocedural value analysis
+[*] Analyzing entry point 'MAIN_'
+[*] Checking properties for entry point 'MAIN_'
 
-Overview of the source code
----------------------------
+# Time stats:
+ikos-analyzer: 0.013 sec
+ikos-pp      : 0.011 sec
 
-See [doc/OVERVIEW.md](doc/OVERVIEW.md)
+# Summary:
+Total number of checks                : 18
+Total number of unreachable checks    : 0
+Total number of safe checks           : 17
+Total number of definite unsafe checks: 1
+Total number of warnings              : 0
+
+The program is definitely UNSAFE
+
+# Results
+cap.f90: In function 'cap_':
+cap.f90:12:1: error: division by zero
+  y = y / (y - x)
+^
+```
+
+## Others
+
+For more details on the use of IKOS, please refer to [IKOS GitHub Repository](https://github.com/NASA-SW-VnV/ikos).

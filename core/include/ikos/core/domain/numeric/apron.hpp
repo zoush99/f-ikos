@@ -958,19 +958,7 @@ public:
     ap_texpr0_t* t = this->to_ap_expr(e);
 
     /// By zoush99
-//    if (std::is_same< Number, FNumber >::value) { // FNumber
-//      /// Latest: t * [1-e,1+e] + [-d,d]
-//      /// Abstraction
-//
-//      if (t->discr==AP_TEXPR_CST){
-//        mpq_t _inf, _sup;
-//        double d = mpq_get_d(t->val.cst.val.scalar->val.mpq);
-//        mpq_inits(_inf, _sup, NULL);
-//        mpq_set_d(_inf, (1 - pow(2, -23))*d-pow(2, -149));
-//        mpq_set_d(_sup, (1 + pow(2, -23))*d+-pow(2, -149));
-//        t = ap_texpr0_cst_interval_mpq(_inf,_sup);
-//        mpq_clears(_inf, _sup, NULL);
-//      }
+
 //      /// Linearization
 //      bool T = true;
 //      bool* tptr = &T;
