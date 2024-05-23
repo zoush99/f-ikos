@@ -919,28 +919,10 @@ public:
   }
 
   /// By zoush99
-  /// \brief Converting Floating Point Data Types to Interval Representation
   void assign(VariableRef x, const LinearExpressionT& e) override {
     std::lock_guard< std::mutex > lock(this->_mutex);
 
     ap_texpr0_t* t = this->to_ap_expr(e);
-
-    /// By zoush99
-
-//      /// Linearization
-//      bool T = true;
-//      bool* tptr = &T;
-//
-//      ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
-//                                            this->_inv.get(),
-//                                            t,
-//                                            tptr,
-//                                            AP_SCALAR_MPQ,
-//                                            true);
-//      t = ap_texpr0_from_linexpr0(l);
-//
-//      ap_linexpr0_free(l);
-//    }
 
     ap_dim_t v_dim = this->var_dim_insert(x);
     ap_abstract0_assign_texpr(manager(),
@@ -967,7 +949,6 @@ private:
     }
   }
 
-  /// \todo
   /// \brief Apply `x = left op right`
   void apply(BinaryOperator op,
              VariableRef x,
@@ -1070,7 +1051,6 @@ private:
           ap_linexpr0_free(l);
         }
       } break;
-
       case BinaryOperator::Mul: {
         if (std::is_same< Number, FNumber >::value) {
           ap_interval_t* intv =
@@ -1087,8 +1067,9 @@ private:
             mpq_mul(_inf,_inf,intv->inf->val.mpq);
             mpq_mul(_sup,_sup,intv->sup->val.mpq);
           }else if(mpq_sgn(intv->sup->val.mpq)<0){  // |y|_r < 0
-            mpq_mul(_inf,_inf,intv->sup->val.mpq);
-            mpq_mul(_sup,_sup,intv->inf->val.mpq);
+            mpq_mul(temp,_sup,intv->inf->val.mpq);
+            mpq_mul(_sup,_inf,intv->sup->val.mpq);
+            mpq_set(_inf,temp);
           }else{
             mpq_mul(_inf,_inf,intv->sup->val.mpq);
             mpq_mul(_sup,_sup,intv->sup->val.mpq);
@@ -1104,8 +1085,9 @@ private:
             mpq_mul(_inf,_inf,intv->inf->val.mpq);
             mpq_mul(_sup,_sup,intv->sup->val.mpq);
           }else if(mpq_sgn(intv->sup->val.mpq)<0){  // |y|_r < 0
-            mpq_mul(_inf,_inf,intv->sup->val.mpq);
-            mpq_mul(_sup,_sup,intv->inf->val.mpq);
+            mpq_mul(temp,_sup,intv->inf->val.mpq);
+            mpq_mul(_sup,_inf,intv->sup->val.mpq);
+            mpq_set(_inf,temp);
           }else{
             mpq_mul(_inf,_inf,intv->sup->val.mpq);
             mpq_mul(_sup,_sup,intv->sup->val.mpq);
@@ -1135,7 +1117,6 @@ private:
                                           _add);
 
           /// Linearization
-
           bool T = true;
           bool* tptr = &T;
           ap_linexpr0_t* l = ap_intlinearize_texpr0(manager(),
@@ -1170,9 +1151,11 @@ private:
             mpq_div(_inf,_inf,intv->sup->val.mpq);
             mpq_div(_sup,_sup,intv->inf->val.mpq);
           }else if(mpq_sgn(intv->sup->val.mpq)<0){  // |y|_r < 0
-            mpq_div(_sup,_inf,intv->sup->val.mpq);
+            mpq_div(temp,_inf,intv->sup->val.mpq);
             mpq_div(_inf,_sup,intv->inf->val.mpq);
-          }else{  /// \todo top
+            mpq_set(_sup,temp);
+          }else{  /// top
+            ikos_assert("divisor may be zero.");
           }
           _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
           t = apron::binop_expr< Number >(AP_TEXPR_MUL,
@@ -1185,9 +1168,11 @@ private:
             mpq_div(_inf,_inf,intv->sup->val.mpq);
             mpq_div(_sup,_sup,intv->inf->val.mpq);
           }else if(mpq_sgn(intv->sup->val.mpq)<0){  // |y|_r < 0
-            mpq_div(_sup,_inf,intv->sup->val.mpq);
+            mpq_div(temp,_inf,intv->sup->val.mpq);
             mpq_div(_inf,_sup,intv->inf->val.mpq);
-          }else{  /// \todo   top
+            mpq_set(_sup,temp);
+          }else{  /// top
+            ikos_assert("divisor may be zero.");
           }
           mpq_add(_inf,one,_inf);
           mpq_add(_sup,one,_sup);
