@@ -976,7 +976,6 @@ private:
           /// ([1-e,1+e] ^ 2) * (x + y)
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
-          mpq_set(_sup, one_add_e);
           _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
           t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
           /// ([1-e,1+e] ^ 2) * (x + y) + (3 + 2e) * [-d,d]
@@ -1011,17 +1010,18 @@ private:
           ap_texpr0_t* _mult;
           ap_texpr0_t* _add;
           mpq_inits(_inf, _sup, three_add_2e, two_e, NULL);
-          /// ([1-e,1+e] ^ 2) * (x - y)
+          /// ([1-e,1+e] ^ 2) * (x + y)
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
           _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
           t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
-          /// ([1-e,1+e] ^ 2) * (x - y) + [-d,d]
-          mpq_set(_sup, d);
+          /// ([1-e,1+e] ^ 2) * (x + y) + (3 + 2e) * [-d,d]
+          mpq_mul(two_e, two, e);
+          mpq_add(three_add_2e, three, two_e);
+          mpq_mul(_sup, three_add_2e, d);
           mpq_neg(_inf, _sup);
           _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
           t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _add);
-
           /// Linearization
 
           bool T = true;
@@ -1042,9 +1042,6 @@ private:
       } break;
       case BinaryOperator::Mul: {
         if (std::is_same< Number, FNumber >::value) {
-          ap_interval_t* intv =
-              ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
-
           /// ([1-e,1+e] ^ 2) * |y|_i * x
           mpq_t _inf, _sup, three_add_2e, two_e, temp;
           ap_texpr0_t* _mult;
@@ -1052,54 +1049,40 @@ private:
           mpq_inits(_inf, _sup, three_add_2e, two_e, temp, NULL);
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
-          if (mpq_sgn(intv->inf->val.mpq) > 0) { // |y|_r > 0
-            mpq_mul(_inf, _inf, intv->inf->val.mpq);
-            mpq_mul(_sup, _sup, intv->sup->val.mpq);
-          } else if (mpq_sgn(intv->sup->val.mpq) < 0) { // |y|_r < 0
-            mpq_mul(temp, _sup, intv->inf->val.mpq);
-            mpq_mul(_sup, _inf, intv->sup->val.mpq);
-            mpq_set(_inf, temp);
-          } else {
-            mpq_mul(_inf, _inf, intv->sup->val.mpq);
-            mpq_mul(_sup, _sup, intv->sup->val.mpq);
-          }
-          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
-          t = apron::binop_expr< Number >(AP_TEXPR_MUL, left, _mult);
-          /// ([1-e,1+e] ^ 2) * |y|_i * x + (1 + |y|_i * [1-e,1+e]) * [-d,d]
-          mpq_set(_inf, one_sub_e);
-          mpq_set(_sup, one_add_e);
-          if (mpq_sgn(intv->inf->val.mpq) > 0) { // |y|_r > 0
-            mpq_mul(_inf, _inf, intv->inf->val.mpq);
-            mpq_mul(_sup, _sup, intv->sup->val.mpq);
-          } else if (mpq_sgn(intv->sup->val.mpq) < 0) { // |y|_r < 0
-            mpq_mul(temp, _sup, intv->inf->val.mpq);
-            mpq_mul(_sup, _inf, intv->sup->val.mpq);
-            mpq_set(_inf, temp);
-          } else {
-            mpq_mul(_inf, _inf, intv->sup->val.mpq);
-            mpq_mul(_sup, _sup, intv->sup->val.mpq);
-          }
-          mpq_add(_inf, one, _inf);
-          mpq_add(_sup, one, _sup);
 
-          if (mpq_sgn(_inf) > 0) { // [] > 0
-            mpq_mul(_sup, _sup, d);
-            mpq_neg(_inf, _sup);
-          } else if (mpq_sgn(_sup) < 0) { // [] < 0
-            mpq_mul(_inf, _inf, d);
-            mpq_neg(_sup, _inf);
-          } else {
-            mpq_add(temp, _inf, _sup);
-            if (mpq_sgn(temp) > 0) {
-              mpq_mul(_sup, _sup, d);
-              mpq_neg(_inf, _sup);
-            } else {
-              mpq_mul(_inf, _inf, d);
-              mpq_neg(_sup, _inf);
-            }
-          }
-          _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
-          t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _add);
+          ap_interval_t* intv =
+              ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
+          ap_texpr0_t *a0andb0 = ap_texpr0_cst_interval_mpq(intv->inf->val.mpq,intv->sup->val.mpq);
+          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          a0andb0 = apron::binop_expr< Number >(AP_TEXPR_MUL, a0andb0, _mult);
+          mpq_set(_sup,d);
+          mpq_neg(_inf,_sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          // [a,b]    a0andb0 = |rnd(y)|_l *[1-e,1+e] + [-d,d]
+          a0andb0 = apron::binop_expr<Number>(AP_TEXPR_ADD,a0andb0,_add);
+
+          // x * [1-e,1+e]^2
+          mpq_mul(_inf, one_sub_e, one_sub_e);
+          mpq_mul(_sup, one_add_e, one_add_e);
+          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
+          // x * [1-e,1+e]^2 * [a,b]
+          t = apron::binop_expr<Number>(AP_TEXPR_MUL,t,a0andb0);
+
+          mpq_mul(_sup,one_add_e,d);
+          mpq_neg(_inf,_sup);
+          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          // [-(1+e)d,(1+e)d] * [a,b]
+          _mult = apron::binop_expr<Number>(AP_TEXPR_MUL,_mult,a0andb0);
+          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b]
+          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_mult);
+
+          mpq_set(_sup,d);
+          mpq_neg(_inf,_sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
+
+          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b] +[-d,d]
+          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_add);
 
           /// Linearization
           bool T = true;
@@ -1122,9 +1105,6 @@ private:
       } break;
       case BinaryOperator::Div: {
         if (std::is_same< Number, FNumber >::value) {
-          ap_interval_t* intv =
-              ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
-
           /// ([1-e,1+e] ^ 2) / |y|_i * x
           mpq_t _inf, _sup, three_add_2e, two_e, temp;
           ap_texpr0_t* _mult;
@@ -1132,52 +1112,40 @@ private:
           mpq_inits(_inf, _sup, three_add_2e, two_e, temp, NULL);
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
-          if (mpq_sgn(intv->inf->val.mpq) > 0) { // |y|_r > 0
-            mpq_div(_inf, _inf, intv->sup->val.mpq);
-            mpq_div(_sup, _sup, intv->inf->val.mpq);
-          } else if (mpq_sgn(intv->sup->val.mpq) < 0) { // |y|_r < 0
-            mpq_div(temp, _inf, intv->sup->val.mpq);
-            mpq_div(_inf, _sup, intv->inf->val.mpq);
-            mpq_set(_sup, temp);
-          } else { /// top
-            ikos_assert("divisor may be zero.");
-          }
-          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
-          t = apron::binop_expr< Number >(AP_TEXPR_MUL, left, _mult);
-          /// ([1-e,1+e] ^ 2) / |y|_i * x + (1 + [1-e,1+e] / |y|_i) * [-d,d]
-          mpq_set(_inf, one_sub_e);
-          mpq_set(_sup, one_add_e);
-          if (mpq_sgn(intv->inf->val.mpq) > 0) { // |y|_r > 0
-            mpq_div(_inf, _inf, intv->sup->val.mpq);
-            mpq_div(_sup, _sup, intv->inf->val.mpq);
-          } else if (mpq_sgn(intv->sup->val.mpq) < 0) { // |y|_r < 0
-            mpq_div(temp, _inf, intv->sup->val.mpq);
-            mpq_div(_inf, _sup, intv->inf->val.mpq);
-            mpq_set(_sup, temp);
-          } else { /// top
-            ikos_assert("divisor may be zero.");
-          }
-          mpq_add(_inf, one, _inf);
-          mpq_add(_sup, one, _sup);
+          ap_interval_t* intv =
+              ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
+          ap_texpr0_t *a0andb0 = ap_texpr0_cst_interval_mpq(intv->inf->val.mpq,intv->sup->val.mpq);
+          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          a0andb0 = apron::binop_expr< Number >(AP_TEXPR_MUL, a0andb0, _mult);
+          mpq_set(_sup,d);
+          mpq_neg(_inf,_sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          // [a,b]    a0andb0 = |rnd(y)|_l *[1-e,1+e] + [-d,d]
+          a0andb0 = apron::binop_expr<Number>(AP_TEXPR_ADD,a0andb0,_add);
 
-          if (mpq_sgn(_inf) > 0) { // [] > 0
-            mpq_mul(_sup, _sup, d);
-            mpq_neg(_inf, _sup);
-          } else if (mpq_sgn(_sup) < 0) { // [] < 0
-            mpq_mul(_inf, _inf, d);
-            mpq_neg(_sup, _inf);
-          } else {
-            mpq_add(temp, _inf, _sup);
-            if (mpq_sgn(temp) > 0) {
-              mpq_mul(_sup, _sup, d);
-              mpq_neg(_inf, _sup);
-            } else {
-              mpq_mul(_inf, _inf, d);
-              mpq_neg(_sup, _inf);
-            }
-          }
-          _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
-          t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _add);
+          // x * [1-e,1+e]^2
+          mpq_mul(_inf, one_sub_e, one_sub_e);
+          mpq_mul(_sup, one_add_e, one_add_e);
+          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
+          // x * [1-e,1+e]^2 * [a,b]
+          t = apron::binop_expr<Number>(AP_TEXPR_MUL,t,a0andb0);
+
+          mpq_mul(_sup,one_add_e,d);
+          mpq_neg(_inf,_sup);
+          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          // [-(1+e)d,(1+e)d] * [a,b]
+          _mult = apron::binop_expr<Number>(AP_TEXPR_MUL,_mult,a0andb0);
+          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b]
+          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_mult);
+
+          mpq_set(_sup,d);
+          mpq_neg(_inf,_sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
+
+          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b] +[-d,d]
+          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_add);
+
           /// Linearization
 
           bool T = true;
@@ -1293,7 +1261,6 @@ public:
     this->add(LinearConstraintSystemT{cst});
   }
 
-  /// By zoush99
   /// \brief Add all constraints to apron's constraint system
   void add(const LinearConstraintSystemT& csts) override {
     std::lock_guard< std::mutex > lock(this->_mutex);
