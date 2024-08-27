@@ -1010,12 +1010,12 @@ private:
           ap_texpr0_t* _mult;
           ap_texpr0_t* _add;
           mpq_inits(_inf, _sup, three_add_2e, two_e, NULL);
-          /// ([1-e,1+e] ^ 2) * (x + y)
+          /// ([1-e,1+e] ^ 2) * (x - y)
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
           _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
           t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
-          /// ([1-e,1+e] ^ 2) * (x + y) + (3 + 2e) * [-d,d]
+          /// ([1-e,1+e] ^ 2) * (x - y) + (3 + 2e) * [-d,d]
           mpq_mul(two_e, two, e);
           mpq_add(three_add_2e, three, two_e);
           mpq_mul(_sup, three_add_2e, d);
@@ -1042,47 +1042,47 @@ private:
       } break;
       case BinaryOperator::Mul: {
         if (std::is_same< Number, FNumber >::value) {
-          /// ([1-e,1+e] ^ 2) * |y|_i * x
-          mpq_t _inf, _sup, three_add_2e, two_e, temp;
+          mpq_t _inf, _sup, three_add_2e, two_e;
           ap_texpr0_t* _mult;
           ap_texpr0_t* _add;
-          mpq_inits(_inf, _sup, three_add_2e, two_e, temp, NULL);
-          mpq_mul(_inf, one_sub_e, one_sub_e);
-          mpq_mul(_sup, one_add_e, one_add_e);
-
+          mpq_inits(_inf, _sup, three_add_2e, two_e, NULL);
+          mpq_set(_inf, one_sub_e);
+          mpq_set(_sup, one_add_e);
+          /// |rnd(y)|_l
           ap_interval_t* intv =
               ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
-          ap_texpr0_t *a0andb0 = ap_texpr0_cst_interval_mpq(intv->inf->val.mpq,intv->sup->val.mpq);
-          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
-          a0andb0 = apron::binop_expr< Number >(AP_TEXPR_MUL, a0andb0, _mult);
-          mpq_set(_sup,d);
-          mpq_neg(_inf,_sup);
-          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
-          // [a,b]    a0andb0 = |rnd(y)|_l *[1-e,1+e] + [-d,d]
-          a0andb0 = apron::binop_expr<Number>(AP_TEXPR_ADD,a0andb0,_add);
+          ap_texpr0_t* a0andb0 = ap_texpr0_cst_interval(intv);
 
-          // x * [1-e,1+e]^2
+          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          a0andb0 = apron::binop_expr< Number >(AP_TEXPR_MUL, a0andb0, _mult);
+          mpq_set(_sup, d);
+          mpq_neg(_inf, _sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          /// [a,b]    a0andb0 = |rnd(y)|_l * [1-e,1+e] + [-d,d]
+          a0andb0 = apron::binop_expr< Number >(AP_TEXPR_ADD, a0andb0, _add);
+
+          /// x * [1-e,1+e]^2
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
           _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
-          t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
-          // x * [1-e,1+e]^2 * [a,b]
-          t = apron::binop_expr<Number>(AP_TEXPR_MUL,t,a0andb0);
+          t = apron::binop_expr< Number >(AP_TEXPR_MUL, left, _mult);
+          /// x * [1-e,1+e]^2 * [a,b]
+          t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, a0andb0);
 
-          mpq_mul(_sup,one_add_e,d);
-          mpq_neg(_inf,_sup);
-          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
-          // [-(1+e)d,(1+e)d] * [a,b]
-          _mult = apron::binop_expr<Number>(AP_TEXPR_MUL,_mult,a0andb0);
-          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b]
-          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_mult);
+          mpq_mul(_sup, one_add_e, d);
+          mpq_neg(_inf, _sup);
+          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          /// [-(1+e)d,(1+e)d] * [a,b]
+          _mult = apron::binop_expr< Number >(AP_TEXPR_MUL, _mult, a0andb0);
+          /// x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b]
+          t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _mult);
 
-          mpq_set(_sup,d);
-          mpq_neg(_inf,_sup);
-          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          mpq_set(_sup, d);
+          mpq_neg(_inf, _sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
 
-          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b] +[-d,d]
-          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_add);
+          /// x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b] +[-d,d]
+          t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _add);
 
           /// Linearization
           bool T = true;
@@ -1095,7 +1095,7 @@ private:
                                                     true);
 
           t = ap_texpr0_from_linexpr0(l);
-          mpq_clears(_inf, _sup, three_add_2e, two_e, temp, NULL);
+          mpq_clears(_inf, _sup, three_add_2e, two_e, NULL);
           ap_texpr0_free(_mult);
           ap_texpr0_free(_add);
           ap_linexpr0_free(l);
@@ -1105,46 +1105,45 @@ private:
       } break;
       case BinaryOperator::Div: {
         if (std::is_same< Number, FNumber >::value) {
-          /// ([1-e,1+e] ^ 2) / |y|_i * x
-          mpq_t _inf, _sup, three_add_2e, two_e, temp;
+          mpq_t _inf, _sup, three_add_2e, two_e;
           ap_texpr0_t* _mult;
           ap_texpr0_t* _add;
-          mpq_inits(_inf, _sup, three_add_2e, two_e, temp, NULL);
-          mpq_mul(_inf, one_sub_e, one_sub_e);
-          mpq_mul(_sup, one_add_e, one_add_e);
+          mpq_inits(_inf, _sup, three_add_2e, two_e, NULL);
+          mpq_set(_inf, one_sub_e);
+          mpq_set(_sup, one_add_e);
+          /// |rnd(y)|_l
           ap_interval_t* intv =
               ap_abstract0_bound_texpr(manager(), this->_inv.get(), right);
-          ap_texpr0_t *a0andb0 = ap_texpr0_cst_interval_mpq(intv->inf->val.mpq,intv->sup->val.mpq);
-          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          ap_texpr0_t* a0andb0 = ap_texpr0_cst_interval(intv);
+          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
           a0andb0 = apron::binop_expr< Number >(AP_TEXPR_MUL, a0andb0, _mult);
-          mpq_set(_sup,d);
-          mpq_neg(_inf,_sup);
-          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
-          // [a,b]    a0andb0 = |rnd(y)|_l *[1-e,1+e] + [-d,d]
-          a0andb0 = apron::binop_expr<Number>(AP_TEXPR_ADD,a0andb0,_add);
-
-          // x * [1-e,1+e]^2
+          mpq_set(_sup, d);
+          mpq_neg(_inf, _sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          /// [a,b]    a0andb0 = |rnd(y)|_l *[1-e,1+e] + [-d,d]
+          a0andb0 = apron::binop_expr< Number >(AP_TEXPR_ADD, a0andb0, _add);
+          /// x * [1-e,1+e]^2
           mpq_mul(_inf, one_sub_e, one_sub_e);
           mpq_mul(_sup, one_add_e, one_add_e);
           _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
-          t = apron::binop_expr< Number >(AP_TEXPR_MUL, t, _mult);
-          // x * [1-e,1+e]^2 * [a,b]
-          t = apron::binop_expr<Number>(AP_TEXPR_MUL,t,a0andb0);
+          t = apron::binop_expr< Number >(AP_TEXPR_MUL, left, _mult);
+          /// x * [1-e,1+e]^2 / [a,b]
+          t = apron::binop_expr< Number >(AP_TEXPR_DIV, t, a0andb0);
 
-          mpq_mul(_sup,one_add_e,d);
-          mpq_neg(_inf,_sup);
-          _mult = ap_texpr0_cst_interval_mpq(_inf,_sup);
-          // [-(1+e)d,(1+e)d] * [a,b]
-          _mult = apron::binop_expr<Number>(AP_TEXPR_MUL,_mult,a0andb0);
-          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b]
-          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_mult);
+          mpq_mul(_sup, one_add_e, d);
+          mpq_neg(_inf, _sup);
+          _mult = ap_texpr0_cst_interval_mpq(_inf, _sup);
+          /// [-(1+e)d,(1+e)d] / [a,b]
+          _mult = apron::binop_expr< Number >(AP_TEXPR_DIV, _mult, a0andb0);
+          /// x * [1-e,1+e]^2 / [a,b] +[-(1+e)d,(1+e)d] / [a,b]
+          t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _mult);
 
-          mpq_set(_sup,d);
-          mpq_neg(_inf,_sup);
-          _add = ap_texpr0_cst_interval_mpq(_inf,_sup);
+          mpq_set(_sup, d);
+          mpq_neg(_inf, _sup);
+          _add = ap_texpr0_cst_interval_mpq(_inf, _sup);
 
-          // x * [1-e,1+e]^2 * [a,b] +[-(1+e)d,(1+e)d] * [a,b] +[-d,d]
-          t = apron::binop_expr<Number>(AP_TEXPR_ADD,t,_add);
+          /// x * [1-e,1+e]^2 / [a,b] +[-(1+e)d,(1+e)d] / [a,b] +[-d,d]
+          t = apron::binop_expr< Number >(AP_TEXPR_ADD, t, _add);
 
           /// Linearization
 
@@ -1158,7 +1157,7 @@ private:
                                                     true);
 
           t = ap_texpr0_from_linexpr0(l);
-          mpq_clears(_inf, _sup, three_add_2e, two_e, temp, NULL);
+          mpq_clears(_inf, _sup, three_add_2e, two_e, NULL);
           ap_texpr0_free(_mult);
           ap_texpr0_free(_add);
           ap_linexpr0_free(l);
@@ -1183,6 +1182,7 @@ private:
                               t,
                               nullptr);
     ap_texpr0_free(t);
+    t = nullptr;
     mpq_clears(e, d, one, two, three, one_sub_e, one_add_e, NULL);
   }
 
@@ -1319,79 +1319,78 @@ public:
 
     ap_tcons0_array_t ap_csts = ap_tcons0_array_make(1);
 
-      switch (pred) {
-        case Predicate::EQ:
-          ap_csts.p[0] = ap_tcons0_make(AP_CONS_EQ,
-                                 apron::binop_expr<
-                                     Number >(ap_texpr_op_t::AP_TEXPR_SUB,
-                                              texpr_x,
-                                              texpr_y),
-                                        nullptr);
-          break;
-        case Predicate::NE:
-          ap_csts.p[0] = ap_tcons0_make(AP_CONS_DISEQ,
-                                 apron::binop_expr<
-                                     Number >(ap_texpr_op_t::AP_TEXPR_SUB,
-                                              texpr_x,
-                                              texpr_y),
-                                        nullptr);
-          break;
-        case Predicate::GT:
-          ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUP,
-                                 apron::binop_expr<
-                                     Number >(ap_texpr_op_t::AP_TEXPR_SUB,
-                                              texpr_x,
-                                              texpr_y),
-                                        nullptr);
-          break;
-        case Predicate::GE:
-          ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUPEQ,
-                                 apron::binop_expr<
-                                     Number >(ap_texpr_op_t::AP_TEXPR_SUB,
-                                              texpr_x,
-                                              texpr_y),
-                                        nullptr);
-          break;
-        case Predicate::LT:
-          ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUP,
-                                 apron::binop_expr<
-                                     Number >(ap_texpr_op_t::AP_TEXPR_SUB,
-                                              texpr_y,
-                                              texpr_x),
-                                        nullptr);
-          break;
-        case Predicate::LE:
-          ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUPEQ,
-                                 apron::binop_expr<
-                                     Number >(ap_texpr_op_t::AP_TEXPR_SUB,
-                                              texpr_y,
-                                              texpr_x),
-                                        nullptr);
-          break;
-        default:
-          ikos_unreachable("unreachable");
-      }
+    switch (pred) {
+      case Predicate::EQ:
+        ap_csts.p[0] = ap_tcons0_make(AP_CONS_EQ,
+                                      apron::binop_expr<
+                                          Number >(ap_texpr_op_t::AP_TEXPR_SUB,
+                                                   texpr_x,
+                                                   texpr_y),
+                                      nullptr);
+        break;
+      case Predicate::NE:
+        ap_csts.p[0] = ap_tcons0_make(AP_CONS_DISEQ,
+                                      apron::binop_expr<
+                                          Number >(ap_texpr_op_t::AP_TEXPR_SUB,
+                                                   texpr_x,
+                                                   texpr_y),
+                                      nullptr);
+        break;
+      case Predicate::GT:
+        ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUP,
+                                      apron::binop_expr<
+                                          Number >(ap_texpr_op_t::AP_TEXPR_SUB,
+                                                   texpr_x,
+                                                   texpr_y),
+                                      nullptr);
+        break;
+      case Predicate::GE:
+        ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUPEQ,
+                                      apron::binop_expr<
+                                          Number >(ap_texpr_op_t::AP_TEXPR_SUB,
+                                                   texpr_x,
+                                                   texpr_y),
+                                      nullptr);
+        break;
+      case Predicate::LT:
+        ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUP,
+                                      apron::binop_expr<
+                                          Number >(ap_texpr_op_t::AP_TEXPR_SUB,
+                                                   texpr_y,
+                                                   texpr_x),
+                                      nullptr);
+        break;
+      case Predicate::LE:
+        ap_csts.p[0] = ap_tcons0_make(AP_CONS_SUPEQ,
+                                      apron::binop_expr<
+                                          Number >(ap_texpr_op_t::AP_TEXPR_SUB,
+                                                   texpr_y,
+                                                   texpr_x),
+                                      nullptr);
+        break;
+      default:
+        ikos_unreachable("unreachable");
+    }
 
-      ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
+    ap_abstract0_meet_tcons_array(manager(), true, this->_inv.get(), &ap_csts);
 
-      // Check satisfiability of ap_csts.p[0]
-      ap_tcons0_t& cst = ap_csts.p[0];
-      ap_interval_t* ap_intv =
-          ap_abstract0_bound_texpr(manager(), this->_inv.get(), cst.texpr0);
-      IntervalT intv = apron::to_ikos_interval< Number >(ap_intv);
-      if (intv.is_bottom() ||
-          (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
-          (cst.constyp == AP_CONS_SUPEQ && intv.ub() < BoundT(0)) ||
-          (cst.constyp == AP_CONS_DISEQ && intv == IntervalT(0))) {
-        // Cst is not satisfiable
-        this->set_to_bottom();
-      }
+    // Check satisfiability of ap_csts.p[0]
+    ap_tcons0_t& cst = ap_csts.p[0];
+    ap_interval_t* ap_intv =
+        ap_abstract0_bound_texpr(manager(), this->_inv.get(), cst.texpr0);
+    IntervalT intv = apron::to_ikos_interval< Number >(ap_intv);
+    if (intv.is_bottom() || (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
+        (cst.constyp == AP_CONS_SUPEQ && intv.ub() < BoundT(0)) ||
+        (cst.constyp == AP_CONS_DISEQ && intv == IntervalT(0))) {
+      // Cst is not satisfiable
+      this->set_to_bottom();
+    }
 
-      ap_interval_free(ap_intv);
+    ap_interval_free(ap_intv);
 
-      ap_texpr0_free(texpr_x);
-      ap_texpr0_free(texpr_y);
-      ap_tcons0_array_clear(&ap_csts);
+    ap_texpr0_free(texpr_x);
+    ap_texpr0_free(texpr_y);
+    ap_tcons0_array_clear(&ap_csts);
   }
 
   void add(Predicate pred, VariableRef x, const Number& y) override {
@@ -1466,8 +1465,7 @@ public:
     ap_interval_t* ap_intv =
         ap_abstract0_bound_texpr(manager(), this->_inv.get(), cst.texpr0);
     IntervalT intv = apron::to_ikos_interval< Number >(ap_intv);
-    if (intv.is_bottom() ||
-        (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
+    if (intv.is_bottom() || (cst.constyp == AP_CONS_EQ && !intv.contains(0)) ||
         (cst.constyp == AP_CONS_SUPEQ && intv.ub() < BoundT(0)) ||
         (cst.constyp == AP_CONS_DISEQ && intv == IntervalT(0))) {
       // Cst is not satisfiable
