@@ -1182,7 +1182,6 @@ private:
                               t,
                               nullptr);
     ap_texpr0_free(t);
-    t = nullptr;
     mpq_clears(e, d, one, two, three, one_sub_e, one_add_e, NULL);
   }
 
@@ -1387,9 +1386,6 @@ public:
     }
 
     ap_interval_free(ap_intv);
-
-    ap_texpr0_free(texpr_x);
-    ap_texpr0_free(texpr_y);
     ap_tcons0_array_clear(&ap_csts);
   }
 
@@ -1473,9 +1469,6 @@ public:
     }
 
     ap_interval_free(ap_intv);
-
-    ap_texpr0_free(texpr_x);
-    ap_texpr0_free(texpr_y);
     ap_tcons0_array_clear(&ap_csts);
   }
 
