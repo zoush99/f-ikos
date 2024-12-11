@@ -48,7 +48,7 @@
 #include <boost/variant.hpp>
 #include <boost/version.hpp>
 
-//#include <ikos/core/number/dummy_number.hpp>  // delete
+// #include <ikos/core/number/dummy_number.hpp>  // delete
 #include <ikos/core/number/f_number.hpp> // By zoush99
 #include <ikos/core/number/machine_int.hpp>
 #include <ikos/core/semantic/dumpable.hpp>
@@ -88,6 +88,10 @@ private:
 
   struct FloatingPointLit {
     // TODO(marthaud): Add a class to represent floating points
+    // By zoush99
+    // Maybe the floating-point type I designed needs to be improved
+    // to support more behaviors of IEEE-754 standards, such as floating-point
+    // overflows and underflows.
     FNumber value;
 
     bool operator==(const FloatingPointLit& o) const {
@@ -179,7 +183,7 @@ public:
   }
 
   /// \brief Create a constant floating point literal
-  static Literal floating_point(FNumber v) {
+  static Literal floating_point(FNumber v) {  // By
     return Literal(Lit(FloatingPointLit{std::move(v)}));
   }
 
@@ -305,7 +309,7 @@ private:
   };
 
 public:
-  // \brief Return true if the literal is a variable
+  /// \brief Return true if the literal is a variable
   bool is_var() const { return boost::apply_visitor(IsVariable(), this->_lit); }
 
 private:
@@ -387,8 +391,7 @@ private:
     }
 
     const FNumber& operator()(const FloatingPointVarLit&) const {
-      ikos_unreachable(
-          "trying to call numeric() on a floating point variable");
+      ikos_unreachable("trying to call numeric() on a floating point variable");
     }
 
     const FNumber& operator()(const PointerVarLit&) const {

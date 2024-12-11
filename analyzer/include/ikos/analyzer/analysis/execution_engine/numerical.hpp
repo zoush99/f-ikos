@@ -480,8 +480,11 @@ private:
 
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
+    // By zoush99
     void floating_point(const FNumber& rhs) {
-      this->_inv.normal().float_assign(this->_lhs,rhs);
+      // Commented by zoush99: Use float_assign function in a specific abstract
+      // domain at runtime
+      this->_inv.normal().float_assign(this->_lhs, rhs);
     }
 
     void memory_location(MemoryLocation*) { ikos_unreachable("unreachable"); }
@@ -539,7 +542,7 @@ private:
     if (lhs.is_machine_int_var()) {
       IntegerAssign v(lhs.var(), this->_inv);
       rhs.apply_visitor(v);
-    } else if (lhs.is_floating_point_var()) {
+    } else if (lhs.is_floating_point_var()) { // By zoush99
       FloatingPointAssign v(lhs.var(), this->_inv);
       rhs.apply_visitor(v);
     } else if (lhs.is_pointer_var()) {
@@ -618,6 +621,7 @@ private:
 
     void machine_int(const MachineInt&) { ikos_unreachable("unreachable"); }
 
+    // By zoush99
     void floating_point(const FNumber& rhs) {
       this->_inv.normal().float_assign(this->_lhs, rhs);
     }
@@ -684,7 +688,7 @@ private:
     if (lhs.is_machine_int_var()) {
       IntegerImplicitBitcast v(lhs.var(), this->_inv);
       rhs.apply_visitor(v);
-    } else if (lhs.is_floating_point_var()) {
+    } else if (lhs.is_floating_point_var()) { // By zoush99
       FloatingPointImplicitBitcast v(lhs.var(), this->_inv);
       rhs.apply_visitor(v);
     } else if (lhs.is_pointer_var()) {
@@ -1041,10 +1045,10 @@ private:
   }
 
   /// \todo(floating point)
-  /// \details This currently doesn't need modification since unary operation-related functions
-  /// are not defined. After the unary operation functions and subsequent abstract
-  /// domain entry points are handled, then this function can be rewritten.
-  /// \brief Execute a floating point conversion
+  /// \details This currently doesn't need modification since unary
+  /// operation-related functions are not defined. After the unary operation
+  /// functions and subsequent abstract domain entry points are handled, then
+  /// this function can be rewritten. \brief Execute a floating point conversion
   void exec_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not a floating point variable");
@@ -1055,39 +1059,39 @@ private:
   }
 
   /// \todo(floating point)
-  /// \details This currently doesn't need modification since unary operation-related functions
-  /// are not defined. After the unary operation functions and subsequent abstract
-  /// domain entry points are handled, then this function can be rewritten.
-  /// \brief Execute a conversion from floating point to integer
+  /// \details This currently doesn't need modification since unary
+  /// operation-related functions are not defined. After the unary operation
+  /// functions and subsequent abstract domain entry points are handled, then
+  /// this function can be rewritten. \brief Execute a conversion from floating
+  /// point to integer
   void exec_float_to_int_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_machine_int_var(),
                     "left hand side is not an integer variable");
 
     if (rhs.is_floating_point_var()) {
       this->_inv.normal().uninit_assert_initialized(rhs.var());
-      this->_inv.normal()
-          .scalar_float_to_int(lhs.var(),
-                                 rhs.var());  // By zoush99
-    }else{
+      this->_inv.normal().scalar_float_to_int(lhs.var(),
+                                              rhs.var()); // By zoush99
+    } else {
       ikos_unreachable("unexpected operand");
     }
   }
 
   /// \todo(floating point)
-  /// \details This currently doesn't need modification since unary operation-related functions
-  /// are not defined. After the unary operation functions and subsequent abstract
-  /// domain entry points are handled, then this function can be rewritten.
-  /// \brief Execute a conversion from integer to floating point
+  /// \details This currently doesn't need modification since unary
+  /// operation-related functions are not defined. After the unary operation
+  /// functions and subsequent abstract domain entry points are handled, then
+  /// this function can be rewritten. \brief Execute a conversion from integer
+  /// to floating point
   void exec_int_to_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
-   ikos_assert_msg(lhs.is_floating_point_var(),
+    ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not a floating point variable");
 
     if (rhs.is_machine_int_var()) {
       this->_inv.normal().uninit_assert_initialized(rhs.var());
-      this->_inv.normal()
-          .scalar_int_to_float(lhs.var(),
-                               rhs.var());  // By zoush99
-    }else{
+      this->_inv.normal().scalar_int_to_float(lhs.var(),
+                                              rhs.var()); // By zoush99
+    } else {
       ikos_unreachable("unexpected operand");
     }
   }
@@ -1180,8 +1184,7 @@ private:
         this->_inv.normal().int_apply(IntUnaryOperator::SignCast,
                                       lhs.var(),
                                       rhs.scalar().var());
-      }
-      else {
+      } else {
         this->_inv.normal().int_assign_nondet(lhs.var());
       }
     } else {
@@ -1517,7 +1520,7 @@ public:
         /// \todo(floating point unordered or not equal)
       case ar::Comparison::FUNE: {
         /// \todo(dummy operation)
-        this->exec_float_comparison(FnuPredicate::EQ,left, right);
+        this->exec_float_comparison(FnuPredicate::EQ, left, right);
       } break;
       case ar::Comparison::PEQ: {
         this->exec_ptr_comparison(PointerPredicate::EQ, left, right);
