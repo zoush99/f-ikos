@@ -970,7 +970,6 @@ public:
                  this->_lit_factory.get(s->operand()));
   }
 
-  /// \todo
   /// \brief Execute an UnaryOperation statement
   void exec(ar::UnaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {
@@ -995,15 +994,15 @@ public:
         this->exec_int_conv(IntUnaryOperator::Ext, lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::FPTrunc:
-      case ar::UnaryOperation::FPExt: { // floating point
+      case ar::UnaryOperation::FPExt: { // Commented by zoush99: floating-point
         this->exec_float_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::FPToUI:
-      case ar::UnaryOperation::FPToSI: { // floating point
+      case ar::UnaryOperation::FPToSI: { // Commented by zoush99: floating-point
         this->exec_float_to_int_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::UIToFP:
-      case ar::UnaryOperation::SIToFP: { // floating point
+      case ar::UnaryOperation::SIToFP: { // Commented by zoush99: floating-point
         this->exec_int_to_float_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::PtrToUI:
@@ -1028,27 +1027,28 @@ private:
     ikos_assert_msg(lhs.is_machine_int_var(),
                     "left hand side is not an integer variable");
 
-    if (rhs.is_machine_int()) { // machine integer constant
+    if (rhs.is_machine_int()) { // Commented by zoush99: rhs is a machine
+                                // integer constant
       auto type = cast< ar::IntegerType >(lhs.var()->type());
-      // question?
       this->_inv.normal()
           .int_assign(lhs.var(),
                       core::machine_int::apply_unary_operator(op,
                                                               rhs.machine_int(),
                                                               type->bit_width(),
                                                               type->sign()));
-    } else if (rhs.is_machine_int_var()) { // machine integer variable
+    } else if (rhs.is_machine_int_var()) { // Commented by zoush99: rhs is a
+                                           // machine integer variable
       this->_inv.normal().int_apply(op, lhs.var(), rhs.var());
     } else {
       ikos_unreachable("unexpected arguments");
     }
   }
 
-  /// \todo(floating point)
-  /// \details This currently doesn't need modification since unary
-  /// operation-related functions are not defined. After the unary operation
-  /// functions and subsequent abstract domain entry points are handled, then
-  /// this function can be rewritten. \brief Execute a floating point conversion
+  // Commented by zoush99: This currently doesn't need modification since unary
+  // operation-related functions are not defined. After the unary operation
+  // functions and subsequent abstract domain entry points are handled, then
+  // this function can be rewritten.
+  /// \brief Execute a floating point conversion
   void exec_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not a floating point variable");
@@ -1059,11 +1059,11 @@ private:
   }
 
   /// \todo(floating point)
-  /// \details This currently doesn't need modification since unary
-  /// operation-related functions are not defined. After the unary operation
-  /// functions and subsequent abstract domain entry points are handled, then
-  /// this function can be rewritten. \brief Execute a conversion from floating
-  /// point to integer
+  // Commented by zoush99: This currently doesn't need modification since unary
+  // operation-related functions are not defined. After the unary operation
+  // functions and subsequent abstract domain entry points are handled, then
+  // this function can be rewritten. \brief Execute a conversion from floating
+  // point to integer
   void exec_float_to_int_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_machine_int_var(),
                     "left hand side is not an integer variable");
@@ -1078,11 +1078,11 @@ private:
   }
 
   /// \todo(floating point)
-  /// \details This currently doesn't need modification since unary
-  /// operation-related functions are not defined. After the unary operation
-  /// functions and subsequent abstract domain entry points are handled, then
-  /// this function can be rewritten. \brief Execute a conversion from integer
-  /// to floating point
+  // Commented by zoush99: This currently doesn't need modification since unary
+  // operation-related functions are not defined. After the unary operation
+  // functions and subsequent abstract domain entry points are handled, then
+  // this function can be rewritten. \brief Execute a conversion from integer
+  // to floating point
   void exec_int_to_float_conv(const ScalarLit& lhs, const ScalarLit& rhs) {
     ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not a floating point variable");
@@ -1209,7 +1209,7 @@ private:
   }
 
 public:
-  /// \todo (covert AR data types to machine integer types)    By zoush99
+  // Commented by zoush99: need to define binary operataions for floating-point types
   /// \brief Execute a BinaryOperation statement
   void exec(ar::BinaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {
@@ -1227,7 +1227,6 @@ public:
     const ScalarLit& right = this->_lit_factory.get_scalar(s->right());
 
     switch (s->op()) {
-        /// \todo(floating point)
       case ar::BinaryOperation::UAdd:
       case ar::BinaryOperation::SAdd: {
         this->exec_int_bin_operation(lhs,
@@ -1306,31 +1305,31 @@ public:
       case ar::BinaryOperation::SXor: {
         this->exec_int_bin_operation(lhs, IntBinaryOperator::Xor, left, right);
       } break;
-      case ar::BinaryOperation::FAdd: {
+      case ar::BinaryOperation::FAdd: { // By zoush99
         this->exec_float_bin_operation(lhs,
                                        FnuBinaryOperator::Add,
                                        left,
                                        right);
       } break;
-      case ar::BinaryOperation::FSub: {
+      case ar::BinaryOperation::FSub: { // By zoush99
         this->exec_float_bin_operation(lhs,
                                        FnuBinaryOperator::Sub,
                                        left,
                                        right);
       } break;
-      case ar::BinaryOperation::FMul: {
+      case ar::BinaryOperation::FMul: { // By zoush99
         this->exec_float_bin_operation(lhs,
                                        FnuBinaryOperator::Mul,
                                        left,
                                        right);
       } break;
-      case ar::BinaryOperation::FDiv: {
+      case ar::BinaryOperation::FDiv: { // By zoush99
         this->exec_float_bin_operation(lhs,
                                        FnuBinaryOperator::Div,
                                        left,
                                        right);
       } break;
-      case ar::BinaryOperation::FRem: {
+      case ar::BinaryOperation::FRem: { // By zoush99
         this->exec_float_bin_operation(lhs,
                                        FnuBinaryOperator::Rem,
                                        left,
@@ -1382,27 +1381,12 @@ private:
     }
   }
 
-  /// By zoush99
+  // By zoush99
   /// \brief Execute a floating point binary operation
   void exec_float_bin_operation(const ScalarLit& lhs,
                                 FnuBinaryOperator op,
                                 const ScalarLit& left,
                                 const ScalarLit& right) {
-    /*
-        ikos_assert_msg(lhs.is_floating_point_var(),
-                        "left hand side is not a floating point variable");
-
-        // TODO(marthaud): add floating point reasoning
-
-        if (left.is_floating_point_var()) {
-          this->_inv.normal().uninit_assert_initialized(left.var());
-        }
-        if (right.is_floating_point_var()) {
-          this->_inv.normal().uninit_assert_initialized(right.var());
-        }
-        this->_inv.normal().float_assign_nondet(lhs.var());
-*/
-
     ikos_assert_msg(lhs.is_floating_point_var(),
                     "left hand side is not an floating point variable");
 
@@ -1485,43 +1469,47 @@ public:
       case ar::Comparison::SILE: {
         this->exec_int_comparison(IntPredicate::LE, left, right);
       } break;
+        // By zoush99
       case ar::Comparison::FOEQ: {
         this->exec_float_comparison(FnuPredicate::EQ, left, right);
       } break;
+        // By zoush99
       case ar::Comparison::FOGT: {
         this->exec_float_comparison(FnuPredicate::GT, left, right);
       } break;
+        // By zoush99
       case ar::Comparison::FOGE: {
         this->exec_float_comparison(FnuPredicate::GE, left, right);
       } break;
+        // By zoush99
       case ar::Comparison::FOLT: {
         this->exec_float_comparison(FnuPredicate::LT, left, right);
       } break;
+        // By zoush99
       case ar::Comparison::FOLE: {
         this->exec_float_comparison(FnuPredicate::LE, left, right);
       } break;
+        // By zoush99
       case ar::Comparison::FONE: {
         this->exec_float_comparison(FnuPredicate::NE, left, right);
       } break;
-        /// \todo(floating point ordered)
+        // NaN may be present in operands
       case ar::Comparison::FORD:
-        /// \todo(floating point unordered)
+        // NaN may be present in operands
       case ar::Comparison::FUNO:
-        /// \todo(floating point unordered or equal)
+        // NaN may be present in operands
       case ar::Comparison::FUEQ:
-        /// \todo(floating point unordered or greater than)
+        // NaN may be present in operands
       case ar::Comparison::FUGT:
-        /// \todo(floating point unordered or greater equal)
+        // NaN may be present in operands
       case ar::Comparison::FUGE:
-        /// \todo(floating point unordered or less than)
+        // NaN may be present in operands
       case ar::Comparison::FULT:
-        /// \todo(floating point unordered or less equal)
+        // NaN may be present in operands
       case ar::Comparison::FULE:
-        /// \todo(floating point unordered or not equal)
-      case ar::Comparison::FUNE: {
-        /// \todo(dummy operation)
-        this->exec_float_comparison(FnuPredicate::EQ, left, right);
-      } break;
+        // NaN may be present in operands
+      case ar::Comparison::FUNE:
+        break;
       case ar::Comparison::PEQ: {
         this->exec_ptr_comparison(PointerPredicate::EQ, left, right);
       } break;
