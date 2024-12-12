@@ -50,6 +50,8 @@
 namespace ikos {
 namespace analyzer {
 
+// Commented by zoush99: IKOS combines program invariants and data flow graphs
+// to detect dead code.
 /// \brief Dead code checker
 class DeadCodeChecker final : public Checker {
 private:

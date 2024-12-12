@@ -105,7 +105,7 @@ AssertProverChecker::CheckResult AssertProverChecker::check_assert(
     flag = IntInterval(cond.machine_int());
   } else if (cond.is_machine_int_var()) {
     flag = inv.normal().int_to_interval(cond.var());
-  } else if (cond.is_floating_point()) {
+  } else if (cond.is_floating_point()) {  // By zoush99
     flagF=FnuInterval (cond.floating_point());
   } else if (cond.is_floating_point_var()) {
     flagF=inv.normal().float_to_interval(cond.var());
@@ -125,7 +125,7 @@ AssertProverChecker::CheckResult AssertProverChecker::check_assert(
     return {CheckKind::Assert, Result::Error};
   } else if (flag.contains(
                  MachineInt::zero(32, Unsigned)) || flagF.contains(
-                 FNumber::zero(32,Signedness::Signed))) {
+                 FNumber::zero(32,Signedness::Signed))) { // By zoush99
     // The condition may be 0
     if (auto msg = this->display_assert_check(Result::Warning, call)) {
       *msg << ": (∃x ∈ " << cond << ", x == 0) and (∃x ∈ " << cond

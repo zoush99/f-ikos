@@ -94,7 +94,7 @@ public:
     /// \brief Check for a memory access on a hardware address
     HardwareAddresses = 3,
 
-    // \brief Check for an out of bound memory access
+    /// \brief Check for an out of bound memory access
     OutOfBound = 4,
   };
 

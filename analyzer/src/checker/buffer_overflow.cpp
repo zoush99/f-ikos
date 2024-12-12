@@ -1329,6 +1329,9 @@ static bool is_multiple(const core::machine_int::Interval& interval,
          (mod(interval.ub(), n).is_zero() || interval.ub().is_max());
 }
 
+// Commented by zoush99: Determines whether a given memory access can be
+// considered access to an array by static analysis and returns the size of
+// the array elements.
 boost::optional< MachineInt > BufferOverflowChecker::is_array_access(
     ar::Statement* stmt,
     const value::AbstractDomain& inv,

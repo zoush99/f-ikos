@@ -295,6 +295,8 @@ public:
   /// \brief Machine integer abstract domain
   MachineIntDomainOption machine_int_domain;
 
+  /// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
+
   /// \brief Is the analysis interprocedural or intraprocedural
   Procedural procedural;
 
@@ -322,22 +324,22 @@ public:
   /// boost::none to perform narrowing iterations until convergence
   boost::optional< unsigned > narrowing_iterations;
 
-  /// \brief Wether we should use a liveness analysis or not
+  /// \brief Whether we should use a liveness analysis or not
   bool use_liveness;
 
-  /// \brief Wether we should use a pointer analysis or not
+  /// \brief Whether we should use a pointer analysis or not
   bool use_pointer;
 
-  /// \brief Wether we should use widening hints or not
+  /// \brief Whether we should use widening hints or not
   bool use_widening_hints;
 
-  /// \brief Wether we should use the partitioning abstract domain or not
+  /// \brief Whether we should use the partitioning abstract domain or not
   bool use_partitioning_domain;
 
-  /// \brief Wether we should save fixpoints on called functions or not
+  /// \brief Whether we should save fixpoints on called functions or not
   bool use_fixpoint_cache;
 
-  /// \brief Wether we should perform checks or not
+  /// \brief Whether we should perform checks or not
   bool use_checks;
 
   /// \brief Whether to trace states during analysis

@@ -131,7 +131,7 @@ protected:
              result == Result::Unreachable));
   }
 
-  // \brief Display the invariant for the given statement, if requested
+  /// \brief Display the invariant for the given statement, if requested
   ///
   /// \return a log message if the invariant should be displayed
   inline llvm::Optional< LogMessage > display_invariant(
