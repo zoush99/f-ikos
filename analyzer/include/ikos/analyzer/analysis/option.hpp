@@ -61,6 +61,7 @@ namespace analyzer {
 // forward declaration
 class SettingsTable;
 
+/// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
 /// \brief Machine integer abstract domain
 enum class MachineIntDomainOption {
   Interval,
@@ -87,6 +88,7 @@ enum class MachineIntDomainOption {
   VarPackApronPkgridPolyhedraLinearCongruences,
 };
 
+/// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
 /// \brief Return a string representing a MachineIntDomainOption
 inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
   switch (d) {

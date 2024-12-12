@@ -994,15 +994,15 @@ public:
         this->exec_int_conv(IntUnaryOperator::Ext, lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::FPTrunc:
-      case ar::UnaryOperation::FPExt: { // Commented by zoush99: floating-point
+      case ar::UnaryOperation::FPExt: { // Commented by zoush99: floating point
         this->exec_float_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::FPToUI:
-      case ar::UnaryOperation::FPToSI: { // Commented by zoush99: floating-point
+      case ar::UnaryOperation::FPToSI: { // Commented by zoush99: floating point
         this->exec_float_to_int_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::UIToFP:
-      case ar::UnaryOperation::SIToFP: { // Commented by zoush99: floating-point
+      case ar::UnaryOperation::SIToFP: { // Commented by zoush99: floating point
         this->exec_int_to_float_conv(lhs.scalar(), rhs.scalar());
       } break;
       case ar::UnaryOperation::PtrToUI:
@@ -1209,7 +1209,8 @@ private:
   }
 
 public:
-  // Commented by zoush99: need to define binary operataions for floating-point types
+  // Commented by zoush99: need to define binary operataions for floating point
+  // types
   /// \brief Execute a BinaryOperation statement
   void exec(ar::BinaryOperation* s) override {
     if (s->has_undefined_constant_operand()) {
@@ -1493,7 +1494,9 @@ public:
       case ar::Comparison::FONE: {
         this->exec_float_comparison(FnuPredicate::NE, left, right);
       } break;
-        // NaN may be present in operands
+        // Commented by zoush99: Since NaN is not considered in my current setup
+        // of floating point types, I have not designed a comparison of such
+        // floating point types. NaN may be present in operands
       case ar::Comparison::FORD:
         // NaN may be present in operands
       case ar::Comparison::FUNO:
@@ -1562,11 +1565,11 @@ private:
     }
   }
 
+  // By zoush99
   /// \brief Execute a floating point comparison
   void exec_float_comparison(FnuPredicate pred,
                              const ScalarLit& left,
                              const ScalarLit& right) {
-    // TODO(marthaud): add floating point reasoning
     if (left.is_floating_point()) {
       if (right.is_floating_point()) {
         if (!compare(pred, left.floating_point(), right.floating_point())) {
@@ -1590,6 +1593,7 @@ private:
     }
   }
 
+  // Commented by zoush99: Comparision between pointers
   /// \brief Execute a pointer comparison
   void exec_ptr_comparison(PointerPredicate pred,
                            const ScalarLit& left,

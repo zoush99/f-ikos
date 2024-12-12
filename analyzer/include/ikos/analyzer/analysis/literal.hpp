@@ -188,7 +188,7 @@ private:
   };
 
 public:
-  // \brief Return true if the literal is a variable
+  /// \brief Return true if the literal is a variable
   bool is_var() const {
     return boost::apply_visitor(IsVariableLit(), this->_lit);
   }

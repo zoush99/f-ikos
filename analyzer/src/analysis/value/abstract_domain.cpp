@@ -107,10 +107,11 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
   } else {
     return MemoryAbstractDomain(inv);
   }*/
-  /// \brief Division is not currently supported. It will be addressed in a future update.
+  /// \brief Partition is not currently supported. It will be addressed in a future update.
   return MemoryAbstractDomain(inv); // By zoush99
 }
 
+/// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
 /// \brief Create the top memory abstract value
 MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
   auto inv = ValueAbstractDomain(
