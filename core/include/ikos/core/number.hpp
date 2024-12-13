@@ -9,6 +9,7 @@
  *   * ikos/core/number/exception.hpp
  *   * ikos/core/number/machine_int.hpp
  *   * ikos/core/number/q_number.hpp
+ *   * ikos/core/number/f_number.hpp
  *   * ikos/core/number/signedness.hpp
  *   * ikos/core/number/supported_integral.hpp
  *   * ikos/core/number/z_number.hpp

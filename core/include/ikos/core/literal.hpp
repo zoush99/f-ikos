@@ -87,7 +87,6 @@ private:
   };
 
   struct FloatingPointLit {
-    // TODO(marthaud): Add a class to represent floating points
     // By zoush99
     // Maybe the floating-point type I designed needs to be improved
     // to support more behaviors of IEEE-754 standards, such as floating-point
@@ -183,7 +182,7 @@ public:
   }
 
   /// \brief Create a constant floating point literal
-  static Literal floating_point(FNumber v) {  // By
+  static Literal floating_point(FNumber v) {  // By zoush99
     return Literal(Lit(FloatingPointLit{std::move(v)}));
   }
 
