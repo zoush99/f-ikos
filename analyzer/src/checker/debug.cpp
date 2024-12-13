@@ -107,17 +107,18 @@ static void print_interval(LogMessage& msg,
   }
 }
 
-/// \brief Print the interval of an floating point variable
+// By zoush99
+/// \brief Print the interval of a floating point variable
 static void print_interval(LogMessage& msg,
                            const std::string& repr,
-                           const core::numeric::Interval<FNumber>& i) {
+                           const core::numeric::Interval<FNumber>& f) {
   msg << "\t" << repr;
-  if (i.is_bottom()) {
+  if (f.is_bottom()) {
     msg << " is bottom\n";
-  } else if (auto x = i.singleton()) {
+  } else if (auto x = f.singleton()) {
     msg << " is " << *x << "\n";
   } else {
-    msg << " is in [" << i.lb() << ", " << i.ub() << "]\n";
+    msg << " is in [" << f.lb() << ", " << f.ub() << "]\n";
   }
 }
 

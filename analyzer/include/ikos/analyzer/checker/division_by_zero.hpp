@@ -52,7 +52,7 @@ namespace analyzer {
 class DivisionByZeroChecker final : public Checker {
 private:
   using IntInterval = core::machine_int::Interval;
-  using FnuInterval = core::numeric::Interval<FNumber>;
+  using FnuInterval = core::numeric::Interval<FNumber>; // By zoush99
 
 public:
   /// \brief Constructor

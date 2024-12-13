@@ -68,6 +68,7 @@ void DivisionByZeroChecker::check(ar::Statement* stmt,
         bin->op() == ar::BinaryOperation::SDiv ||
         bin->op() == ar::BinaryOperation::URem ||
         bin->op() == ar::BinaryOperation::SRem ||
+        // By zoush99. Check the division in a floating point expression
         bin->op() == ar::BinaryOperation::FDiv ||
         bin->op() == ar::BinaryOperation::FRem) {
       CheckResult check = this->check_division(bin, inv);
@@ -95,8 +96,11 @@ DivisionByZeroChecker::CheckResult DivisionByZeroChecker::check_division(
 
   const ScalarLit& lit = this->_lit_factory.get_scalar(stmt->right());
 
-  if (lit.is_undefined() || (lit.is_machine_int_var() &&
-                             inv.normal().uninit_is_uninitialized(lit.var()))) {
+  if (lit.is_undefined() ||
+      ((lit.is_machine_int_var() ||
+        lit.is_floating_point_var()) && // By zoush99. Add check for floating
+                                        // point variables
+       inv.normal().uninit_is_uninitialized(lit.var()))) {
     // Undefined operand
     if (auto msg = this->display_division_check(Result::Error, stmt)) {
       *msg << ": undefined operand\n";
@@ -111,7 +115,8 @@ DivisionByZeroChecker::CheckResult DivisionByZeroChecker::check_division(
     divisor = IntInterval(lit.machine_int());
   } else if (lit.is_machine_int_var()) {
     divisor = inv.normal().int_to_interval(lit.var());
-  } else if (lit.is_floating_point()) {
+  } else if (lit.is_floating_point()) { // By zoush99. Add check for floating
+                                        // point constants and variables
     fdivisor = FnuInterval(lit.floating_point());
   } else if (lit.is_floating_point_var()) {
     fdivisor = inv.normal().float_to_interval(lit.var());
@@ -131,8 +136,7 @@ DivisionByZeroChecker::CheckResult DivisionByZeroChecker::check_division(
     return {CheckKind::DivisionByZero, Result::Error, {}};
   } else if (divisor.contains(
                  MachineInt::zero(divisor.bit_width(), divisor.sign())) ||
-             fdivisor.contains(
-                 FNumber ::zero(32, Signedness::Signed) )){
+             fdivisor.contains(FNumber ::zero(32, Signedness::Signed))) {
     // The second operand may be 0
     if (auto msg = this->display_division_check(Result::Warning, stmt)) {
       *msg << ": ∃d ∈ divisor, d == 0\n";
