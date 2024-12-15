@@ -871,31 +871,6 @@ public:
   /// @}
   /// \name Implement floating point abstract domain methods
   /// @{
-  /*void float_assign_undef(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-
-    this->_uninitialized.assign_uninitialized(x);
-  }
-
-  void float_assign_nondet(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-
-    this->_uninitialized.assign_initialized(x);
-  }
-
-  void float_assign(VariableRef x, VariableRef y) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-    ikos_assert(ScalarVariableTrait::is_float(y));
-
-    this->_uninitialized.assign(x, y);
-  }
-
-  void float_forget(VariableRef x) override {
-    ikos_assert(ScalarVariableTrait::is_float(x));
-
-    this->_uninitialized.forget(x);
-  }
-*/
 
     void float_assign(VariableRef x,const FNumber& n) override {
       ikos_assert(ScalarVariableTrait::is_float(x));
