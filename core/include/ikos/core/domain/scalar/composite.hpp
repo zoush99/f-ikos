@@ -68,7 +68,8 @@ namespace scalar {
 /// For each machine integer `x`, it keeps track of its value and whether it is
 /// initialized or not.
 ///
-/// For each floating point `x`, it keeps track of whether it is initialized or
+/// // By zoush99
+/// For each floating point `x`, it keeps track of its value and whether it is initialized or
 /// not.
 ///
 /// For each pointer `p`, it keep track of its address, its offset, its nullity

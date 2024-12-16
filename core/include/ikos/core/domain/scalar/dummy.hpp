@@ -71,6 +71,7 @@ public:
   using PointerSetT = PointerSet< MemoryLocationRef >;
 
   // By zoush99
+  // To implment virtual functions that are inherited from AbstractDomain
   using FnuBinaryOperator = numeric::BinaryOperator;
   using FnuPredicate = numeric::Predicate;
   using FnuLinearExpression = LinearExpression< FNumber, VariableRef >;
@@ -340,17 +341,9 @@ public:
   void counter_forget(VariableRef) override {}
 
   /// @}
+  // By zoush99
   /// \name Implement floating point abstract domain methods
   /// @{
-  /*
-    void float_assign_undef(VariableRef) override {}
-
-    void float_assign_nondet(VariableRef) override {}
-
-    void float_assign(VariableRef, VariableRef) override {}
-
-    void float_forget(VariableRef) override {}
-  */
 
   void float_assign(VariableRef, const FNumber&) override {}
 

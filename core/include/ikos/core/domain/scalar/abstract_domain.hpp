@@ -555,7 +555,7 @@ public:
   /// \brief Write a non deterministic float to a dynamically typed variable
   virtual void dynamic_write_nondet_float(VariableRef x) = 0;
 
-  /// \brief By zoush99
+  // By zoush99
   /// \brief Write an float variable to a dynamically typed variable
   virtual void dynamic_write_float(VariableRef x, VariableRef y) = 0;
 
@@ -573,7 +573,7 @@ public:
   /// \brief Read an integer variable from a dynamically typed variable
   virtual void dynamic_read_int(VariableRef x, VariableRef y) = 0;
 
-  /// \brief By zoush99
+  // By zoush99
   /// \brief Read an float variable from a dynamically typed variable
   virtual void dynamic_read_float(VariableRef x, VariableRef y) = 0;
 
@@ -599,7 +599,7 @@ public:
   /// \brief Assign `x` to a non deterministic value
   virtual void scalar_assign_nondet(VariableRef x) = 0;
 
-  /// \brief By zoush99
+  // By zoush99
   /// \brief Assign 'x = fl-to-int f'
   virtual void scalar_float_to_int(VariableRef f, VariableRef x) = 0;
 

@@ -56,21 +56,22 @@ namespace scalar {
 ///
 /// This class implements a scalar abstract domain that handles machine integers
 /// and ignore floating points and pointers safely.
-/// (Choose not to ignore floating point values, but rather pass them down.By
+/// (Choose not to ignore floating point values, but rather pass them down. By
 /// zoush99)
 template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
            typename MachineIntDomainT,
-           typename FNumberDomainT >
+           typename FNumberDomainT > // By zoush99
 class MachineIntDomain final
-    : public scalar::AbstractDomain< VariableRef,
-                                     MemoryLocationRef,
-                                     MachineIntDomain< VariableRef,
-                                                       MemoryLocationRef,
-                                                       UninitializedDomain,
-                                                       MachineIntDomainT,
-                                                       FNumberDomainT > > {
+    : public scalar::AbstractDomain<
+          VariableRef,
+          MemoryLocationRef,
+          MachineIntDomain< VariableRef,
+                            MemoryLocationRef,
+                            UninitializedDomain,
+                            MachineIntDomainT,
+                            FNumberDomainT > > { // By zoush99
 public:
   static_assert(
       uninitialized::IsAbstractDomain< UninitializedDomain,
@@ -454,7 +455,8 @@ public:
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      // I won't consider widening the threshold for floating-point types at this point; I'll consider it later.
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.widening(
                                   other._uninitialized),
                               this->_integer.widening_threshold(other._integer,
@@ -481,7 +483,8 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
-      // I won't consider widening the threshold for floating-point types at this point; I'll consider it later.
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
                               this->_integer.narrowing(other._integer),
@@ -497,7 +500,8 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
-      // I won't consider widening the threshold for floating-point types at this point; I'll consider it later.
+      // I won't consider widening the threshold for floating-point types at
+      // this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
                               this->_integer.narrowing_threshold(other._integer,
@@ -872,74 +876,75 @@ public:
   /// \name Implement floating point abstract domain methods
   /// @{
 
-    void float_assign(VariableRef x,const FNumber& n) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
+  void float_assign(VariableRef x, const FNumber& n) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-      if (this->is_bottom_fast()) {
-        return;
-      }
-      this->_uninitialized.assign_initialized(x);
-      this->_fnumber.assign(x, n);
+    if (this->is_bottom_fast()) {
+      return;
+    }
+    this->_uninitialized.assign_initialized(x);
+    this->_fnumber.assign(x, n);
+  }
+
+  void float_assign_undef(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+
+    if (this->is_bottom_fast()) {
+      return;
     }
 
-    void float_assign_undef(VariableRef x) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
+    this->_uninitialized.assign_uninitialized(x);
+    this->_fnumber.forget(x);
+  }
 
-      if (this->is_bottom_fast()) {
-        return;
-      }
+  void float_assign_nondet(VariableRef x) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-      this->_uninitialized.assign_uninitialized(x);
-      this->_fnumber.forget(x);
+    if (this->is_bottom_fast()) {
+      return;
     }
 
-    void float_assign_nondet(VariableRef x) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
+    this->_uninitialized.assign_initialized(x);
+    this->_fnumber.forget(x);
+  }
 
-      if (this->is_bottom_fast()) {
-        return;
-      }
+  void float_assign(VariableRef x, VariableRef y) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
+    ikos_assert(ScalarVariableTrait::is_float(y));
 
-      this->_uninitialized.assign_initialized(x);
-      this->_fnumber.forget(x);
+    if (this->is_bottom_fast()) {
+      return;
     }
 
-    void float_assign(VariableRef x, VariableRef y) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
-      ikos_assert(ScalarVariableTrait::is_float(y));
+    this->_uninitialized.assign(x, y);
+    this->_fnumber.assign(x, y);
+  }
 
-      if (this->is_bottom_fast()) {
-        return;
-      }
+  void float_assign(VariableRef x, const FnuLinearExpression& e) override {
+    ikos_assert(ScalarVariableTrait::is_float(x));
 
-      this->_uninitialized.assign(x, y);
-      this->_fnumber.assign(x, y);
+    if (this->is_bottom_fast()) {
+      return;
     }
 
-    void float_assign(VariableRef x, const FnuLinearExpression& e) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
-
-      if (this->is_bottom_fast()) {
-        return;
-      }
-
-      for (const auto& term : e) {
-        ikos_assert(ScalarVariableTrait::is_float(term.first));
-        this->_uninitialized.assert_initialized(term.first);
-      }
-
-      if (this->_uninitialized.is_bottom()) {
-        this->set_to_bottom();
-        return;
-      }
-
-      this->_uninitialized.assign_initialized(x);
-      this->_fnumber.assign(x, e);
+    for (const auto& term : e) {
+      ikos_assert(ScalarVariableTrait::is_float(term.first));
+      this->_uninitialized.assert_initialized(term.first);
     }
 
-/*
- void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override{}
- */
+    if (this->_uninitialized.is_bottom()) {
+      this->set_to_bottom();
+      return;
+    }
+
+    this->_uninitialized.assign_initialized(x);
+    this->_fnumber.assign(x, e);
+  }
+
+  /*
+   void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
+   override{}
+   */
 
   void float_apply(FnuBinaryOperator op,
                    VariableRef x,
