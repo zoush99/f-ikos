@@ -202,7 +202,7 @@ private:
     }
   }
 
-  /// \brief Slove a large linear constraint system
+  /// \brief Solve a large linear constraint system
   void solve_large_system(NumAbstractDomain& inv) {
     this->_op_count = 0;
     this->_refined_variables.clear();
@@ -221,7 +221,7 @@ private:
              this->_op_count <= this->_max_op);
   }
 
-  /// \brief Slove a small linear constraint system
+  /// \brief Solve a small linear constraint system
   void solve_small_system(NumAbstractDomain& inv) {
     std::size_t cycle = 0;
     do {

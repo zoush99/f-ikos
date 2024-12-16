@@ -458,6 +458,7 @@ public:
 
 }; // end class DomainProduct2
 
+// Commented by zoush99: Iterate using DomainProduct2 twice
 /// \brief Domain product of 3 numerical abstract domains
 template < typename Number,
            typename VariableRef,

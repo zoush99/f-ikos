@@ -295,6 +295,7 @@ public:
   /// \brief Forget a non-negative loop counter
   virtual void counter_forget(VariableRef x) = 0;
 
+  // By zoush99
   /// @}
   /// \name Floating point abstract domain methods
   /// @{
@@ -339,15 +340,15 @@ public:
                            const FNumber& y,
                            VariableRef z) = 0;
 
-  // \brief Add the constraint `x pred y`
+  /// \brief Add the constraint `x pred y`
   virtual void float_add(FnuPredicate pred, VariableRef x, VariableRef y) = 0;
 
-  // \brief Add the constraint `x pred y`
+  /// \brief Add the constraint `x pred y`
   virtual void float_add(FnuPredicate pred,
                          VariableRef x,
                          const FNumber& y) = 0;
 
-  // \brief Add the constraint `x pred y`
+  /// \brief Add the constraint `x pred y`
   virtual void float_add(FnuPredicate pred,
                          const FNumber& x,
                          VariableRef y) = 0;
