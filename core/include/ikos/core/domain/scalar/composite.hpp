@@ -484,7 +484,6 @@ public:
   }
 
   // By zoush99. I don't consider the threshold for floating-points.
-  /// \brief Narrowing the threshold can be a floating-point number.
   void narrow_threshold_with(const CompositeDomain& other,
                              const MachineInt& threshold) override {
     this->normalize();
