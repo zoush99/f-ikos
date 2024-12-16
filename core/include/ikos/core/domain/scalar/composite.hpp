@@ -167,7 +167,7 @@ private:
   /// \brief Constructor
   CompositeDomain(UninitializedDomain uninitialized,
                   MachineIntDomain integer,
-                  FNumberDomain fnumber,  // By zoush99
+                  FNumberDomain fnumber,
                   NullityDomain nullity,
                   PointsToMap points_to_map)
       : _uninitialized(std::move(uninitialized)),
@@ -187,7 +187,7 @@ public:
   /// \param nullity The nullity abstract value
   CompositeDomain(UninitializedDomain uninitialized,
                   MachineIntDomain integer,
-                  FNumberDomain fnumber,  // By zoush99
+                  FNumberDomain fnumber,
                   NullityDomain nullity)
       : _uninitialized(std::move(uninitialized)),
         _integer(std::move(integer)),
@@ -434,6 +434,7 @@ public:
     }
   }
 
+  // By zoush99. I don't consider the threshold for floating-points.
   /// \brief Expanding the threshold can be a floating-point number.
   void widen_threshold_with(const CompositeDomain& other,
                             const MachineInt& threshold) override {
@@ -443,10 +444,9 @@ public:
     } else if (other.is_bottom()) {
       return;
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       this->_uninitialized.widen_with(other._uninitialized);
       this->_integer.widen_threshold_with(other._integer, threshold);
+      // By zoush99
       this->_fnumber.widen_with(other._fnumber);
       this->_nullity.widen_with(other._nullity);
       this->_points_to_map.widen_with(other._points_to_map);
@@ -483,6 +483,7 @@ public:
     }
   }
 
+  // By zoush99. I don't consider the threshold for floating-points.
   /// \brief Narrowing the threshold can be a floating-point number.
   void narrow_threshold_with(const CompositeDomain& other,
                              const MachineInt& threshold) override {
@@ -492,10 +493,9 @@ public:
     } else if (other.is_bottom()) {
       this->set_to_bottom();
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_threshold_with(other._integer, threshold);
+      // By zoush99
       this->_fnumber.narrow_with(other._fnumber);
       this->_nullity.narrow_with(other._nullity);
       this->_points_to_map.narrow_with(other._points_to_map);
@@ -564,7 +564,7 @@ public:
     }
   }
 
-  /// \brief (Expanding the threshold can be a floating-point number.)
+  // By zoush99. I don't consider the threshold for floating-points.
   CompositeDomain widening_threshold(
       const CompositeDomain& other,
       const MachineInt& threshold) const override {
@@ -573,12 +573,11 @@ public:
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       return CompositeDomain(this->_uninitialized.widening(
                                  other._uninitialized),
                              this->_integer.widening_threshold(other._integer,
                                                                threshold),
+                             // By zoush99
                              this->_fnumber.widening(other._fnumber),
                              this->_nullity.widening(other._nullity),
                              this->_points_to_map.widening(
@@ -616,7 +615,7 @@ public:
     }
   }
 
-  /// \brief (Narrowing the threshold can be a floating-point number.)
+  // By zoush99. I don't consider the threshold for floating-points.
   CompositeDomain narrowing_threshold(
       const CompositeDomain& other,
       const MachineInt& threshold) const override {
@@ -625,12 +624,11 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       return CompositeDomain(this->_uninitialized.narrowing(
                                  other._uninitialized),
                              this->_integer.narrowing_threshold(other._integer,
                                                                 threshold),
+                             // By zoush99
                              this->_fnumber.narrowing(other._fnumber),
                              this->_nullity.narrowing(other._nullity),
                              this->_points_to_map.narrowing(
@@ -751,10 +749,10 @@ public:
     this->_integer.apply(op, x, y);
   }
 
-  // \brief Assert that x is initialized (throw if not), but only if the
-  // operation, op, is not logical "and" or "or" as these are used in
-  // bitfield operations which may start with uninitialized memory.
-  // Is only called if one of the operands is constant.
+  /// \brief Assert that x is initialized (throw if not), but only if the
+  /// operation, op, is not logical "and" or "or" as these are used in
+  /// bitfield operations which may start with uninitialized memory.
+  /// Is only called if one of the operands is constant.
   void assert_initialized_if_not_and_or(IntBinaryOperator op, VariableRef x) {
     if ((op == IntBinaryOperator::And) || (op == IntBinaryOperator::Or)) {
       return;
@@ -1013,33 +1011,9 @@ public:
   }
 
   /// @}
+  // By zoush99
   /// \name Implement floating point abstract domain methods
   /// @{
-  /*
-    void float_assign_undef(VariableRef x) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
-
-      this->_uninitialized.assign_uninitialized(x);
-    }
-
-    void float_assign_nondet(VariableRef x) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
-
-      this->_uninitialized.assign_initialized(x);
-    }
-
-    void float_assign(VariableRef x, VariableRef y) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
-      ikos_assert(ScalarVariableTrait::is_float(y));
-
-      this->_uninitialized.assign(x, y);
-    }
-
-    void float_forget(VariableRef x) override {
-      ikos_assert(ScalarVariableTrait::is_float(x));
-
-      this->_uninitialized.forget(x);
-    }*/
 
   void float_assign(VariableRef x, const FNumber& n) override {
     ikos_assert(ScalarVariableTrait::is_float(x));
@@ -1107,26 +1081,7 @@ public:
     this->_fnumber.assign(x, e);
   }
 
-  /*
-      void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y)
-     override { ikos_assert(ScalarVariableTrait::is_float(x));
-        ikos_assert(ScalarVariableTrait::is_float(y));
-
-        if (this->is_bottom_fast()) {
-          return;
-        }
-
-        this->_uninitialized.assert_initialized(y);
-
-        if (this->_uninitialized.is_bottom()) {
-          this->set_to_bottom();
-          return;
-        }
-
-        this->_uninitialized.assign_initialized(x);
-        this->_integer.apply(op, x, y);
-      }
-  */
+  // void float_apply(FnuUnaryOperator op, VariableRef x, VariableRef y) override{}
 
   /// \brief Assert that x is initialized (throw if not), but only if the
   /// operation, op, is not logical "and" or "or" as these are used in
