@@ -69,8 +69,8 @@ namespace scalar {
 /// initialized or not.
 ///
 /// // By zoush99
-/// For each floating point `x`, it keeps track of its value and whether it is initialized or
-/// not.
+/// For each floating point `x`, it keeps track of its value and whether it is
+/// initialized or not.
 ///
 /// For each pointer `p`, it keep track of its address, its offset, its nullity
 /// and whether it is initialized or not.
@@ -92,7 +92,7 @@ template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
            typename MachineIntDomain,
-           typename FNumberDomain,  // By zoush99
+           typename FNumberDomain, // By zoush99
            typename NullityDomain >
 
 class CompositeDomain final
@@ -102,7 +102,8 @@ class CompositeDomain final
                                                       MemoryLocationRef,
                                                       UninitializedDomain,
                                                       MachineIntDomain,
-                                                      FNumberDomain,
+                                                      FNumberDomain, // By
+                                                                     // zoush99
                                                       NullityDomain > > {
 public:
   static_assert(
@@ -152,7 +153,7 @@ private:
   /// \brief Underlying machine integer abstract domains
   MachineIntDomain _integer;
 
-  /// By zoush99
+  // By zoush99
   /// \brief Underlying floating point abstract domains
   FNumberDomain _fnumber;
 
@@ -166,7 +167,7 @@ private:
   /// \brief Constructor
   CompositeDomain(UninitializedDomain uninitialized,
                   MachineIntDomain integer,
-                  FNumberDomain fnumber,
+                  FNumberDomain fnumber,  // By zoush99
                   NullityDomain nullity,
                   PointsToMap points_to_map)
       : _uninitialized(std::move(uninitialized)),
@@ -186,7 +187,7 @@ public:
   /// \param nullity The nullity abstract value
   CompositeDomain(UninitializedDomain uninitialized,
                   MachineIntDomain integer,
-                  FNumberDomain fnumber,
+                  FNumberDomain fnumber,  // By zoush99
                   NullityDomain nullity)
       : _uninitialized(std::move(uninitialized)),
         _integer(std::move(integer)),
@@ -2266,7 +2267,7 @@ public:
       this->_integer.dump(o);
       o << ", ";
       this->_fnumber.dump(o);
-      o<<", ";
+      o << ", ";
       this->_nullity.dump(o);
       o << ", ";
       this->_points_to_map.dump(o);

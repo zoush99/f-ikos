@@ -52,12 +52,12 @@ namespace ikos {
 namespace core {
 namespace scalar {
 
+// By zoush99. Enable this scalar domain to analyze floating points, and it
+// only supports machine integers previously.
 /// \brief Machine integer scalar abstract domain
 ///
 /// This class implements a scalar abstract domain that handles machine integers
-/// and ignore floating points and pointers safely.
-/// (Choose not to ignore floating point values, but rather pass them down. By
-/// zoush99)
+/// and floating points, while ignoring pointers safely.
 template < typename VariableRef,
            typename MemoryLocationRef,
            typename UninitializedDomain,
@@ -80,7 +80,7 @@ public:
   static_assert(
       machine_int::IsAbstractDomain< MachineIntDomainT, VariableRef >::value,
       "MachineIntDomain must implement machine_int::AbstractDomain");
-  /// By zoush99
+  // By zoush99
   static_assert(
       numeric::IsAbstractDomain< FNumberDomainT, FNumber, VariableRef >::value,
       "MachineIntDomain must implement numeric::AbstractDomain");
@@ -117,7 +117,7 @@ private:
   /// \brief Underlying machine integer abstract domains
   MachineIntDomainT _integer;
 
-  /// \brief By zoush99
+  // By zoush99
   /// \brief Underlying floating point abstract domains
   FNumberDomainT _fnumber;
 
@@ -181,7 +181,7 @@ public:
       return;
     }
 
-    /// By zoush99
+    // By zoush99
     this->_fnumber.normalize();
     if (this->_fnumber.is_bottom()) {
       this->_uninitialized.set_to_bottom();
@@ -337,7 +337,7 @@ public:
     }
   }
 
-  /// \brief It feels a bit off, but I'm not sure if it's like that. By zoush99
+  // By zoush99. I don't consider threshold for floating points.
   void widen_threshold_with(const MachineIntDomain& other,
                             const MachineInt& threshold) override {
     this->normalize();
@@ -347,9 +347,8 @@ public:
       return;
     } else {
       this->_uninitialized.widen_with(other._uninitialized);
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       this->_integer.widen_threshold_with(other._integer, threshold);
+      // By zoush99
       this->_fnumber.widen_with(other._fnumber);
     }
   }
@@ -380,6 +379,7 @@ public:
     }
   }
 
+  // By zoush99. I don't consider threshold for floating points.
   void narrow_threshold_with(const MachineIntDomain& other,
                              const MachineInt& threshold) override {
     this->normalize();
@@ -388,10 +388,9 @@ public:
     } else if (other.is_bottom()) {
       this->set_to_bottom();
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       this->_uninitialized.narrow_with(other._uninitialized);
       this->_integer.narrow_threshold_with(other._integer, threshold);
+      // By zoush99
       this->_fnumber.widen_with(other._fnumber);
     }
   }
@@ -447,6 +446,7 @@ public:
     }
   }
 
+  // By zoush99. I don't consider threshold for floating points.
   MachineIntDomain widening_threshold(
       const MachineIntDomain& other,
       const MachineInt& threshold) const override {
@@ -455,12 +455,11 @@ public:
     } else if (other.is_bottom()) {
       return *this;
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.widening(
                                   other._uninitialized),
                               this->_integer.widening_threshold(other._integer,
                                                                 threshold),
+                              // By zoush99
                               this->_fnumber.widening(other._fnumber));
     }
   }
@@ -477,21 +476,22 @@ public:
     }
   }
 
+  // By zoush99. I don't consider threshold for floating points.
   MachineIntDomain narrowing(const MachineIntDomain& other) const override {
     if (this->is_bottom()) {
       return *this;
     } else if (other.is_bottom()) {
       return other;
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
                               this->_integer.narrowing(other._integer),
+                              // By zoush99
                               this->_fnumber.narrowing(other._fnumber));
     }
   }
 
+  // By zoush99. I don't consider threshold for floating points.
   MachineIntDomain narrowing_threshold(
       const MachineIntDomain& other,
       const MachineInt& threshold) const override {
@@ -500,12 +500,11 @@ public:
     } else if (other.is_bottom()) {
       return other;
     } else {
-      // I won't consider widening the threshold for floating-point types at
-      // this point; I'll consider it later.
       return MachineIntDomain(this->_uninitialized.narrowing(
                                   other._uninitialized),
                               this->_integer.narrowing_threshold(other._integer,
                                                                  threshold),
+                              // By zoush99
                               this->_fnumber.narrowing(other._fnumber));
     }
   }
