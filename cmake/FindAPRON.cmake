@@ -77,6 +77,13 @@ if (NOT APRON_FOUND)
     DOC "Path to apron boxMPQ library"
   )
 
+  # By zoush99
+  find_library(APRON_T1P_LIB
+          NAMES t1pMPQ
+          HINTS ${APRON_LIBRARY_SEARCH_DIRS}
+          DOC "Path to apron t1pMPQ library"
+  )
+
   find_library(APRON_OCT_LIB
     NAMES octMPQ
     HINTS ${APRON_LIBRARY_SEARCH_DIRS}
@@ -107,6 +114,7 @@ if (NOT APRON_FOUND)
       APRON_INCLUDE_DIR
       APRON_APRON_LIB
       APRON_BOX_LIB
+      APRON_T1P_LIB  # By zoush99
       APRON_OCT_LIB
       APRON_POLKA_LIB
       APRON_PPL_LIB
@@ -128,6 +136,7 @@ set(APRON_INCLUDE_DIRS
 set(APRON_LIBRARIES
   ${APRON_APRON_LIB}
   ${APRON_BOX_LIB}
+  ${APRON_T1P_LIB}  # By zoush99
   ${APRON_OCT_LIB}
   ${APRON_POLKA_LIB}
   ${APRON_PPL_LIB}

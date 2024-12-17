@@ -56,8 +56,11 @@
 #include <oct.h>
 #include <pk.h>
 #include <pkeq.h>
+/// \todo
+#include <t1p.h>  // By zoush99
 
 #include <gmp.h>
+#include <t1p.h>
 #include <ikos/core/adt/patricia_tree/map.hpp>
 #include <ikos/core/domain/numeric/abstract_domain.hpp>
 #include <ikos/core/linear_constraint.hpp>
@@ -267,8 +270,10 @@ inline const char* domain_name(Domain d) {
 
 inline ap_manager_t* alloc_domain_manager(Domain d) {
   switch (d) {
+      /// \todo by zoush99
     case Interval:
-      return box_manager_alloc();
+//      return box_manager_alloc();
+    return t1p_manager_alloc();
     case Octagon:
       return oct_manager_alloc();
     case PolkaPolyhedra:
