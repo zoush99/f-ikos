@@ -187,6 +187,8 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return QNumber(mpq_class(scalar->val.mpq));
 }
 
+/// \todo By zoush99. Bugs here!!!
+// Print invariants report bugs here, maybe related to invariants initialization.
 /// By zoush99, ap_scalar_t* -> FNumber
 template <>
 inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {

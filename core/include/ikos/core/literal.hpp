@@ -88,7 +88,7 @@ private:
 
   struct FloatingPointLit {
     // By zoush99
-    // Maybe the floating-point type I designed needs to be improved
+    // Maybe the floating-point type zoush99 designed needs to be improved
     // to support more behaviors of IEEE-754 standards, such as floating-point
     // overflows and underflows.
     FNumber value;
@@ -368,6 +368,7 @@ private:
       ikos_unreachable("trying to call numeric() on a machine integer");
     }
 
+    // By zoush99
     const FNumber& operator()(const FloatingPointLit& lit) const {
       return lit.value;
     }

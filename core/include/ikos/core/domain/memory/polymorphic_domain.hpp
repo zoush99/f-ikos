@@ -2048,21 +2048,6 @@ public:
   /// @}
   /// \name Floating point abstract domain methods
   /// @{
-/*
-  void float_assign_undef(VariableRef x) override {
-    this->_ptr->float_assign_undef(x);
-  }
-
-  void float_assign_nondet(VariableRef x) override {
-    this->_ptr->float_assign_nondet(x);
-  }
-
-  void float_assign(VariableRef x, VariableRef y) override {
-    this->_ptr->float_assign(x, y);
-  }
-
-  void float_forget(VariableRef x) override { this->_ptr->float_forget(x); }
- */
 
   void float_assign(VariableRef x, const FNumber& n) override {
     this->_ptr->float_assign(x, n);

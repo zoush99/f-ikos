@@ -47,7 +47,7 @@
 
 #pragma once
 
-#include <ikos/core/domain/numeric/polymorphic_domain.hpp>  // Warnings
+#include <ikos/core/domain/numeric/polymorphic_domain.hpp>
 
 #include <ikos/analyzer/analysis/option.hpp>
 #include <ikos/analyzer/analysis/variable.hpp>
@@ -69,12 +69,10 @@ NumericAbstractDomain make_bottom_numeric_interval();
 NumericAbstractDomain make_top_numeric_apron_polka_polyhedra();
 NumericAbstractDomain make_bottom_numeric_apron_polka_polyhedra();
 
-//NumericAbstractDomain make_top_numeric_apron_ppl_polyhedra();
-//NumericAbstractDomain make_bottom_numeric_apron_ppl_polyhedra();
-
-
 /// @}
 
+/// \todo By zoush99. We need to extend the options of abstract domains for
+/// floating point types
 /// \brief Create the top floating point abstract value of the given choice
 NumericAbstractDomain make_top_numeric_abstract_value(
     MachineIntDomainOption domain);

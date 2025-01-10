@@ -129,7 +129,7 @@ MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
   } else {
     return MemoryAbstractDomain(inv);
   }*/
-  /// \brief Division is not currently supported. It will be addressed in a future update.
+  /// \brief Partitioning is not currently supported. It will be addressed in a future update.
   return MemoryAbstractDomain(inv); // By zoush99
 }
 

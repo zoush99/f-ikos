@@ -746,6 +746,8 @@ std::vector< BufferOverflowChecker::CheckResult > BufferOverflowChecker::
   }
 }
 
+// By zoush99. Add support for floating-point array out-of-bounds (buffer
+// overflow)
 BufferOverflowChecker::CheckResult BufferOverflowChecker::check_mem_access(
     ar::Statement* stmt,
     ar::Value* pointer,
@@ -967,6 +969,8 @@ BufferOverflowChecker::CheckResult BufferOverflowChecker::check_mem_access(
   }
 }
 
+// By zoush99. Add support for floating-point array out-of-bounds (buffer
+// overflow)
 BufferOverflowChecker::MemoryLocationCheckResult BufferOverflowChecker::
     check_memory_location_access(ar::Statement* stmt,
                                  ar::Value* pointer,
@@ -1329,7 +1333,7 @@ static bool is_multiple(const core::machine_int::Interval& interval,
          (mod(interval.ub(), n).is_zero() || interval.ub().is_max());
 }
 
-// Commented by zoush99: Determines whether a given memory access can be
+// Commented by zoush99: check whether a given memory access can be
 // considered access to an array by static analysis and returns the size of
 // the array elements.
 boost::optional< MachineInt > BufferOverflowChecker::is_array_access(
@@ -1337,7 +1341,7 @@ boost::optional< MachineInt > BufferOverflowChecker::is_array_access(
     const value::AbstractDomain& inv,
     const IntInterval& offset_intv,
     const PointsToSet& addrs) const {
-  // Use heuristics to determine if it is an array access
+  // Use heuristics to check if it is an array access
   ar::Type* access_type = nullptr;
 
   // Load or Store
