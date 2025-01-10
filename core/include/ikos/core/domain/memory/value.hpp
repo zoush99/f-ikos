@@ -134,9 +134,9 @@ public:
   using FnuBinaryOperator = numeric::BinaryOperator;
   using FnuPredicate = numeric::Predicate;
   using FnuLinearExpression = LinearExpression< FNumber, VariableRef >;
-  using FnuInterval = numeric::Interval<FNumber>;
-  using FnuCongruence = numeric::Congruence<FNumber>;
-  using FnuIntervalCongruence = numeric::IntervalCongruence<FNumber>;
+  using FnuInterval = numeric::Interval< FNumber >;
+  using FnuCongruence = numeric::Congruence< FNumber >;
+  using FnuIntervalCongruence = numeric::IntervalCongruence< FNumber >;
 
 private:
   using CellSetT = CellSet< VariableRef >;
@@ -743,23 +743,10 @@ public:
   /// @}
   /// \name Implement floating point abstract domain methods
   /// @{
-/*
-  void float_assign_undef(VariableRef x) override {
-    this->_scalar.float_assign_undef(x);
-  }
 
-  void float_assign_nondet(VariableRef x) override {
-    this->_scalar.float_assign_nondet(x);
-  }
-
-  void float_assign(VariableRef x, VariableRef y) override {
-    this->_scalar.float_assign(x, y);
-  }
-
-  void float_forget(VariableRef x) override { this->_scalar.float_forget(x); }
-*/
-
-
+  /// \todo zoush99 guesses something wrong happened here.
+  // I need to know what is 'this->_scalar' domain. Is it a MachineInt domain
+  // that terminal specifies?
   void float_assign(VariableRef x, const FNumber& n) override {
     this->_scalar.float_assign(x, n);
   }
@@ -839,7 +826,8 @@ public:
     this->_scalar.float_refine(x, value);
   }
 
-  void float_refine(VariableRef x, const FnuIntervalCongruence& value) override {
+  void float_refine(VariableRef x,
+                    const FnuIntervalCongruence& value) override {
     this->_scalar.float_refine(x, value);
   }
 
@@ -857,7 +845,8 @@ public:
     return this->_scalar.float_to_congruence(x);
   }
 
-  FnuCongruence float_to_congruence(const FnuLinearExpression& e) const override {
+  FnuCongruence float_to_congruence(
+      const FnuLinearExpression& e) const override {
     return this->_scalar.float_to_congruence(e);
   }
 
@@ -1097,14 +1086,14 @@ public:
 
   /// \todo (floating point)
   /// \brief By zoush99
-  void scalar_float_to_int(VariableRef f, VariableRef x) override{
-//    this->_scalar.scalar_float_to_int(f, x);
+  void scalar_float_to_int(VariableRef f, VariableRef x) override {
+    //    this->_scalar.scalar_float_to_int(f, x);
     return;
   }
 
   /// \brief By zoush99
-  void scalar_int_to_float(VariableRef x, VariableRef f) override{
-//    this->_scalar.scalar_int_to_float(x, f);
+  void scalar_int_to_float(VariableRef x, VariableRef f) override {
+    //    this->_scalar.scalar_int_to_float(x, f);
     return;
   }
 
@@ -1425,8 +1414,8 @@ private:
     /// \todo bugs here!!!
     /// \brief (floating point) By zoush99
     void floating_point(const FNumber& rhs) {
-//      this->_scalar.dynamic_write_nondet_float(this->_lhs);
-        this->_scalar.dynamic_write_float(this->_lhs, rhs);
+      //      this->_scalar.dynamic_write_nondet_float(this->_lhs);
+      this->_scalar.dynamic_write_float(this->_lhs, rhs);
     }
 
     void memory_location(MemoryLocationRef addr) {
@@ -1450,7 +1439,7 @@ private:
 
     /// \brief(floating point) By zoush99
     void floating_point_var(VariableRef rhs) {
-//      this->_scalar.dynamic_write_nondet_float(this->_lhs);
+      //      this->_scalar.dynamic_write_nondet_float(this->_lhs);
       if (ScalarVariableTrait::is_float(rhs)) {
         this->_scalar.dynamic_write_float(this->_lhs, rhs);
       } else {
@@ -1509,11 +1498,11 @@ private:
     }
 
     void floating_point_var(VariableRef lhs) {
-//      this->_scalar.float_assign_nondet(lhs);
-      // If the right hand side is a null pointer, assign the floating point number
-      // to zero (implicit cast from pointer to int)
+      //      this->_scalar.float_assign_nondet(lhs);
+      // If the right hand side is a null pointer, assign the floating point
+      // number to zero (implicit cast from pointer to int)
       if (this->_scalar.dynamic_is_null(this->_rhs)) {
-        auto zero = FNumber(0.0,64,Signedness::Signed);
+        auto zero = FNumber(0.0, 64, Signedness::Signed);
         this->_scalar.float_assign(lhs, zero);
       } else if (ScalarVariableTrait::is_float(lhs)) {
         this->_scalar.dynamic_read_float(lhs, this->_rhs);

@@ -478,7 +478,6 @@ public:
 }; // end class StructType
 
 /// \brief Base class for sequential types, such as ArrayType and VectorType
-/// \todo(Here, only ZNumber type is considered; later on, FNumber type needs to be added.)
 class SequentialType : public AggregateType {
 protected:
  // Element type
@@ -511,7 +510,6 @@ public:
 ///
 /// The layout in memory includes padding so that each element is properly
 /// aligned. This is the equivalent of arrays in C.
-/// \todo(Here, only ZNumber type is considered; later on, FNumber type needs to be added.)
 class ArrayType final : public SequentialType {
 private:
  /// \brief Private constructor
@@ -541,7 +539,6 @@ public:
 /// This is similar to ArrayType, but can only hold scalars and does not add
 /// padding between elements. This is mostly used to represent return types of C
 /// function returning small structures.
-/// \todo(Here, only ZNumber type is considered; later on, FNumber type needs to be added.)
 class VectorType final : public SequentialType {
 private:
  /// \brief Private constructor
