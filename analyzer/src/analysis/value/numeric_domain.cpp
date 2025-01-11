@@ -50,11 +50,14 @@ namespace ikos {
 namespace analyzer {
 namespace value {
 
+// By zoush99
 NumericAbstractDomain make_top_numeric_abstract_value(
     FNumberDomainOption domain) {
   switch (domain) {
     case FNumberDomainOption::ApronInterval :
       return make_top_numeric_apron_interval();
+    case FNumberDomainOption::ApronOctagon :
+      return make_top_numeric_apron_octagon();
     case FNumberDomainOption::ApronPolkaPolyhedra:
       return make_top_numeric_apron_polka_polyhedra();
     default: {
@@ -68,6 +71,8 @@ NumericAbstractDomain make_bottom_numeric_abstract_value(
   switch (domain) {
     case FNumberDomainOption::ApronInterval:
       return make_bottom_numeric_apron_interval();
+    case FNumberDomainOption::ApronOctagon:
+      return make_bottom_numeric_apron_octagon();
     case FNumberDomainOption::ApronPolkaPolyhedra:
       return make_bottom_numeric_apron_polka_polyhedra();
     default: {

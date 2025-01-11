@@ -238,6 +238,7 @@ add_executable(ikos-analyzer
   src/analysis/value/machine_int_domain/var_pack_dbm.cpp
   src/analysis/value/machine_int_domain/var_pack_dbm_congruence.cpp
   src/analysis/value/numeric/apron_interval_f.cpp # By zoush99
+  src/analysis/value/numeric/apron_octagon_f.cpp # By zoush99
   src/analysis/value/numeric/apron_polka_polyhedra_f.cpp # By zoush99
   src/analysis/variable.cpp
   src/analysis/widening_hint.cpp
@@ -280,7 +281,8 @@ add_executable(ikos-analyzer
   src/util/source_location.cpp
   src/util/timer.cpp
   src/analysis/value/numeric_domain.cpp
- )
+        src/analysis/value/numeric/apron_octagon_f.cpp
+)
 if (IKOS_LINK_LLVM_DYLIB)
   set(IKOS_ANALYZER_LLVM_LIBS "LLVM")
 else()
