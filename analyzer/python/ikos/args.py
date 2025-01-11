@@ -196,7 +196,6 @@ default_analyses = (
     'dbg',
 )
 
-
 domains = (
     ('interval',
      'Interval domain'),
@@ -244,6 +243,19 @@ domains = (
 )
 
 default_domain = 'interval'
+
+# By zoush99
+fp_domains = (
+    ('apron-interval-f',
+     'APRON Interval domain'),
+    ('apron-octagon-f',
+     'APRON Octagon domain'),
+    ('apron-polka-polyhedra-f',
+     'APRON Polka Polyhedra domain'),
+)
+
+# By zoush99
+fp_default_domain = 'apron-interval-f'
 
 globals_init_policies = (
     ('all', 'Initialize all global variables'),

@@ -51,11 +51,11 @@ namespace analyzer {
 namespace value {
 
 NumericAbstractDomain make_top_numeric_abstract_value(
-    MachineIntDomainOption domain) {
+    FNumberDomainOption domain) {
   switch (domain) {
-    case MachineIntDomainOption::FInterval:
-      return make_top_numeric_interval();
-    case MachineIntDomainOption::ApronPolkaPolyhedra:
+    case FNumberDomainOption::ApronInterval :
+      return make_top_numeric_apron_interval();
+    case FNumberDomainOption::ApronPolkaPolyhedra:
       return make_top_numeric_apron_polka_polyhedra();
     default: {
       ikos_unreachable("unreachable");
@@ -64,11 +64,11 @@ NumericAbstractDomain make_top_numeric_abstract_value(
 }
 
 NumericAbstractDomain make_bottom_numeric_abstract_value(
-    MachineIntDomainOption domain) {
+    FNumberDomainOption domain) {
   switch (domain) {
-    case MachineIntDomainOption::FInterval:
-      return make_bottom_numeric_interval();
-    case MachineIntDomainOption::ApronPolkaPolyhedra:
+    case FNumberDomainOption::ApronInterval:
+      return make_bottom_numeric_apron_interval();
+    case FNumberDomainOption::ApronPolkaPolyhedra:
       return make_bottom_numeric_apron_polka_polyhedra();
     default: {
       ikos_unreachable("unreachable");

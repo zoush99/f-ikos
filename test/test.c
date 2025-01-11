@@ -2,8 +2,8 @@
 
 int main()
 {
-    int c =2;
-    int d =2;
+    float c =2.5;
+    float d =2.5;
     c = c - d;
     d = d / c;
 

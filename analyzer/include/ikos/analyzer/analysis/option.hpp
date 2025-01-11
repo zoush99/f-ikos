@@ -61,11 +61,9 @@ namespace analyzer {
 // forward declaration
 class SettingsTable;
 
-/// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
 /// \brief Machine integer abstract domain
 enum class MachineIntDomainOption {
   Interval,
-  FInterval, // floating point interval, by zoush99
   Congruence,
   IntervalCongruence,
   DBM,
@@ -88,14 +86,11 @@ enum class MachineIntDomainOption {
   VarPackApronPkgridPolyhedraLinearCongruences,
 };
 
-/// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
 /// \brief Return a string representing a MachineIntDomainOption
 inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
   switch (d) {
     case MachineIntDomainOption::Interval:
       return "interval";
-    case MachineIntDomainOption::FInterval: // By zoush99
-      return "finterval";
     case MachineIntDomainOption::Congruence:
       return "congruence";
     case MachineIntDomainOption::IntervalCongruence:
@@ -136,6 +131,30 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
       return "var-pack-apron-ppl-linear-congruences";
     case MachineIntDomainOption::VarPackApronPkgridPolyhedraLinearCongruences:
       return "var-pack-apron-pkgrid-polyhedra-lin-cong";
+    default: {
+      ikos_unreachable("unreachable");
+    }
+  }
+}
+
+// By zoush99
+/// \brief Floating point abstract domain
+enum class FNumberDomainOption {
+  ApronInterval,
+  ApronOctagon,
+  ApronPolkaPolyhedra
+};
+
+// By zoush99
+/// \brief Return a string representing a floating point abstract domain
+inline const char* floating_point_domain_option_str(FNumberDomainOption d) {
+  switch (d) {
+    case FNumberDomainOption::ApronInterval:
+      return "apron-interval-f";
+    case FNumberDomainOption::ApronOctagon:
+      return "apron-octagon-f";
+    case FNumberDomainOption::ApronPolkaPolyhedra:
+      return "apron-polka-polyhedra-f";
     default: {
       ikos_unreachable("unreachable");
     }
@@ -295,7 +314,8 @@ public:
   /// \brief Machine integer abstract domain
   MachineIntDomainOption machine_int_domain;
 
-  /// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
+  // By zoush99
+  FNumberDomainOption floating_point_domain;
 
   /// \brief Is the analysis interprocedural or intraprocedural
   Procedural procedural;

@@ -57,10 +57,9 @@
 #include <pk.h>
 #include <pkeq.h>
 /// \todo
-#include <t1p.h>  // By zoush99
+//#include <t1p.h>  // By zoush99
 
 #include <gmp.h>
-#include <t1p.h>
 #include <ikos/core/adt/patricia_tree/map.hpp>
 #include <ikos/core/domain/numeric/abstract_domain.hpp>
 #include <ikos/core/linear_constraint.hpp>
@@ -187,7 +186,6 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return QNumber(mpq_class(scalar->val.mpq));
 }
 
-/// \todo By zoush99. Bugs here!!!
 // Print invariants report bugs here, maybe related to invariants initialization.
 /// By zoush99, ap_scalar_t* -> FNumber
 template <>
@@ -272,10 +270,9 @@ inline const char* domain_name(Domain d) {
 
 inline ap_manager_t* alloc_domain_manager(Domain d) {
   switch (d) {
-      /// \todo by zoush99
+      /// \todo By zoush99. Add support for t1p domain
     case Interval:
-//      return box_manager_alloc();
-    return t1p_manager_alloc();
+      return box_manager_alloc();
     case Octagon:
       return oct_manager_alloc();
     case PolkaPolyhedra:

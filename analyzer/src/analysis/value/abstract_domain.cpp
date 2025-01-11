@@ -51,7 +51,7 @@
 #include <ikos/analyzer/analysis/value/abstract_domain.hpp>
 
 #include <ikos/analyzer/analysis/value/machine_int_domain.hpp>
-#include <ikos/analyzer/analysis/value/numeric_domain.hpp>  // By zoush99
+#include <ikos/analyzer/analysis/value/numeric_domain.hpp> // By zoush99
 
 namespace ikos {
 namespace analyzer {
@@ -98,21 +98,22 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
                            make_bottom_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
                            make_bottom_numeric_abstract_value(
-                               MachineIntDomainOption::ApronPolkaPolyhedra),  // By zoush99
+                               ctx.opts.floating_point_domain), // By zoush99
                            NullityAbstractDomain::bottom()),
       LifetimeAbstractDomain::bottom());
 
-/*  if (ctx.opts.use_partitioning_domain) {
-    return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
-  } else {
-    return MemoryAbstractDomain(inv);
-  }*/
-  /// \brief Partition is not currently supported. It will be addressed in a future update.
+/*    if (ctx.opts.use_partitioning_domain) {
+      return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
+    } else {
+      return MemoryAbstractDomain(inv);
+    }*/
+  /// \brief Partition is not currently supported. It will be addressed in a
+  /// future update.
   return MemoryAbstractDomain(inv); // By zoush99
 }
 
-/// \todo By zoush99 (Support more abstract domains to analyze floating point programs)
-/// \brief Create the top memory abstract value
+/// \todo By zoush99 (Support more abstract domains to analyze floating point
+/// programs) \brief Create the top memory abstract value
 MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
   auto inv = ValueAbstractDomain(
       ctx.var_factory,
@@ -120,16 +121,17 @@ MemoryAbstractDomain make_top_memory_abstract_value(Context& ctx) {
                            make_top_machine_int_abstract_value(
                                ctx.opts.machine_int_domain),
                            make_top_numeric_abstract_value(
-                               MachineIntDomainOption::ApronPolkaPolyhedra),  // By zoush99
+                               ctx.opts.floating_point_domain), // By zoush99
                            NullityAbstractDomain::top()),
       LifetimeAbstractDomain::top());
 
-/*  if (ctx.opts.use_partitioning_domain) {
-    return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
-  } else {
-    return MemoryAbstractDomain(inv);
-  }*/
-  /// \brief Partitioning is not currently supported. It will be addressed in a future update.
+  /*  if (ctx.opts.use_partitioning_domain) {
+      return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
+    } else {
+      return MemoryAbstractDomain(inv);
+    }*/
+  /// \brief Partitioning is not currently supported. It will be addressed in a
+  /// future update.
   return MemoryAbstractDomain(inv); // By zoush99
 }
 

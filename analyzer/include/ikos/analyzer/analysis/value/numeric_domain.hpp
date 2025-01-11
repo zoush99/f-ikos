@@ -63,23 +63,22 @@ using NumericAbstractDomain =
 /// \name Constructors of floating point abstract domains
 /// @{
 
-NumericAbstractDomain make_top_numeric_interval();
-NumericAbstractDomain make_bottom_numeric_interval();
+NumericAbstractDomain make_top_numeric_apron_interval();
+NumericAbstractDomain make_bottom_numeric_apron_interval();
 
 NumericAbstractDomain make_top_numeric_apron_polka_polyhedra();
 NumericAbstractDomain make_bottom_numeric_apron_polka_polyhedra();
 
 /// @}
 
-/// \todo By zoush99. We need to extend the options of abstract domains for
-/// floating point types
+// By zoush99
 /// \brief Create the top floating point abstract value of the given choice
 NumericAbstractDomain make_top_numeric_abstract_value(
-    MachineIntDomainOption domain);
+    FNumberDomainOption domain);
 
 /// \brief Create the bottom floating point abstract value of the given choice
 NumericAbstractDomain make_bottom_numeric_abstract_value(
-    MachineIntDomainOption domain);
+    FNumberDomainOption domain);
 
 } // end namespace value
 } // end namespace analyzer

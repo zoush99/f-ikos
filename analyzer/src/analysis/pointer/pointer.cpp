@@ -47,7 +47,7 @@
 #include <ikos/core/domain/exception/exception.hpp>
 #include <ikos/core/domain/machine_int/interval.hpp>
 #include <ikos/core/domain/memory/dummy.hpp>
-#include <ikos/core/domain/numeric/f_interval.hpp> // By zoush99
+#include <ikos/core/domain/numeric/apron_interval_f.hpp> // By zoush99
 #include <ikos/core/domain/scalar/machine_int.hpp>
 #include <ikos/core/domain/uninitialized/separate_domain.hpp>
 #include <ikos/core/fixpoint/fwd_fixpoint_iterator.hpp>

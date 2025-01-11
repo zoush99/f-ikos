@@ -115,6 +115,15 @@ def parse_arguments(argv):
                                          args.default_domain),
                           choices=args.choices(args.domains),
                           default=args.default_domain)
+    # By zoush99
+    analysis.add_argument('-fpd', '--fp-domain',
+                          dest='fp-domain',
+                          metavar='',
+                          help=args.help('Available abstract domains for floating point:',
+                                         args.fp_domains,
+                                         args.fp_default_domain),
+                          choices=args.choices(args.fp_domains),
+                          default=args.fp_default_domain)
     analysis.add_argument('-e', '--entry-points',
                           dest='entry_points',
                           metavar='<function>',

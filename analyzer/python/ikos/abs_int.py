@@ -185,9 +185,10 @@ class Interval:
 
     def to_constraints(self, var):
         # bugs here!!! By zoush99
-        assert not self.is_bottom()
-
-        if self.is_top():
+        # assert not self.is_bottom()
+        if self.is_bottom():
+            return 'bottom %s' % var
+        elif self.is_top():
             return 'could not bound %s' % var
         elif self.lb == self.ub:
             return '%s = %s' % (var, self.lb)
