@@ -92,6 +92,12 @@ CLANGXX = '@CLANGXX_EXECUTABLE@'
 
 CLANG_VERSION = '@CLANG_VERSION@'
 
+# By zoush99
+FLANG = '@FLANG_EXECUTABLE@'
+
+# By zoush99
+FLANG_VERSION = '@FLANG_VERSION@'
+
 HAS_APRON = @HAS_APRON@
 
 
@@ -117,6 +123,12 @@ def clangxx():
     assert is_executable(path), 'could not find clang++ executable'
     return path
 
+# By zoush99. Add support for Fortran
+def flang():
+    path = FLANG
+    assert os.path.isabs(path)
+    assert is_executable(path), 'could not find flang executable'
+    return path
 
 def opt():
     path = os.path.join(LLVM_BIN_DIR, 'opt@CMAKE_EXECUTABLE_SUFFIX@')

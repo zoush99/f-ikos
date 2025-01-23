@@ -587,6 +587,8 @@ c_extensions = ('.c', '.h', '.i')
 cpp_extensions = ('.cpp', '.cc', '.cxx', '.cppm', '.c++', '.cp', '.C', '.CPP',
                   '.hpp', '.hh', '.hxx',
                   '.ii', '.iim')
+# By zoush99
+fortran_extensions = ('.f','.f90')
 llvm_extensions = ('.bc', '.ll')
 
 
@@ -659,6 +661,10 @@ def clang_emit_llvm_flags():
     ''' Clang flags to emit llvm bitcode '''
     return ['-c', '-emit-llvm']
 
+# By zoush99
+def flang_emit_llvm_flags():
+    ''' Flang flags to emit llvm bitcode '''
+    return ['-c', '-emit-llvm']
 
 def clang_ikos_flags():
     ''' Clang flags for ikos '''
@@ -680,6 +686,26 @@ def clang_ikos_flags():
         '-disable-O0-optnone',
     ]
 
+# By zoush99
+def flang_ikos_flags():
+    ''' Flang flags for ikos '''
+    return [
+        # enable clang warnings
+        '-Wall',
+        # disable source code fortification
+        '-U_FORTIFY_SOURCE',
+        '-D_FORTIFY_SOURCE=0',
+        # flag for intrinsic.h
+        '-D__IKOS__',
+        # compile in debug mode
+        '-g',
+        # disable optimizations
+        '-O0',
+        # disable the 'optnone' attribute
+        # see https://bugs.llvm.org/show_bug.cgi?id=35950#c10
+        '-Xflang',
+        '-disable-O0-optnone',
+    ]
 
 ##################
 # ikos toolchain #
@@ -725,6 +751,50 @@ def clang(
         cmd.append('-std=c++17')  # available because clang >= 7.0
 
     log.info('Compiling %s' % cpp_path)
+    log.debug('Running %s' % command_string(cmd))
+    subprocess.check_call(cmd)
+
+# By zoush99
+def flang(
+        bc_path,
+        fortran_path,
+        include_flags=None,
+        define_flags=None,
+        warning_flags=None,
+        disable_warnings=False,
+        machine_flags=None,
+        colors=True,
+):
+    cmd = [settings.flang()]
+    cmd += flang_emit_llvm_flags()
+    cmd += flang_ikos_flags()
+    cmd += [fortran_path,
+            '-o',
+            bc_path]
+
+    # For #include <ikos/analyzer/intrinsic.hpp>
+    cmd += ['-isystem', settings.INCLUDE_DIR]
+
+    if include_flags:
+        cmd += ['-I%s' % i for i in include_flags]
+    if define_flags:
+        cmd += ['-D%s' % d for d in define_flags]
+    if warning_flags:
+        cmd += ['-W%s' % w for w in warning_flags]
+    if disable_warnings:
+        cmd.append('-w')
+    if machine_flags:
+        cmd += ['-m%s' % m for m in machine_flags]
+
+    if colors:
+        cmd.append('-fcolor-diagnostics')
+    else:
+        cmd.append('-fno-color-diagnostics')
+
+    # if path_ext(fortran_path) in fortran_extensions:
+        # cmd.append('-std=c++17')  # available because clang >= 7.0
+
+    log.info('Compiling %s' % fortran_path)
     log.debug('Running %s' % command_string(cmd))
     subprocess.check_call(cmd)
 
@@ -1007,6 +1077,26 @@ def main(argv):
 
         input_path = bc_path
 
+    # By zoush99. Compile fortran code
+    if path_ext(input_path) in fortran_extensions:
+        bc_path = namer(opt.file, '.bc', wd)
+
+        try:
+            with stats.timer('flang'):
+                flang(bc_path, input_path,
+                      opt.compiler_include_flags,
+                      opt.compiler_define_flags,
+                      opt.compiler_warning_flags,
+                      opt.compiler_disable_warnings,
+                      opt.compiler_machine_flags,
+                      colors.ENABLE)
+        except subprocess.CalledProcessError as e:
+            printf('%s: error while compiling %s, abort.\n',
+                   progname, input_path, file=sys.stderr)
+            sys.exit(e.returncode)
+
+        input_path = bc_path
+
     if path_ext(input_path) not in llvm_extensions:
         printf('%s: error: unexpected file extension.\n',
                progname, file=sys.stderr)
@@ -1052,6 +1142,7 @@ def main(argv):
         ('bc-file', input_path),
         ('pp-bc-file', pp_path),
         ('clang', settings.clang()),
+        ('flang', settings.flang()),    # By zoush99
         ('ikos-pp', settings.ikos_pp()),
         ('opt-level', opt.opt_level),
         ('inline-all', json.dumps(opt.inline_all)),

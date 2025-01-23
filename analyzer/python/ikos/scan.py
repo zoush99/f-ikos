@@ -163,6 +163,8 @@ class ClangArgumentParser:
             '--coverage': (0, self._add_compile_link_unary),
             # Component-specifiers
             '-Xclang': (1, self._add_compile_binary),
+            # By zoush99. Maybe can add a command of flang
+            # '-Xflang': (1, self._add_compile_binary),
             '-Xpreprocessor': (1, self._ignore),
             '-Xassembler': (1, self._ignore),
             '-Xlinker': (1, self._ignore),
@@ -450,6 +452,9 @@ def compiler(mode):
         return settings.clang()
     elif mode == 'c++':
         return settings.clangxx()
+    # By zoush99. Add support for Fortran
+    elif mode == 'ff':
+        return settings.flang()
     else:
         assert False, 'unexpected mode'
 
@@ -458,8 +463,10 @@ def build_bitcode(mode, parser, src_path, bc_path):
     ''' Compile the given source file to llvm bitcode '''
     cmd = [compiler(mode)]
     cmd += analyzer.clang_emit_llvm_flags()
+    cmd += analyzer.flang_emit_llvm_flags() # By zoush99
     cmd += parser.compile_args
     cmd += analyzer.clang_ikos_flags()
+    cmd += analyzer.flang_ikos_flags()  # By zoush99
     cmd += [src_path,
             '-o',
             bc_path]
@@ -923,9 +930,11 @@ def scan_main(argv):
     os.environ['PATH'] += os.path.pathsep + settings.BIN_DIR
     os.environ['CC'] = 'ikos-scan-cc'
     os.environ['CXX'] = 'ikos-scan-c++'
+    os.environ['FC'] = 'ikos-scan-ff'   # By zoush99
+    # \todo
     os.environ['LD'] = 'ikos-scan-cc'
 
-    # add -e to make commands, to avoid makefiles overriding CC/CXX/LD
+    # add -e to make commands, to avoid makefiles overriding CC/CXX/FC/LD
     if os.path.basename(opt.args[0]) in ('make', 'gmake'):
         opt.args.insert(1, '-e')
 

@@ -1,0 +1,22 @@
+#!@PYTHON_VENV_EXECUTABLE@
+###############################################################################
+#
+# ikos-scan-ff: wrapper around flang for ikos-scan
+# Author: zoush99
+#
+###############################################################################
+import os.path
+import sys
+
+if __name__ == '__main__':
+    try:
+        import ikos.scan
+    except ImportError:
+        sys.stderr.write('error: could not find ikos python module\n')
+        sys.stderr.write('error: see TROUBLESHOOTING.md\n')
+        sys.exit(1)
+
+    try:
+        ikos.scan.compile_main('ff', sys.argv)
+    except KeyboardInterrupt:
+        pass

@@ -1,0 +1,33 @@
+#!/bin/bash
+
+# ¼ì²é C ±àÒëÆ÷
+if ! command -v gcc &> /dev/null && ! command -v clang &> /dev/null
+then
+    echo "Error: No C compiler found (gcc or clang required)."
+    exit 1
+fi
+
+# ÉèÖÃ±àÒëÆ÷
+# CC=${CC:-gcc}
+
+# ´´½¨ Makefile
+cat > Makefile <<EOL
+# Makefile for simple C project
+
+# CC = $CC
+CFLAGS = -I./include
+
+SRC = main.c utils.c
+OBJ = \$(SRC:.c=.o)
+EXEC = my_program
+
+\$(EXEC): \$(OBJ)
+	\$(CC) \$(OBJ) -o \$(EXEC)
+
+%.o: %.c
+	\$(CC) \$(CFLAGS) -c \$< -o \$@
+
+clean:
+	rm -f \$(OBJ) \$(EXEC)
+
+EOL
