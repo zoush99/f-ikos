@@ -1,6 +1,6 @@
 # Makefile for Fortran project using Flang
 
-FC = flang
+# FC = flang
 CFLAGS = -I./include
 
 # 源文件列表

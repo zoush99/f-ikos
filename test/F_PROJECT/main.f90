@@ -1,13 +1,24 @@
 program main
     use math_operations
     implicit none
-    real :: a, b, result
+    integer :: a, b, result
+    integer :: c,d,r
+    real :: first,second,rf
+    ! real,external::divs3
+    a = 1
+    b = 2
+    b = 2 * a - b
 
-    ! Initialize variables
-    a = 5.0
-    b = 3.0
+    result = div()
+    print *,result
+    
+    c = 1
+    d = 2
+    d = 2 * c - d
+    r = c / d
+    print *,r
 
-    ! Call the addition function
-    result = add(a, b)
-    print *, "The sum of ", a, " and ", b, " is: ", result
+    first = 2
+    second = 2
+    call divs3(first, second)
 end program main

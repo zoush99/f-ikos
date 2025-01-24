@@ -125,7 +125,7 @@ def clangxx():
 
 # By zoush99. Add support for Fortran
 def flang():
-    path = FLANG
+    path = '/home/zou/Documents/build-flang/classic-flang-llvm-project/build/bin/flang'
     assert os.path.isabs(path)
     assert is_executable(path), 'could not find flang executable'
     return path
@@ -229,5 +229,10 @@ def main(argv):
                         help='Print the path to clang')
     parser.add_argument('--clang-version', action=print_action(CLANG_VERSION), nargs=0,
                         help='Print clang version')
+    # By zoush99
+    parser.add_argument('--flang', action=print_action(FLANG), nargs=0,
+                        help='Print the path to flang')
+    parser.add_argument('--flang-version', action=print_action(FLANG_VERSION), nargs=0,
+                        help='Print flang version')
 
     parser.parse_args(argv[1:])

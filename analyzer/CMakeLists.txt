@@ -145,7 +145,6 @@ include(AddLLVM)
 option(IKOS_LINK_LLVM_DYLIB "Link IKOS against the libLLVM dynamic library" OFF)
 
 find_package(Clang REQUIRED)
-find_package(Flang REQUIRED)
 
 if (NOT (LLVM_VERSION VERSION_EQUAL CLANG_VERSION))
   message(FATAL_ERROR "LLVM and Clang versions do not match.")
@@ -398,8 +397,8 @@ configure_file(script/ikos-scan-c++.py.in script/ikos-scan-c++ @ONLY)
 install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/script/ikos-scan-c++" DESTINATION bin)
 
 # By zoush99
-configure_file(script/ikos-scan-ff.py.in script/ikos-scan-ff @ONLY)
-install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/script/ikos-scan-ff" DESTINATION bin)
+configure_file(script/ikos-scan-fc.py.in script/ikos-scan-fc @ONLY)
+install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/script/ikos-scan-fc" DESTINATION bin)
 
 configure_file(script/ikos-scan-extract.py.in script/ikos-scan-extract @ONLY)
 install(PROGRAMS "${CMAKE_CURRENT_BINARY_DIR}/script/ikos-scan-extract" DESTINATION bin)

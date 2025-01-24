@@ -17,6 +17,6 @@ if __name__ == '__main__':
         sys.exit(1)
 
     try:
-        ikos.scan.compile_main('ff', sys.argv)
+        ikos.scan.compile_main('fc', sys.argv)
     except KeyboardInterrupt:
         pass

@@ -164,7 +164,7 @@ class ClangArgumentParser:
             # Component-specifiers
             '-Xclang': (1, self._add_compile_binary),
             # By zoush99. Maybe can add a command of flang
-            # '-Xflang': (1, self._add_compile_binary),
+            '-Xflang': (1, self._add_compile_binary),
             '-Xpreprocessor': (1, self._ignore),
             '-Xassembler': (1, self._ignore),
             '-Xlinker': (1, self._ignore),
@@ -453,7 +453,7 @@ def compiler(mode):
     elif mode == 'c++':
         return settings.clangxx()
     # By zoush99. Add support for Fortran
-    elif mode == 'ff':
+    elif mode == 'fc':
         return settings.flang()
     else:
         assert False, 'unexpected mode'
@@ -930,7 +930,7 @@ def scan_main(argv):
     os.environ['PATH'] += os.path.pathsep + settings.BIN_DIR
     os.environ['CC'] = 'ikos-scan-cc'
     os.environ['CXX'] = 'ikos-scan-c++'
-    os.environ['FC'] = 'ikos-scan-ff'   # By zoush99
+    os.environ['FC'] = 'ikos-scan-fc'   # By zoush99
     # \todo
     os.environ['LD'] = 'ikos-scan-cc'
 
