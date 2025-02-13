@@ -87,8 +87,8 @@ MachineIntAbstractDomain make_top_machine_int_apron_interval();
 MachineIntAbstractDomain make_bottom_machine_int_apron_interval();
 
 // By zoush99
-MachineIntAbstractDomain make_top_machine_int_apron_zonotopes();
-MachineIntAbstractDomain make_bottom_machine_int_apron_zonotopes();
+MachineIntAbstractDomain make_top_machine_int_apron_zonotope();
+MachineIntAbstractDomain make_bottom_machine_int_apron_zonotope();
 
 MachineIntAbstractDomain make_top_machine_int_apron_octagon();
 MachineIntAbstractDomain make_bottom_machine_int_apron_octagon();

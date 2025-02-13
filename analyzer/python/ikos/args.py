@@ -215,8 +215,8 @@ domains = (
      'Reduced product of Gauge, Interval and Congruence'),
     ('apron-interval',
      'APRON Interval domain'),
-     ('apron-zonotopes',    # By zoush99
-      'APRON Zonotopes domain'),
+     ('apron-zonotope',    # By zoush99
+      'APRON Zonotope domain'),
     ('apron-octagon',
      'APRON Octagon domain'),
     ('apron-polka-polyhedra',

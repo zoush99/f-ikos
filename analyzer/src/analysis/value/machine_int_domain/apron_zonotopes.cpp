@@ -30,7 +30,7 @@
  } // end anonymous namespace
  #endif
  
- MachineIntAbstractDomain make_top_machine_int_apron_zonotopes() {
+ MachineIntAbstractDomain make_top_machine_int_apron_zonotope() {
  #ifdef HAS_APRON
    return MachineIntAbstractDomain(
        RuntimeMachineIntDomain(RuntimeNumericDomain::top()));
@@ -39,7 +39,7 @@
  #endif
  }
  
- MachineIntAbstractDomain make_bottom_machine_int_apron_zonotopes() {
+ MachineIntAbstractDomain make_bottom_machine_int_apron_zonotope() {
  #ifdef HAS_APRON
    return MachineIntAbstractDomain(
        RuntimeMachineIntDomain(RuntimeNumericDomain::bottom()));
