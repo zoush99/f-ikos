@@ -5,10 +5,12 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "/usr/include/llvm-14",
-                "/usr/include/llvm-c-14"
+                "/usr/include/llvm-c-14",
+                "/usr/local/apron/include",
+                "/usr/local/apron/include"
             ],
             "defines": [],
-            "compilerPath": "/home/zou/Documents/build-flang/classic-flang-llvm-project/build/bin/clang",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
             "cppStandard": "c++14",
             "intelliSenseMode": "linux-clang-x64"

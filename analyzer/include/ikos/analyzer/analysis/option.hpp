@@ -72,6 +72,7 @@ enum class MachineIntDomainOption {
   Gauge,
   GaugeIntervalCongruence,
   ApronInterval,
+  ApronZonotopes, // By zoush99
   ApronOctagon,
   ApronPolkaPolyhedra,
   ApronPolkaLinearEqualities,
@@ -107,6 +108,8 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
       return "gauge-interval-congruence";
     case MachineIntDomainOption::ApronInterval:
       return "apron-interval";
+    case MachineIntDomainOption::ApronZonotopes:  // By zoush99
+      return "apron-zonotopes";
     case MachineIntDomainOption::ApronOctagon:
       return "apron-octagon";
     case MachineIntDomainOption::ApronPolkaPolyhedra:
