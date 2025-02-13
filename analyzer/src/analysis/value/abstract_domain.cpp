@@ -102,6 +102,7 @@ MemoryAbstractDomain make_bottom_memory_abstract_value(Context& ctx) {
                            NullityAbstractDomain::bottom()),
       LifetimeAbstractDomain::bottom());
 
+/// \todo By zoush99 I have banned the partition operation for some bugs reported
 /*    if (ctx.opts.use_partitioning_domain) {
       return MemoryAbstractDomain(PartitioningAbstractDomain(inv));
     } else {
