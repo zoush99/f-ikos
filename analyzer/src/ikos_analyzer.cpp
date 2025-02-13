@@ -264,6 +264,10 @@ static llvm::cl::opt< analyzer::MachineIntDomainOption > Domain(
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::ApronInterval),
                    "APRON Interval domain"),
+        clEnumValN(analyzer::MachineIntDomainOption::ApronZonotope, // By zoush99
+                   machine_int_domain_option_str(
+                       analyzer::MachineIntDomainOption::ApronZonotope),
+                   "APRON Zonotope domain"),
         clEnumValN(analyzer::MachineIntDomainOption::ApronOctagon,
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::ApronOctagon),

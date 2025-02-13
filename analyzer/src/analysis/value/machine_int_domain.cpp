@@ -68,6 +68,8 @@ MachineIntAbstractDomain make_top_machine_int_abstract_value(
       return make_top_machine_int_gauge_interval_congruence();
     case MachineIntDomainOption::ApronInterval:
       return make_top_machine_int_apron_interval();
+    case MachineIntDomainOption::ApronZonotope:  // By zoush99
+      return make_top_machine_int_apron_zonotope();
     case MachineIntDomainOption::ApronOctagon:
       return make_top_machine_int_apron_octagon();
     case MachineIntDomainOption::ApronPolkaPolyhedra:
@@ -119,6 +121,8 @@ MachineIntAbstractDomain make_bottom_machine_int_abstract_value(
       return make_bottom_machine_int_gauge_interval_congruence();
     case MachineIntDomainOption::ApronInterval:
       return make_bottom_machine_int_apron_interval();
+    case MachineIntDomainOption::ApronZonotope: // By zoush99
+      return make_bottom_machine_int_apron_zonotope();
     case MachineIntDomainOption::ApronOctagon:
       return make_bottom_machine_int_apron_octagon();
     case MachineIntDomainOption::ApronPolkaPolyhedra:

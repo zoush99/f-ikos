@@ -56,8 +56,7 @@
 #include <oct.h>
 #include <pk.h>
 #include <pkeq.h>
-/// \todo
-//#include <t1p.h>  // By zoush99
+#include <t1p.h>  // By zoush99
 
 #include <gmp.h>
 #include <ikos/core/adt/patricia_tree/map.hpp>
@@ -186,7 +185,6 @@ inline QNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
   return QNumber(mpq_class(scalar->val.mpq));
 }
 
-// Print invariants report bugs here, maybe related to invariants initialization.
 /// By zoush99, ap_scalar_t* -> FNumber
 template <>
 inline FNumber to_ikos_number(ap_scalar_t* scalar, bool /*round_upper*/) {
@@ -238,6 +236,7 @@ inline Interval< Number > to_ikos_interval(ap_interval_t* intv) {
 /// \brief Available abstract domains
 enum Domain {
   Interval,
+  Zonotope, // By zoush99
   Octagon,
   PolkaPolyhedra,
   PolkaLinearEqualities,
@@ -250,6 +249,8 @@ inline const char* domain_name(Domain d) {
   switch (d) {
     case Interval:
       return "APRON Intervals";
+    case Zonotope:  // By zoush99
+      return "APRON Zonotopes";
     case Octagon:
       return "APRON Octagons";
     case PolkaPolyhedra:
@@ -270,9 +271,10 @@ inline const char* domain_name(Domain d) {
 
 inline ap_manager_t* alloc_domain_manager(Domain d) {
   switch (d) {
-      /// \todo By zoush99. Add support for t1p domain
     case Interval:
       return box_manager_alloc();
+    case Zonotope:  // By zoush99
+      return t1p_manager_alloc();
     case Octagon:
       return oct_manager_alloc();
     case PolkaPolyhedra:
@@ -1676,7 +1678,7 @@ public:
     std::lock_guard< std::mutex > lock(this->_mutex);
 
     if (ap_abstract0_is_bottom(manager(), this->_inv.get())) {
-      o << "âŠ¥";
+      o << "âŠ?";
       return;
     }
 
