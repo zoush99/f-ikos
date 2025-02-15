@@ -45,7 +45,6 @@ import datetime
 import json
 import os
 import os.path
-import pipes
 import shlex
 import shutil
 import signal
@@ -561,12 +560,7 @@ def parse_arguments(argv):
 
     return opt
 
-
-if hasattr(shlex, 'quote'):
-    sh_quote = shlex.quote
-else:
-    sh_quote = pipes.quote
-
+sh_quote = shlex.quote
 
 def command_string(cmd):
     return ' '.join(map(sh_quote, cmd))
