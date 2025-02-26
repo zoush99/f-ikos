@@ -250,6 +250,8 @@ default_domain = 'interval'
 fp_domains = (
     ('apron-interval-f',
      'APRON Interval domain'),
+     ('apron-zonotope-f',
+     'APRON Zonotope domain'),
     ('apron-octagon-f',
      'APRON Octagon domain'),
     ('apron-polka-polyhedra-f',

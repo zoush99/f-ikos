@@ -225,11 +225,6 @@ static llvm::cl::opt< analyzer::MachineIntDomainOption > Domain(
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::Interval),
                    "Interval domain"),
-        /// \todo(floating point interval domain)
-        // clEnumValN(analyzer::MachineIntDomainOption::FInterval,
-        //            machine_int_domain_option_str(
-        //                analyzer::MachineIntDomainOption::FInterval),
-        //            "FInterval domain"),
         clEnumValN(analyzer::MachineIntDomainOption::Congruence,
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::Congruence),
@@ -264,10 +259,11 @@ static llvm::cl::opt< analyzer::MachineIntDomainOption > Domain(
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::ApronInterval),
                    "APRON Interval domain"),
-        clEnumValN(analyzer::MachineIntDomainOption::ApronZonotope, // By zoush99
-                   machine_int_domain_option_str(
-                       analyzer::MachineIntDomainOption::ApronZonotope),
-                   "APRON Zonotope domain"),
+        clEnumValN(
+            analyzer::MachineIntDomainOption::ApronZonotope, // By zoush99
+            machine_int_domain_option_str(
+                analyzer::MachineIntDomainOption::ApronZonotope),
+            "APRON Zonotope domain"),
         clEnumValN(analyzer::MachineIntDomainOption::ApronOctagon,
                    machine_int_domain_option_str(
                        analyzer::MachineIntDomainOption::ApronOctagon),
@@ -329,6 +325,30 @@ static llvm::cl::opt< analyzer::MachineIntDomainOption > Domain(
                    "APRON Pkgrid Polyhedra and Linear Congruences domain with "
                    "variable packing")),
     llvm::cl::init(analyzer::MachineIntDomainOption::Interval),
+    llvm::cl::cat(AnalysisCategory));
+
+// By zoush99
+static llvm::cl::opt< analyzer::FNumberDomainOption > Domain(
+    "d",
+    llvm::cl::desc("Available abstract domains:"),
+    llvm::cl::values(
+        clEnumValN(analyzer::FNumberDomainOption::ApronInterval,
+                   floating_point_domain_option_str(
+                       analyzer::FNumberDomainOption::ApronInterval),
+                   "Apron Interval domain"),
+        clEnumValN(analyzer::FNumberDomainOption::ApronZonotope,
+                   floating_point_domain_option_str(
+                       analyzer::FNumberDomainOption::ApronZonotope),
+                   "Apron Zonotope domain"),
+        clEnumValN(analyzer::FNumberDomainOption::ApronOctagon,
+                   floating_point_domain_option_str(
+                       analyzer::FNumberDomainOption::ApronOctagon),
+                   "Apron Octagon domain"),
+        clEnumValN(analyzer::FNumberDomainOption::ApronPolkaPolyhedra,
+                   floating_point_domain_option_str(
+                       analyzer::FNumberDomainOption::ApronPolkaPolyhedra),
+                   "Apron Polka Polyhedra domain")),
+    llvm::cl::init(analyzer::FNumberDomainOption::ApronInterval),
     llvm::cl::cat(AnalysisCategory));
 
 static llvm::cl::list< std::string > EntryPoints(

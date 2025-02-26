@@ -66,6 +66,9 @@ using NumericAbstractDomain =
 NumericAbstractDomain make_top_numeric_apron_interval();
 NumericAbstractDomain make_bottom_numeric_apron_interval();
 
+NumericAbstractDomain make_top_numeric_apron_zonotope();
+NumericAbstractDomain make_bottom_numeric_apron_zonotope();
+
 NumericAbstractDomain make_top_numeric_apron_octagon();
 NumericAbstractDomain make_bottom_numeric_apron_octagon();
 

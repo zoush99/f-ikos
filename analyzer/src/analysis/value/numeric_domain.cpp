@@ -22,6 +22,8 @@ NumericAbstractDomain make_top_numeric_abstract_value(
   switch (domain) {
     case FNumberDomainOption::ApronInterval :
       return make_top_numeric_apron_interval();
+    case FNumberDomainOption::ApronZonotope :
+      return make_top_numeric_apron_zonotope();
     case FNumberDomainOption::ApronOctagon :
       return make_top_numeric_apron_octagon();
     case FNumberDomainOption::ApronPolkaPolyhedra:
@@ -37,6 +39,8 @@ NumericAbstractDomain make_bottom_numeric_abstract_value(
   switch (domain) {
     case FNumberDomainOption::ApronInterval:
       return make_bottom_numeric_apron_interval();
+    case FNumberDomainOption::ApronZonotope:
+      return make_bottom_numeric_apron_zonotope();
     case FNumberDomainOption::ApronOctagon:
       return make_bottom_numeric_apron_octagon();
     case FNumberDomainOption::ApronPolkaPolyhedra:

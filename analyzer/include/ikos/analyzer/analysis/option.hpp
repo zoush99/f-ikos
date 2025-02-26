@@ -144,6 +144,7 @@ inline const char* machine_int_domain_option_str(MachineIntDomainOption d) {
 /// \brief Floating point abstract domain
 enum class FNumberDomainOption {
   ApronInterval,
+  ApronZonotope,
   ApronOctagon,
   ApronPolkaPolyhedra
 };
@@ -154,6 +155,8 @@ inline const char* floating_point_domain_option_str(FNumberDomainOption d) {
   switch (d) {
     case FNumberDomainOption::ApronInterval:
       return "apron-interval-f";
+    case FNumberDomainOption::ApronZonotope:
+      return "apron-zonotope-f";
     case FNumberDomainOption::ApronOctagon:
       return "apron-octagon-f";
     case FNumberDomainOption::ApronPolkaPolyhedra:

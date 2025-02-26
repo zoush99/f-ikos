@@ -2,8 +2,8 @@
 
 int main()
 {
-    int c =2;
-    int d =3;
+    float c =2.2;
+    float d =3.1;
     if (c > d)
         c = c + d;
     else
@@ -12,11 +12,12 @@ int main()
     int i;
     for (i = 0; i < 10; i++)
     {
-        c = c + 1;
+        c = c + 1.0f;
     }
     
-    c = c - 9;
+    c = c - 9.1;
     d = d / c;
+    printf("%f\n", c);
 
     return d;
 }
