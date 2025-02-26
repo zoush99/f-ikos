@@ -328,9 +328,9 @@ static llvm::cl::opt< analyzer::MachineIntDomainOption > Domain(
     llvm::cl::cat(AnalysisCategory));
 
 // By zoush99
-static llvm::cl::opt< analyzer::FNumberDomainOption > Domain(
-    "d",
-    llvm::cl::desc("Available abstract domains:"),
+static llvm::cl::opt< analyzer::FNumberDomainOption > FPDomain(
+    "fpd",
+    llvm::cl::desc("Available floating point abstract domains:"),
     llvm::cl::values(
         clEnumValN(analyzer::FNumberDomainOption::ApronInterval,
                    floating_point_domain_option_str(
@@ -823,6 +823,7 @@ static analyzer::AnalysisOptions make_analysis_options(ar::Bundle* bundle) {
       .entry_points = parse_function_names(EntryPoints, bundle),
       .no_init_globals = parse_function_names(NoInitGlobals, bundle),
       .machine_int_domain = Domain,
+      .floating_point_domain = FPDomain, // By zoush99
       .procedural = Procedural,
       .num_threads = Jobs,
       .widening_strategy = WideningStrategy,
