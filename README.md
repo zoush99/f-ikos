@@ -102,6 +102,7 @@ program main
 implicit none
 real,external :: cap
 real :: x
+real :: a
 x = 13.3
 ! Cap the value of x by calling the cap function
 a = cap(x)
@@ -148,6 +149,7 @@ cap.f90:12:1: error: division by zero
   y = y / (y - x)
 ^
 ```
+More examples can be found at https://github.com/zoush99/f-ikos/issues/1
 
 ## Others
 
